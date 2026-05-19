@@ -1,0 +1,1143 @@
+<!DOCTYPE html>
+<html lang="en"><head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Job Plan Admin · ShareWillow Prototype</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link href="https://use.typekit.net/mgx2gxv.css" rel="stylesheet">
+  <style>
+    :root {
+      --bg: #f5f4f0;
+      --card-border: #e8e6df;
+      --text: #1a1a1a;
+      --muted: #6b7280;
+      --faint: #9ca3af;
+      --green: #047857;
+      --green-bg: #ecfdf5;
+      --amber: #b45309;
+      --amber-bg: #fef3c7;
+      --red: #b91c1c;
+      --red-bg: #fef2f2;
+      --blue: #2563eb;
+      --hairline: #f0eee7;
+    }
+    * { box-sizing: border-box; }
+    body { font-family: 'Matter', -apple-system, BlinkMacSystemFont, sans-serif; background: var(--bg); color: var(--text); margin: 0; font-size: 14px; -webkit-font-smoothing: antialiased; }
+    h1, h2, h3, h4 { font-family: 'p22-mackinac-pro', serif; font-weight: 600; margin: 0; }
+    a { color: inherit; text-decoration: none; }
+    button { font-family: inherit; cursor: pointer; }
+
+    /* ── Prototype scenario tabs ── */
+    #proto-bar { padding: 8px 24px; display: flex; align-items: center; gap: 10px; background: #1a1a1a; color: white; }
+    #proto-bar .label { font-size: 10px; font-weight: 700; color: #9ca3af; text-transform: uppercase; letter-spacing: .5px; }
+    #proto-bar .sc-tab { padding: 5px 12px; border-radius: 6px; font-size: 12px; font-weight: 500; border: 1px solid rgba(255,255,255,.15); background: transparent; color: rgba(255,255,255,.7); white-space: nowrap; transition: all .15s; }
+    #proto-bar .sc-tab:hover { color: white; border-color: rgba(255,255,255,.35); }
+    #proto-bar .sc-tab.active { background: white; color: #1a1a1a; border-color: white; font-weight: 600; }
+    #proto-bar .back-link { margin-left: auto; font-size: 12px; color: #93c5fd; }
+    #proto-bar .back-link:hover { color: #dbeafe; }
+
+    /* ── App container ── */
+    #app { max-width: 1240px; margin: 0 auto; padding: 24px 32px 80px; }
+
+    /* ── Breadcrumb ── */
+    .crumb { display: flex; align-items: center; gap: 8px; font-size: 13px; color: var(--muted); margin-bottom: 14px; }
+    .crumb svg { width: 14px; height: 14px; }
+    .crumb a.blue { color: var(--blue); }
+
+    /* ── Title row ── */
+    .title-row { display: flex; align-items: flex-start; justify-content: space-between; gap: 24px; }
+    .title-block h1 { font-size: 40px; display: flex; align-items: center; gap: 12px; flex-wrap: wrap; line-height: 1.15; }
+    .title-meta { font-size: 13px; color: var(--muted); margin-top: 10px; }
+    .pill { display: inline-flex; align-items: center; gap: 5px; padding: 3px 10px; border-radius: 999px; font-size: 12px; font-weight: 500; }
+    .pill-status { background: var(--green-bg); color: var(--green); }
+    .pill-status::before { content: ""; width: 6px; height: 6px; border-radius: 50%; background: #10b981; }
+    .pill-version { background: #f3f4f6; color: var(--muted); border-radius: 6px; font-weight: 500; }
+    .pill-role { background: #ede9fe; color: #6d28d9; border-radius: 6px; }
+    .pill-role.crew { background: #dbeafe; color: #1e40af; }
+    .pill-role.solo { background: #dcfce7; color: #166534; }
+
+    .ytd-block { text-align: right; flex-shrink: 0; }
+    .ytd-figure { font-size: 38px; font-weight: 600; color: var(--green); font-family: 'p22-mackinac-pro', serif; line-height: 1; letter-spacing: -.5px; }
+    .ytd-sub { font-size: 12px; color: var(--muted); margin-top: 6px; }
+    .btn-actions { background: var(--text); color: white; border: none; border-radius: 8px; padding: 8px 16px; font-size: 13px; font-weight: 600; display: inline-flex; align-items: center; gap: 8px; margin-top: 12px; }
+    .btn-actions:hover { background: #333; }
+
+    /* ── Action banner ── */
+    .banner { background: white; border: 1px solid var(--card-border); border-radius: 12px; padding: 13px 16px; display: flex; align-items: center; gap: 14px; margin: 20px 0 22px; }
+    .banner .check { width: 30px; height: 30px; border-radius: 8px; background: var(--green-bg); color: var(--green); display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+    .banner-body { flex: 1; }
+    .banner-title { font-size: 14px; font-weight: 600; }
+    .banner-meta { font-size: 12px; color: var(--muted); margin-top: 3px; display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+    .banner-meta .warn { color: var(--amber); display: inline-flex; align-items: center; gap: 4px; }
+    .banner-meta .warn::before { content: ""; width: 5px; height: 5px; border-radius: 50%; background: #f59e0b; }
+    .btn-outline { background: white; border: 1px solid #d1d5db; border-radius: 7px; padding: 7px 12px; font-size: 13px; font-weight: 500; color: #374151; }
+    .btn-outline:hover { border-color: #9ca3af; background: #fafafa; }
+    .btn-primary { background: var(--text); color: white; border: none; border-radius: 7px; padding: 7px 14px; font-size: 13px; font-weight: 600; display: inline-flex; align-items: center; gap: 6px; }
+    .btn-primary:hover { background: #333; }
+    .btn-icon { background: none; border: none; color: var(--faint); font-size: 18px; padding: 4px; line-height: 1; }
+    .btn-icon:hover { color: var(--text); }
+
+    /* ── Tabs ── */
+    .tabs { display: flex; align-items: center; gap: 2px; border-bottom: 1px solid var(--card-border); margin-bottom: 22px; }
+    .tab { padding: 12px 16px; font-size: 14px; font-weight: 500; color: var(--muted); border: none; background: none; border-bottom: 2px solid transparent; margin-bottom: -1px; transition: color .15s; }
+    .tab:hover { color: var(--text); }
+    .tab.active { color: var(--text); font-weight: 600; border-bottom-color: var(--text); }
+    .tab .star { color: #7c3aed; margin-right: 4px; font-size: 11px; }
+
+    /* ── Tab panes ── */
+    .tab-pane { display: none; }
+    .tab-pane.active { display: block; }
+
+    /* ── Two-col layout (summary tab) ── */
+    .grid { display: grid; grid-template-columns: minmax(0, 1fr) 308px; gap: 22px; }
+
+    /* ── Cards ── */
+    .card { background: white; border: 1px solid var(--card-border); border-radius: 14px; margin-bottom: 16px; }
+    .card-pad { padding: 20px 22px; }
+    .card-head { display: flex; align-items: flex-start; justify-content: space-between; gap: 12px; padding: 18px 22px 14px; border-bottom: 1px solid var(--hairline); }
+    .card-head.borderless { border-bottom: none; padding-bottom: 18px; }
+    .card-title { font-size: 16px; font-weight: 600; color: var(--text); }
+    .card-sub { font-size: 12px; color: var(--muted); margin-top: 3px; line-height: 1.4; }
+    .card-action { font-size: 13px; color: var(--text); font-weight: 500; }
+    .card-action:hover { text-decoration: underline; }
+    .card-body { padding: 16px 22px 20px; }
+
+    /* ── Rail ── */
+    .rail-card { background: white; border: 1px solid var(--card-border); border-radius: 12px; padding: 16px 18px; margin-bottom: 14px; }
+    .rail-head { display: flex; align-items: center; justify-content: space-between; margin-bottom: 10px; }
+    .rail-title { font-size: 10px; font-weight: 700; color: var(--muted); text-transform: uppercase; letter-spacing: .6px; }
+    .rail-row { display: flex; align-items: center; justify-content: space-between; padding: 6px 0; font-size: 13px; gap: 12px; }
+    .rail-row + .rail-row { border-top: 1px solid var(--hairline); }
+    .rail-row .label { color: var(--muted); }
+    .rail-row .value { color: var(--text); font-weight: 500; text-align: right; }
+    .rail-row .muted-info { color: var(--faint); font-size: 11px; font-weight: 400; }
+    .rail-row .dot { display: inline-block; width: 6px; height: 6px; border-radius: 50%; margin-right: 4px; vertical-align: 1px; }
+    .dot.green { background: #10b981; }
+    .dot.amber { background: #f59e0b; }
+
+    /* ── Structure tables (Job Award, Scorecard) ── */
+    .struct-table { width: 100%; border-collapse: collapse; font-size: 13px; }
+    .struct-table th { font-size: 10px; font-weight: 700; color: var(--faint); text-transform: uppercase; letter-spacing: .5px; padding: 0 16px 10px; text-align: left; border-bottom: 1px solid var(--hairline); }
+    .struct-table th:last-child { text-align: right; }
+    .struct-table td { padding: 14px 16px; border-bottom: 1px solid var(--hairline); vertical-align: top; }
+    .struct-table tr:last-child td { border-bottom: none; }
+    .struct-table tr.attention td { background: #fefce8; }
+    .struct-table tr.clickable:hover td { background: #fafafa; cursor: pointer; }
+    .struct-table tr.clickable.attention:hover td { background: #fef9c3; }
+    .row-name { display: flex; align-items: flex-start; gap: 12px; }
+    .row-icon { width: 32px; height: 32px; border-radius: 8px; background: var(--green-bg); color: var(--green); display: flex; align-items: center; justify-content: center; flex-shrink: 0; font-size: 14px; }
+    .row-icon.blue { background: #eff6ff; color: var(--blue); }
+    .row-icon.purple { background: #f5f3ff; color: #7c3aed; }
+    .row-icon.amber { background: var(--amber-bg); color: var(--amber); }
+    .row-name-text { font-weight: 600; color: var(--text); font-size: 13.5px; }
+    .row-sub { font-size: 12px; color: var(--muted); margin-top: 2px; }
+    .formula { font-family: 'JetBrains Mono', ui-monospace, Menlo, monospace; font-size: 12.5px; background: #fafaf7; padding: 4px 9px; border-radius: 6px; display: inline-block; color: var(--text); border: 1px solid var(--hairline); }
+    .pill-attention { background: var(--amber-bg); color: var(--amber); font-size: 10px; font-weight: 600; padding: 2px 7px; border-radius: 999px; margin-left: 6px; display: inline-flex; align-items: center; gap: 3px; }
+    .pill-inherited { background: #f3f4f6; color: var(--muted); font-size: 10px; font-weight: 600; padding: 2px 7px; border-radius: 999px; }
+    .last-sync { font-size: 12px; color: var(--faint); white-space: nowrap; }
+    .last-sync .resync { color: var(--amber); font-weight: 500; margin-left: 4px; }
+
+    /* ── Eligibility list ── */
+    .elig-grid { display: grid; gap: 8px; }
+    .elig-item { display: flex; align-items: center; gap: 10px; padding: 10px 14px; background: #fafaf7; border: 1px solid var(--hairline); border-radius: 9px; font-size: 13px; }
+    .elig-item .check { color: var(--green); font-weight: 700; flex-shrink: 0; }
+    .elig-item .tail { margin-left: auto; }
+
+    /* ── Crew split detail ── */
+    .split-row { display: grid; grid-template-columns: 150px 1fr; gap: 12px; padding: 12px 14px; background: #fafaf7; border: 1px solid var(--hairline); border-radius: 9px; font-size: 13px; margin-bottom: 8px; }
+    .split-row:last-child { margin-bottom: 0; }
+    .split-row .lbl { color: var(--muted); font-size: 12px; }
+    .split-row .val { color: var(--text); font-weight: 500; }
+    .badge-tag { background: #f3f4f6; color: var(--muted); font-size: 10px; font-weight: 600; padding: 2px 7px; border-radius: 6px; margin-left: 6px; }
+
+    /* ── Participants ── */
+    .part-controls { display: flex; align-items: center; gap: 8px; }
+    .part-search { border: 1px solid var(--card-border); border-radius: 7px; padding: 6px 10px; font-size: 12px; width: 150px; outline: none; font-family: inherit; }
+    .part-table { width: 100%; border-collapse: collapse; }
+    .part-table th { font-size: 10px; font-weight: 700; color: var(--faint); text-transform: uppercase; letter-spacing: .5px; padding: 0 16px 10px; text-align: left; border-bottom: 1px solid var(--hairline); }
+    .part-table td { padding: 12px 16px; border-bottom: 1px solid var(--hairline); font-size: 13px; }
+    .part-table tr:last-child td { border-bottom: none; }
+    .part-table tr:hover td { background: #fafafa; cursor: pointer; }
+    .avatar { display: inline-flex; align-items: center; justify-content: center; width: 28px; height: 28px; border-radius: 50%; background: var(--text); color: white; font-size: 10px; font-weight: 700; vertical-align: middle; margin-right: 8px; }
+    .ytd-cell { display: flex; align-items: center; gap: 10px; }
+    .ytd-cell .amt { font-weight: 600; min-width: 60px; }
+    .bar-track { flex: 1; height: 4px; background: #e5e7eb; border-radius: 2px; max-width: 140px; }
+    .bar-fill { height: 4px; background: var(--text); border-radius: 2px; }
+    .chev { color: var(--faint); }
+    .part-footer { display: flex; align-items: center; justify-content: space-between; padding: 12px 22px 18px; font-size: 12px; color: var(--faint); }
+
+    /* ── Activity ── */
+    .act-item { display: flex; gap: 10px; padding: 9px 0; font-size: 12px; }
+    .act-item + .act-item { border-top: 1px solid var(--hairline); }
+    .act-dot { width: 6px; height: 6px; border-radius: 50%; background: var(--text); margin-top: 6px; flex-shrink: 0; }
+    .act-text { color: var(--text); line-height: 1.45; }
+    .act-meta { color: var(--faint); font-size: 11px; margin-top: 2px; }
+
+    /* ── Data sources ── */
+    .ds-row { display: flex; align-items: center; gap: 10px; padding: 9px 0; font-size: 13px; }
+    .ds-row + .ds-row { border-top: 1px solid var(--hairline); }
+    .ds-icon { width: 26px; height: 26px; border-radius: 7px; background: #f3f4f6; display: flex; align-items: center; justify-content: center; flex-shrink: 0; font-size: 13px; }
+    .ds-info { flex: 1; min-width: 0; }
+    .ds-name { font-weight: 500; font-size: 13px; }
+    .ds-sub { font-size: 11px; color: var(--muted); margin-top: 1px; }
+    .ds-count { font-size: 11px; color: var(--faint); }
+
+    /* ── Performance tab ── */
+    .perf-controls { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-bottom: 18px; flex-wrap: wrap; }
+    .perf-period { display: flex; align-items: center; gap: 10px; }
+    .perf-period select { border: 1px solid var(--card-border); border-radius: 7px; padding: 7px 10px; font-size: 13px; background: white; outline: none; font-family: inherit; min-width: 170px; cursor: pointer; }
+
+    .kpi-row { display: grid; grid-template-columns: repeat(5, 1fr); gap: 12px; margin-bottom: 20px; }
+    .kpi { background: white; border: 1px solid var(--card-border); border-radius: 12px; padding: 14px 16px; }
+    .kpi-label { font-size: 10px; font-weight: 700; color: var(--muted); text-transform: uppercase; letter-spacing: .5px; margin-bottom: 8px; }
+    .kpi-value { font-size: 22px; font-weight: 600; font-family: 'p22-mackinac-pro', serif; line-height: 1; letter-spacing: -.3px; }
+    .kpi-sub { font-size: 11px; color: var(--muted); margin-top: 5px; }
+    .kpi-sub.up { color: var(--green); }
+    .kpi-sub.down { color: var(--amber); }
+
+    .chip-row { display: flex; align-items: center; gap: 8px; margin-bottom: 14px; flex-wrap: wrap; }
+    .chip-row .label { font-size: 12px; color: var(--muted); margin-right: 4px; }
+    .chip { background: white; border: 1px solid var(--card-border); border-radius: 999px; padding: 5px 14px; font-size: 12px; font-weight: 500; color: #374151; display: inline-flex; align-items: center; gap: 6px; transition: all .15s; }
+    .chip:hover { border-color: var(--faint); }
+    .chip.active { background: var(--text); color: white; border-color: var(--text); }
+    .chip-count { background: rgba(0,0,0,.08); padding: 1px 7px; border-radius: 999px; font-size: 10px; font-weight: 700; }
+    .chip.active .chip-count { background: rgba(255,255,255,.22); }
+    .chip-row .result-count { margin-left: auto; font-size: 11px; color: var(--faint); }
+
+    .jobs-card { background: white; border: 1px solid var(--card-border); border-radius: 12px; overflow: hidden; }
+    .jobs-table { width: 100%; border-collapse: collapse; font-size: 13px; }
+    .jobs-table th { background: #fafaf7; padding: 10px 14px; text-align: left; font-weight: 600; color: var(--muted); font-size: 10px; text-transform: uppercase; letter-spacing: .5px; border-bottom: 1px solid var(--hairline); }
+    .jobs-table th.right { text-align: right; }
+    .jobs-table td { padding: 13px 14px; border-bottom: 1px solid var(--hairline); }
+    .jobs-table tr:last-child td { border-bottom: none; }
+    .jobs-table tr.inelig td { background: #fdfcf5; }
+    .jobs-table tr:hover td { background: #fafafa; cursor: pointer; }
+    .jobs-table tr.inelig:hover td { background: #fef9c3; }
+    .job-link { color: var(--blue); font-weight: 500; }
+    .m-pass { color: var(--green); font-weight: 600; }
+    .m-fail { color: var(--red); font-weight: 600; }
+    .status-pill { display: inline-flex; align-items: center; gap: 5px; padding: 3px 9px; border-radius: 999px; font-size: 11px; font-weight: 600; white-space: nowrap; }
+    .status-pill.elig { background: var(--green-bg); color: var(--green); }
+    .status-pill.inelig { background: var(--red-bg); color: var(--red); }
+    .award { font-weight: 600; color: var(--text); }
+    .award-sub { font-size: 11px; color: var(--muted); margin-top: 2px; font-family: 'JetBrains Mono', ui-monospace, monospace; }
+    .award-empty { color: #d1d5db; }
+    .perf-footer-note { font-size: 11px; color: var(--faint); text-align: center; margin-top: 14px; }
+
+    /* ── Drawer ── */
+    #drawer-bg { position: fixed; inset: 0; background: rgba(15,15,15,.45); z-index: 90; opacity: 0; pointer-events: none; transition: opacity .2s; }
+    #drawer-bg.open { opacity: 1; pointer-events: auto; }
+    #drawer { position: fixed; top: 0; right: 0; bottom: 0; width: 560px; max-width: 92vw; background: white; box-shadow: -10px 0 40px rgba(0,0,0,.18); z-index: 91; transform: translateX(100%); transition: transform .25s ease; overflow-y: auto; }
+    #drawer.open { transform: translateX(0); }
+    .dr-head { padding: 22px 28px 18px; border-bottom: 1px solid var(--hairline); display: flex; align-items: flex-start; justify-content: space-between; gap: 12px; position: sticky; top: 0; background: white; }
+    .dr-eyebrow { font-size: 10px; font-weight: 700; color: var(--faint); text-transform: uppercase; letter-spacing: .5px; margin-bottom: 4px; }
+    .dr-title { font-size: 22px; font-weight: 600; font-family: 'p22-mackinac-pro', serif; }
+    .dr-body { padding: 22px 28px 40px; }
+    .dr-section { margin-bottom: 26px; }
+    .dr-section-title { font-size: 10px; font-weight: 700; color: var(--muted); text-transform: uppercase; letter-spacing: .6px; margin-bottom: 10px; }
+    .dr-kv { display: flex; align-items: center; justify-content: space-between; padding: 8px 0; font-size: 13px; }
+    .dr-kv + .dr-kv { border-top: 1px solid var(--hairline); }
+    .dr-kv .k { color: var(--muted); }
+    .dr-kv .v { color: var(--text); font-weight: 500; text-align: right; }
+    .dr-table { width: 100%; border-collapse: collapse; font-size: 12px; }
+    .dr-table th { background: #fafaf7; padding: 8px 10px; text-align: left; font-size: 10px; font-weight: 700; color: var(--muted); text-transform: uppercase; letter-spacing: .4px; border-bottom: 1px solid var(--hairline); }
+    .dr-table td { padding: 9px 10px; border-bottom: 1px solid var(--hairline); }
+    .dr-table tr:last-child td { border-bottom: none; }
+    .callout-warn { background: var(--amber-bg); border: 1px solid #fde68a; border-radius: 10px; padding: 12px 14px; font-size: 13px; color: var(--amber); line-height: 1.5; }
+
+    code { background: #f3f4f6; padding: 1px 6px; border-radius: 4px; font-size: 12px; font-family: 'JetBrains Mono', ui-monospace, monospace; }
+  </style>
+</head>
+<body>
+
+<!-- Prototype controls -->
+<div id="proto-bar">
+  <span class="label">Prototype</span>
+  <button class="sc-tab active" id="tab-a" onclick="setScenario('a')">A · Crew Chief Bonus (Individual / Lead)</button>
+  <button class="sc-tab" id="tab-b" onclick="setScenario('b')">B · Field Tech Pool (Crew)</button>
+  <a class="back-link" href="./builder.html">← Back to Plan Builder</a>
+</div>
+
+<div id="app">
+
+  <!-- Breadcrumb -->
+  <nav class="crumb">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 12l9-9 9 9M5 10v10a1 1 0 001 1h3M19 10v10a1 1 0 01-1 1h-3M9 21h6"/></svg>
+    <a class="blue" href="#">Plans</a>
+    <span>›</span>
+    <span id="crumb-plan" style="color:var(--text);">HVAC Install Crew Chief Bonus</span>
+  </nav>
+
+  <!-- Title -->
+  <header class="title-row">
+    <div class="title-block">
+      <h1>
+        <span id="plan-title">HVAC Install Crew Chief Bonus</span>
+        <span class="pill pill-status">Active</span>
+        <span class="pill pill-version">v2</span>
+        <span class="pill pill-role" id="plan-role">Lead</span>
+      </h1>
+      <div class="title-meta" id="plan-meta">2026 Job-Based Plan · Individual · Monthly Payout · Created Mar 14 · Last edited May 12 by Danielle G.</div>
+    </div>
+    <div class="ytd-block">
+      <div class="ytd-figure" id="ytd-figure">$12,400</div>
+      <div class="ytd-sub" id="ytd-sub">Awarded YTD · 5 payout runs</div>
+      <button class="btn-actions">Actions <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="6 9 12 15 18 9"/></svg></button>
+    </div>
+  </header>
+
+  <!-- Action banner -->
+  <div class="banner">
+    <div class="check">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
+    </div>
+    <div class="banner-body">
+      <div class="banner-title" id="banner-title">Review May 12 – 18 payouts</div>
+      <div class="banner-meta" id="banner-meta">
+        <span>ServiceTitan synced 8 min ago</span><span>·</span>
+        <span><strong id="banner-elig">12</strong> eligible jobs</span><span>·</span>
+        <span>est. total <strong id="banner-total">$1,250</strong></span><span>·</span>
+        <span class="warn" id="banner-warn">1 rule needs attention</span>
+      </div>
+    </div>
+    <button class="btn-outline">Upload manually</button>
+    <button class="btn-primary">Review &amp; finalize →</button>
+    <button class="btn-icon" title="Dismiss">×</button>
+  </div>
+
+  <!-- Tabs -->
+  <nav class="tabs">
+    <button class="tab active" id="t-summary" onclick="setTab('summary')">Plan Summary</button>
+    <button class="tab" id="t-performance" onclick="setTab('performance')">Performance</button>
+    <button class="tab" onclick="alert('Payouts tab coming soon')">Payouts</button>
+    <button class="tab"><span class="star">✦</span> Plan Intelligence</button>
+    <button class="tab"><span class="star">✦</span> Behavioral Proof</button>
+    <button class="tab"><span class="star">✦</span> Pay Simulator</button>
+  </nav>
+
+  <!-- ============== PLAN SUMMARY TAB ============== -->
+  <div class="tab-pane active" id="pane-summary">
+    <div class="grid">
+      <!-- LEFT COLUMN -->
+      <div>
+        <!-- Eligibility -->
+        <section class="card">
+          <header class="card-head">
+            <div>
+              <h3 class="card-title">Eligibility</h3>
+              <div class="card-sub" id="elig-mode">Filter mode · 3 criteria</div>
+            </div>
+            <a class="card-action" onclick="openDrawer('elig')">Edit eligibility ›</a>
+          </header>
+          <div class="card-body">
+            <div class="elig-grid" id="elig-list"></div>
+          </div>
+        </section>
+
+        <!-- Job Award Rules -->
+        <section class="card">
+          <header class="card-head">
+            <div>
+              <h3 class="card-title">Job Award Rules</h3>
+              <div class="card-sub" id="award-sub">2 rules · Per-job, stacked</div>
+            </div>
+            <a class="card-action" onclick="openDrawer('award')">Edit rules ›</a>
+          </header>
+          <table class="struct-table">
+            <thead>
+              <tr><th>Rule</th><th>Type</th><th>Formula</th><th style="text-align:right;">Last sync</th></tr>
+            </thead>
+            <tbody id="award-rows"></tbody>
+          </table>
+        </section>
+
+        <!-- Crew Split (Pool only) -->
+        <section class="card" id="split-card" style="display:none;">
+          <header class="card-head">
+            <div>
+              <h3 class="card-title">Crew Split</h3>
+              <div class="card-sub">Pool deduction runs first, then distribution splits the remainder</div>
+            </div>
+            <a class="card-action" onclick="openDrawer('split')">Edit split ›</a>
+          </header>
+          <div class="card-body">
+            <div class="split-row">
+              <span class="lbl">Pool Deduction</span>
+              <span class="val">−$60 / job (avg) <span class="badge-tag">column ref · <code>lead_share_amount</code></span></span>
+            </div>
+            <div class="split-row">
+              <span class="lbl">Distribution</span>
+              <span class="val">By % of time on job <span class="badge-tag">timesheet · Gusto</span></span>
+            </div>
+            <div class="split-row">
+              <span class="lbl">Deduction destination</span>
+              <span class="val" style="color:var(--muted);font-weight:400;font-size:12px;">Separate Lead plan (not paid from this plan)</span>
+            </div>
+          </div>
+        </section>
+
+        <!-- Scorecard Items -->
+        <section class="card">
+          <header class="card-head">
+            <div>
+              <h3 class="card-title">Scorecard Items</h3>
+              <div class="card-sub" id="sc-sub">Per-event bonuses on top of job awards</div>
+            </div>
+            <a class="card-action" onclick="openDrawer('scorecard')">Edit items ›</a>
+          </header>
+          <table class="struct-table">
+            <thead><tr><th>Item</th><th>Type</th><th>Formula</th><th style="text-align:right;">Last sync</th></tr></thead>
+            <tbody id="sc-rows"></tbody>
+          </table>
+        </section>
+
+        <!-- Participants -->
+        <section class="card">
+          <header class="card-head">
+            <div>
+              <h3 class="card-title">Participants <span style="color:var(--faint);font-weight:500;font-size:13px;margin-left:4px;" id="part-count">(3)</span></h3>
+              <div class="card-sub">YTD earnings on this plan</div>
+            </div>
+            <div class="part-controls">
+              <input class="part-search" placeholder="Search…">
+              <button class="btn-outline" style="padding:6px 11px;font-size:12px;">Sort: YTD</button>
+              <button class="btn-outline" style="padding:6px 11px;font-size:12px;">Manage</button>
+            </div>
+          </header>
+          <table class="part-table">
+            <thead><tr><th>Employee</th><th>Role</th><th>YTD Earned</th><th>Last cycle</th><th style="width:24px;"></th></tr></thead>
+            <tbody id="part-rows"></tbody>
+          </table>
+          <div class="part-footer">
+            <span id="part-footer-text">Showing 3 of 3 · All synced from ServiceTitan</span>
+            <a class="card-action" style="font-size:12px;">View full roster →</a>
+          </div>
+        </section>
+      </div>
+
+      <!-- RIGHT RAIL -->
+      <aside>
+        <div class="rail-card">
+          <div class="rail-head">
+            <span class="rail-title">Plan Details</span>
+            <span class="muted-info" id="plan-version-meta" style="font-size:11px;color:var(--faint);">v2 · May 12</span>
+          </div>
+          <div class="rail-row"><span class="label">Status</span><span class="value"><span class="dot green"></span>Active</span></div>
+          <div class="rail-row"><span class="label">Cadence</span><span class="value">Monthly</span></div>
+          <div class="rail-row"><span class="label">Award Mode</span><span class="value" id="rail-mode">Individual</span></div>
+          <div class="rail-row"><span class="label">Compensation</span><span class="value" id="rail-comp">Performance Pay</span></div>
+          <div class="rail-row"><span class="label">Role Group</span><span class="value" id="rail-role">Lead</span></div>
+          <div class="rail-row"><span class="label">Period</span><span class="value">Jan 1 – Dec 31, 2026</span></div>
+          <div class="rail-row"><span class="label">Participants</span><span class="value" id="rail-parts">3 enrolled</span></div>
+          <div class="rail-row"><span class="label">Next payout</span><span class="value"><span class="dot amber"></span>May 12 – 18</span></div>
+          <div class="rail-row"><span class="label">Rules tracked</span><span class="value" id="rail-rules">2 <span class="muted-info">· 1 attention</span></span></div>
+        </div>
+
+        <div class="rail-card">
+          <div class="rail-head">
+            <span class="rail-title">YTD Performance</span>
+            <span class="muted-info" style="font-size:11px;color:var(--faint);">2026</span>
+          </div>
+          <div class="rail-row"><span class="label">Total paid</span><span class="value" id="ytd-total">$12,400</span></div>
+          <div class="rail-row"><span class="label">Payout runs</span><span class="value">5</span></div>
+          <div class="rail-row"><span class="label">Eligible jobs</span><span class="value" id="ytd-jobs">165 / 178 <span class="muted-info">· 93%</span></span></div>
+          <div class="rail-row"><span class="label">Avg per run</span><span class="value" id="ytd-avg">$2,480</span></div>
+          <div class="rail-row"><span class="label">Top earner</span><span class="value" id="ytd-top">Anthony H. · $5,200</span></div>
+        </div>
+
+        <div class="rail-card">
+          <div class="rail-head">
+            <span class="rail-title">Data Sources</span>
+            <a class="card-action" style="font-size:12px;">Manage</a>
+          </div>
+          <div id="ds-list"></div>
+        </div>
+
+        <div class="rail-card">
+          <div class="rail-head">
+            <span class="rail-title">Recent Activity</span>
+          </div>
+          <div id="activity-list"></div>
+        </div>
+      </aside>
+    </div>
+  </div>
+
+  <!-- ============== PERFORMANCE TAB ============== -->
+  <div class="tab-pane" id="pane-performance">
+
+    <div class="perf-controls">
+      <div class="perf-period">
+        <span style="font-size:12px;color:var(--muted);">Period</span>
+        <select id="perf-period" onchange="renderPerformance()">
+          <option value="may-2026" selected>May 2026 (current)</option>
+          <option value="apr-2026">April 2026</option>
+          <option value="mar-2026">March 2026</option>
+          <option value="ytd-2026">YTD 2026</option>
+        </select>
+      </div>
+      <div style="display:flex;gap:8px;">
+        <button class="btn-outline" style="font-size:12px;padding:6px 11px;">↻ Refresh sync</button>
+        <button class="btn-outline" style="font-size:12px;padding:6px 11px;">Export CSV</button>
+      </div>
+    </div>
+
+    <div class="kpi-row" id="kpi-row"></div>
+
+    <div class="chip-row">
+      <span class="label">Filter</span>
+      <button class="chip active" id="chip-all" onclick="setFilter('all')">All <span class="chip-count" id="chip-all-n">0</span></button>
+      <button class="chip" id="chip-elig" onclick="setFilter('eligible')">✓ Eligible <span class="chip-count" id="chip-elig-n">0</span></button>
+      <button class="chip" id="chip-inelig" onclick="setFilter('ineligible')">✗ Ineligible <span class="chip-count" id="chip-inelig-n">0</span></button>
+      <span class="result-count" id="result-count">Showing 0 jobs</span>
+    </div>
+
+    <div class="jobs-card">
+      <table class="jobs-table">
+        <thead>
+          <tr>
+            <th>Job #</th>
+            <th>Date</th>
+            <th>Customer</th>
+            <th>GP%</th>
+            <th>On-Time</th>
+            <th>Callbacks 30d</th>
+            <th>Status</th>
+            <th class="right" id="th-award">Award</th>
+            <th style="width:24px;"></th>
+          </tr>
+        </thead>
+        <tbody id="jobs-rows"></tbody>
+      </table>
+    </div>
+
+    <div class="perf-footer-note">Click any row to drill into the per-job math · Job # links to ServiceTitan</div>
+  </div>
+
+</div>
+
+<!-- Drawer -->
+<div id="drawer-bg" onclick="closeDrawer()"></div>
+<div id="drawer">
+  <header class="dr-head">
+    <div>
+      <div class="dr-eyebrow" id="dr-eyebrow">Detail</div>
+      <div class="dr-title" id="dr-title">—</div>
+    </div>
+    <button class="btn-icon" onclick="closeDrawer()" style="font-size:22px;">×</button>
+  </header>
+  <div class="dr-body" id="dr-body"></div>
+</div>
+
+<script>
+// ═══════════════════ DATA ═══════════════════
+let scenario = 'a';
+let perfFilter = 'all';
+
+const SCEN = {
+  a: {
+    title: 'HVAC Install Crew Chief Bonus',
+    meta: '2026 Job-Based Plan · Individual · Monthly Payout · Created Mar 14 · Last edited May 12 by Danielle G.',
+    role: 'Lead', roleClass: '',
+    ytd: '$12,400', ytdSub: 'Awarded YTD · 5 payout runs',
+    banner: { title: 'Review May 12 – 18 payouts', elig: '12', total: '$1,250', warn: '1 rule needs attention' },
+    eligMode: 'Filter mode · 3 criteria',
+    elig: [
+      { label: 'GP% ≥ 35%' },
+      { label: 'On-time completion' },
+      { label: 'No callbacks within 30 days' },
+    ],
+    awardSub: '2 rules · Per-job, stacked',
+    award: [
+      { idx: 1, name: 'Piece Rate per Eligible Install', sub: 'Source: ServiceTitan · jobs.completed', type: 'Piece Rate', formula: '$75 × eligible installs', sync: '8 min ago', iconCls: '' },
+      { idx: 2, name: 'Bonus on GP Over $5k', sub: 'Source: ServiceTitan · jobs.gross_profit', type: '% Over Goal', formula: '5% × (gp − $5,000)', sync: '8 min ago', iconCls: 'blue' },
+    ],
+    showSplit: false,
+    scSub: '2 items · Apply to eligible jobs',
+    sc: [
+      { idx: 1, name: '5-Star Review', sub: 'Source: Google Reviews API', type: 'Per Event', formula: '+$25 per 5-star review', sync: '22 min ago', iconCls: 'purple' },
+      { idx: 2, name: 'Callback Penalty', sub: 'No data since May 15 · 3 days stale', type: 'Per Event', formula: '−$50 per callback', sync: '3 days ago', iconCls: 'amber', attention: true },
+    ],
+    rail: { mode: 'Individual', comp: 'Performance Pay', role: 'Lead', parts: '3 enrolled', rules: '2 <span class="muted-info">· 1 attention</span>' },
+    ytdRail: { total: '$12,400', jobs: '165 / 178 <span class="muted-info">· 93%</span>', avg: '$2,480', top: 'Anthony H. · $5,200' },
+    parts: [
+      { initials: 'AH', name: 'Anthony Headen', role: 'Crew Chief', ytd: 5200, ytdL: '$5,200', last: '$925', pct: 100 },
+      { initials: 'AB', name: 'Austin Hughes', role: 'Crew Chief', ytd: 4100, ytdL: '$4,100', last: '$725', pct: 79 },
+      { initials: 'BJ', name: 'Brooke Jamison', role: 'Crew Chief', ytd: 3100, ytdL: '$3,100', last: '$600', pct: 60 },
+    ],
+    partCount: 3,
+    ds: [
+      { icon: '⚙', name: 'ServiceTitan Jobs', sub: 'Synced 8m ago', dot: 'green', count: '3 rules' },
+      { icon: '🔁', name: 'Callbacks feed', sub: 'Stale · 3d ago', dot: 'amber', count: '1 rule' },
+      { icon: '⭐', name: 'Google Reviews', sub: 'Synced 22m ago', dot: 'green', count: '1 rule' },
+    ],
+    activity: [
+      { text: '<strong>Danielle G.</strong> raised piece rate to $75', meta: 'May 12 · v1 → v2' },
+      { text: '<strong>May 5 – 11</strong> payout finalized · $2,150', meta: 'May 11 · 3 leads notified' },
+      { text: 'Callbacks data feed marked stale', meta: 'May 15 · last sync 3d ago' },
+      { text: '<strong>Anthony H.</strong> added to plan', meta: 'Mar 14 · by Danielle G.' },
+    ],
+  },
+  b: {
+    title: 'HVAC Install Field Tech Pool',
+    meta: '2026 Job-Based Plan · Job Pool · Monthly Payout · Created Mar 14 · Last edited May 12 by Danielle G.',
+    role: 'Crew', roleClass: 'crew',
+    ytd: '$28,650', ytdSub: 'Awarded YTD · 5 payout runs',
+    banner: { title: 'Review May 12 – 18 payouts', elig: '12', total: '$2,820', warn: 'Timesheet feed pending' },
+    eligMode: 'Referenced from Crew Chief Bonus · Live-synced',
+    elig: [
+      { label: 'GP% ≥ 35%', tail: 'inherited' },
+      { label: 'On-time completion', tail: 'inherited' },
+      { label: 'No callbacks within 30 days', tail: 'inherited' },
+    ],
+    awardSub: '1 pool rule · Split among crew via Crew Split',
+    award: [
+      { idx: 1, name: 'Job Pool · 12% Labor Savings', sub: 'Source: ServiceTitan + Gusto timesheets', type: 'Pool · % of Metric', formula: '12% × (labor_budget − actual_labor_$)', sync: '8 min ago', iconCls: 'blue', poolIcon: true },
+    ],
+    showSplit: true,
+    scSub: '1 item · Splits among crew on eligible job',
+    sc: [
+      { idx: 1, name: '5-Star Review (per job)', sub: 'Splits among crew on the job', type: 'Per-Event Pool', formula: '+$25 split by hours on job', sync: '22 min ago', iconCls: 'purple' },
+    ],
+    rail: { mode: 'Job Pool', comp: 'Performance Pay', role: 'Crew', parts: '8 enrolled', rules: '1 pool + 1 scorecard <span class="muted-info">· feed pending</span>' },
+    ytdRail: { total: '$28,650', jobs: '165 / 178 <span class="muted-info">· 93%</span>', avg: '$5,730', top: 'Carlos R. · $4,300' },
+    parts: [
+      { initials: 'CR', name: 'Carlos Reyes', role: 'Field Tech', ytd: 4300, ytdL: '$4,300', last: '$680', pct: 100 },
+      { initials: 'DM', name: 'Derek McAlister', role: 'Field Tech', ytd: 3950, ytdL: '$3,950', last: '$680', pct: 92 },
+      { initials: 'AB', name: 'Angelina Brown', role: 'Field Tech', ytd: 3720, ytdL: '$3,720', last: '$555', pct: 87 },
+      { initials: 'GT', name: 'Garrett Trimnal', role: 'Field Tech', ytd: 3680, ytdL: '$3,680', last: '$420', pct: 86 },
+      { initials: 'DC', name: 'Dory Cantillano', role: 'Field Tech', ytd: 3450, ytdL: '$3,450', last: '$400', pct: 80 },
+      { initials: 'EB', name: 'Emma Blakely', role: 'Field Tech', ytd: 3300, ytdL: '$3,300', last: '$385', pct: 77 },
+      { initials: 'DM', name: 'Daniel McAlister', role: 'Field Tech', ytd: 3120, ytdL: '$3,120', last: '$330', pct: 73 },
+      { initials: 'GS', name: 'Gregory Sellers', role: 'Field Tech', ytd: 3130, ytdL: '$3,130', last: '$345', pct: 73 },
+    ],
+    partCount: 8,
+    ds: [
+      { icon: '⚙', name: 'ServiceTitan Jobs', sub: 'Synced 8m ago', dot: 'green', count: '1 rule' },
+      { icon: '⏱', name: 'Gusto Timesheets', sub: 'Pending sync · 12m ago', dot: 'amber', count: 'crew split' },
+      { icon: '🔁', name: 'Callbacks feed', sub: 'Synced 22m ago', dot: 'green', count: 'eligibility' },
+      { icon: '⭐', name: 'Google Reviews', sub: 'Synced 22m ago', dot: 'green', count: '1 scorecard' },
+    ],
+    activity: [
+      { text: '<strong>Danielle G.</strong> linked eligibility to Crew Chief Bonus', meta: 'May 12 · live-sync enabled' },
+      { text: '<strong>May 5 – 11</strong> payout finalized · $5,640', meta: 'May 11 · 8 techs notified' },
+      { text: 'Pool Deduction set to <code>lead_share_amount</code> column', meta: 'May 12 · by Danielle G.' },
+      { text: '<strong>Carlos R.</strong> added to plan', meta: 'Mar 14 · by Danielle G.' },
+    ],
+  },
+};
+
+// Shared jobs dataset across both scenarios — B references A's eligibility
+const PERF_JOBS = {
+  'may-2026': [
+    { id: '#1058', date: 'May 18', customer: 'Smith Residence',     gpAmt: 9300, gpPct: 75, onTime: true,  callbacks: 0, savings: 2000 },
+    { id: '#1057', date: 'May 17', customer: 'Park Place Bldg.',    gpAmt: 5400, gpPct: 42, onTime: true,  callbacks: 0, savings: 1600 },
+    { id: '#1056', date: 'May 17', customer: 'Riverdale Apartments', gpAmt: 1900, gpPct: 28, onTime: true,  callbacks: 0, savings: 800 },
+    { id: '#1055', date: 'May 16', customer: 'Westwood Family',     gpAmt: 7800, gpPct: 51, onTime: true,  callbacks: 1, savings: 1900 },
+    { id: '#1054', date: 'May 16', customer: 'Hartman Office',      gpAmt: 8200, gpPct: 40, onTime: true,  callbacks: 0, savings: 2300 },
+    { id: '#1053', date: 'May 15', customer: 'Bell Townhomes #12',  gpAmt: 4200, gpPct: 38, onTime: false, callbacks: 0, savings: 1100 },
+    { id: '#1052', date: 'May 15', customer: 'Oakland Residence',   gpAmt: 6900, gpPct: 46, onTime: true,  callbacks: 0, savings: 1500 },
+    { id: '#1051', date: 'May 14', customer: 'Marina Heights',      gpAmt: 5100, gpPct: 36, onTime: true,  callbacks: 0, savings: 1200 },
+    { id: '#1050', date: 'May 14', customer: 'Pine Ridge Estates',  gpAmt: 7500, gpPct: 49, onTime: true,  callbacks: 0, savings: 1800 },
+    { id: '#1049', date: 'May 13', customer: 'Carter Residence',    gpAmt: 6200, gpPct: 41, onTime: true,  callbacks: 0, savings: 1400 },
+    { id: '#1048', date: 'May 13', customer: 'Sunset Plaza',        gpAmt: 2800, gpPct: 31, onTime: true,  callbacks: 0, savings: 600 },
+    { id: '#1047', date: 'May 12', customer: 'Greenway Condos',     gpAmt: 4800, gpPct: 39, onTime: true,  callbacks: 0, savings: 1300 },
+    { id: '#1046', date: 'May 12', customer: 'Holly Park Family',   gpAmt: 8800, gpPct: 53, onTime: true,  callbacks: 0, savings: 2200 },
+    { id: '#1045', date: 'May 11', customer: 'Brooks Apartments',   gpAmt: 3400, gpPct: 33, onTime: true,  callbacks: 0, savings: 700 },
+    { id: '#1044', date: 'May 11', customer: 'Donovan Residence',   gpAmt: 9600, gpPct: 58, onTime: true,  callbacks: 0, savings: 2400 },
+  ],
+};
+PERF_JOBS['apr-2026'] = PERF_JOBS['may-2026'].slice(0, 11).map(j => ({...j, id: j.id.replace('10', '09'), date: j.date.replace('May', 'Apr')}));
+PERF_JOBS['mar-2026'] = PERF_JOBS['may-2026'].slice(0, 9).map(j => ({...j, id: j.id.replace('10', '08'), date: j.date.replace('May', 'Mar')}));
+PERF_JOBS['ytd-2026'] = [...PERF_JOBS['may-2026'], ...PERF_JOBS['apr-2026'], ...PERF_JOBS['mar-2026']];
+
+// ═══════════════════ RENDER ═══════════════════
+function render() {
+  const d = SCEN[scenario];
+  document.getElementById('plan-title').textContent = d.title;
+  document.getElementById('crumb-plan').textContent = d.title;
+  document.title = d.title + ' · ShareWillow';
+  document.getElementById('plan-meta').textContent = d.meta;
+
+  const roleEl = document.getElementById('plan-role');
+  roleEl.textContent = d.role;
+  roleEl.className = 'pill pill-role ' + d.roleClass;
+
+  document.getElementById('ytd-figure').textContent = d.ytd;
+  document.getElementById('ytd-sub').textContent = d.ytdSub;
+
+  document.getElementById('banner-title').textContent = d.banner.title;
+  document.getElementById('banner-elig').textContent = d.banner.elig;
+  document.getElementById('banner-total').textContent = d.banner.total;
+  document.getElementById('banner-warn').textContent = d.banner.warn;
+
+  // Eligibility
+  document.getElementById('elig-mode').textContent = d.eligMode;
+  document.getElementById('elig-list').innerHTML = d.elig.map(e => `
+    <div class="elig-item">
+      <span class="check">✓</span>
+      <span>${e.label}</span>
+      ${e.tail ? `<span class="tail pill-inherited">${e.tail}</span>` : ''}
+    </div>
+  `).join('');
+
+  // Award rules
+  document.getElementById('award-sub').textContent = d.awardSub;
+  document.getElementById('award-rows').innerHTML = d.award.map(r => `
+    <tr class="clickable ${r.attention ? 'attention' : ''}" onclick="openDrawer('rule-${r.idx}')">
+      <td>
+        <div class="row-name">
+          <div class="row-icon ${r.iconCls}">${r.poolIcon ? '◯' : (r.idx === 1 ? '①' : '②')}</div>
+          <div>
+            <div class="row-name-text">${r.name}${r.attention ? '<span class="pill-attention">⚠ Attention</span>' : ''}</div>
+            <div class="row-sub">${r.sub}</div>
+          </div>
+        </div>
+      </td>
+      <td style="color:var(--muted);">${r.type}</td>
+      <td><span class="formula">${r.formula}</span></td>
+      <td style="text-align:right;" class="last-sync">${r.sync}</td>
+    </tr>
+  `).join('');
+
+  // Crew split visibility
+  document.getElementById('split-card').style.display = d.showSplit ? '' : 'none';
+
+  // Scorecard
+  document.getElementById('sc-sub').textContent = d.scSub;
+  document.getElementById('sc-rows').innerHTML = d.sc.map(it => `
+    <tr class="clickable ${it.attention ? 'attention' : ''}" onclick="openDrawer('sc-${it.idx}')">
+      <td>
+        <div class="row-name">
+          <div class="row-icon ${it.iconCls}">${it.idx === 1 ? '★' : '•'}</div>
+          <div>
+            <div class="row-name-text">${it.name}${it.attention ? '<span class="pill-attention">⚠ Stale</span>' : ''}</div>
+            <div class="row-sub">${it.sub}</div>
+          </div>
+        </div>
+      </td>
+      <td style="color:var(--muted);">${it.type}</td>
+      <td><span class="formula">${it.formula}</span></td>
+      <td style="text-align:right;" class="last-sync">${it.sync}${it.attention ? '<span class="resync">· Resync</span>' : ''}</td>
+    </tr>
+  `).join('');
+
+  // Right rail
+  document.getElementById('rail-mode').textContent = d.rail.mode;
+  document.getElementById('rail-comp').textContent = d.rail.comp;
+  document.getElementById('rail-role').textContent = d.rail.role;
+  document.getElementById('rail-parts').textContent = d.rail.parts;
+  document.getElementById('rail-rules').innerHTML = d.rail.rules;
+
+  document.getElementById('ytd-total').textContent = d.ytdRail.total;
+  document.getElementById('ytd-jobs').innerHTML = d.ytdRail.jobs;
+  document.getElementById('ytd-avg').textContent = d.ytdRail.avg;
+  document.getElementById('ytd-top').textContent = d.ytdRail.top;
+
+  // Data sources
+  document.getElementById('ds-list').innerHTML = d.ds.map(s => `
+    <div class="ds-row">
+      <div class="ds-icon">${s.icon}</div>
+      <div class="ds-info">
+        <div class="ds-name">${s.name}</div>
+        <div class="ds-sub"><span class="dot ${s.dot}"></span>${s.sub}</div>
+      </div>
+      <div class="ds-count">${s.count}</div>
+    </div>
+  `).join('');
+
+  // Activity
+  document.getElementById('activity-list').innerHTML = d.activity.map(a => `
+    <div class="act-item">
+      <div class="act-dot"></div>
+      <div>
+        <div class="act-text">${a.text}</div>
+        <div class="act-meta">${a.meta}</div>
+      </div>
+    </div>
+  `).join('');
+
+  // Participants
+  document.getElementById('part-count').textContent = `(${d.partCount})`;
+  document.getElementById('part-footer-text').textContent = `Showing ${d.partCount} of ${d.partCount} · All synced from ServiceTitan`;
+  document.getElementById('part-rows').innerHTML = d.parts.map(p => `
+    <tr>
+      <td><span class="avatar">${p.initials}</span>${p.name}</td>
+      <td style="color:var(--muted);">${p.role}</td>
+      <td>
+        <div class="ytd-cell">
+          <span class="amt">${p.ytdL}</span>
+          <div class="bar-track"><div class="bar-fill" style="width:${p.pct}%;"></div></div>
+        </div>
+      </td>
+      <td style="color:var(--muted);">${p.last}</td>
+      <td style="text-align:right;" class="chev">›</td>
+    </tr>
+  `).join('');
+}
+
+function setScenario(s) {
+  scenario = s;
+  document.getElementById('tab-a').classList.toggle('active', s === 'a');
+  document.getElementById('tab-b').classList.toggle('active', s === 'b');
+  render();
+  if (document.getElementById('pane-performance').classList.contains('active')) renderPerformance();
+}
+
+// ═══════════════════ TABS ═══════════════════
+function setTab(name) {
+  document.querySelectorAll('.tab-pane').forEach(p => p.classList.remove('active'));
+  document.getElementById('pane-' + name).classList.add('active');
+  document.getElementById('t-summary').classList.toggle('active', name === 'summary');
+  document.getElementById('t-performance').classList.toggle('active', name === 'performance');
+  if (name === 'performance') renderPerformance();
+}
+
+// ═══════════════════ PERFORMANCE ═══════════════════
+function evalElig(j) {
+  const reasons = [];
+  if (j.gpPct < 35)    reasons.push('GP% below 35%');
+  if (!j.onTime)       reasons.push('Not on-time');
+  if (j.callbacks > 0) reasons.push(`Callback within 30d`);
+  return { ok: reasons.length === 0, reasons };
+}
+
+function computeAward(j, ok) {
+  if (!ok) return null;
+  if (scenario === 'a') {
+    const piece = 75;
+    const bonus = j.gpAmt > 5000 ? Math.round((j.gpAmt - 5000) * 0.05) : 0;
+    return { total: piece + bonus, sub: bonus ? `$75 piece + $${bonus} GP bonus` : `$75 piece rate` };
+  } else {
+    const pool = Math.round(j.savings * 0.12);
+    const ded = 60;
+    const crew = Math.max(0, pool - ded);
+    const techs = 3;
+    const per = Math.round(crew / techs);
+    return { total: pool, sub: `−$${ded} lead · $${crew} ÷ ${techs} = $${per}/tech` };
+  }
+}
+
+function renderPerformance() {
+  const period = document.getElementById('perf-period').value;
+  const jobs = PERF_JOBS[period] || [];
+  const evald = jobs.map(j => {
+    const e = evalElig(j);
+    return { ...j, ok: e.ok, reasons: e.reasons, award: computeAward(j, e.ok) };
+  });
+
+  const total = evald.length;
+  const elig = evald.filter(j => j.ok);
+  const inelig = evald.filter(j => !j.ok);
+  const eligPct = total ? Math.round((elig.length / total) * 100) : 0;
+  const ineligPct = total ? Math.round((inelig.length / total) * 100) : 0;
+  const paid = elig.reduce((s, j) => s + (j.award?.total || 0), 0);
+  const avg = elig.length ? Math.round(paid / elig.length) : 0;
+
+  const totalLabel = scenario === 'a' ? 'Total Paid' : 'Total Pool';
+  const totalSub = scenario === 'a' ? 'across eligible jobs' : 'before deductions';
+  const avgLabel = scenario === 'a' ? 'Avg / Job' : 'Avg Pool / Job';
+
+  document.getElementById('kpi-row').innerHTML = `
+    <div class="kpi"><div class="kpi-label">Total Jobs</div><div class="kpi-value">${total}</div><div class="kpi-sub">imported in period</div></div>
+    <div class="kpi"><div class="kpi-label">Eligible</div><div class="kpi-value">${elig.length} <span style="font-size:14px;color:var(--muted);font-weight:500;">/ ${total}</span></div><div class="kpi-sub up">${eligPct}% eligibility rate</div></div>
+    <div class="kpi"><div class="kpi-label">Ineligible</div><div class="kpi-value">${inelig.length}</div><div class="kpi-sub down">${ineligPct}% filtered out</div></div>
+    <div class="kpi"><div class="kpi-label">${totalLabel}</div><div class="kpi-value">$${paid.toLocaleString()}</div><div class="kpi-sub">${totalSub}</div></div>
+    <div class="kpi"><div class="kpi-label">${avgLabel}</div><div class="kpi-value">$${avg.toLocaleString()}</div><div class="kpi-sub">per eligible job</div></div>
+  `;
+
+  document.getElementById('chip-all-n').textContent = total;
+  document.getElementById('chip-elig-n').textContent = elig.length;
+  document.getElementById('chip-inelig-n').textContent = inelig.length;
+
+  let shown = evald;
+  if (perfFilter === 'eligible') shown = elig;
+  if (perfFilter === 'ineligible') shown = inelig;
+
+  document.getElementById('result-count').textContent = `Showing ${shown.length} of ${total} jobs`;
+  document.getElementById('th-award').textContent = scenario === 'a' ? 'Award' : 'Pool · Split';
+
+  document.getElementById('jobs-rows').innerHTML = shown.map(j => {
+    const status = j.ok
+      ? `<span class="status-pill elig">✓ Eligible</span>`
+      : `<span class="status-pill inelig" title="${j.reasons.join('; ')}">✗ ${j.reasons[0]}</span>`;
+    const awardCell = j.award
+      ? `<div class="award">$${j.award.total.toLocaleString()}</div><div class="award-sub">${j.award.sub}</div>`
+      : `<span class="award-empty">—</span>`;
+    return `
+      <tr class="${j.ok ? '' : 'inelig'}" onclick="openDrawer('job-${j.id.slice(1)}')">
+        <td><a class="job-link" onclick="event.stopPropagation();">${j.id}</a></td>
+        <td style="color:var(--muted);">${j.date}</td>
+        <td>${j.customer}</td>
+        <td><span class="${j.gpPct < 35 ? 'm-fail' : 'm-pass'}">${j.gpPct}%</span></td>
+        <td><span class="${!j.onTime ? 'm-fail' : 'm-pass'}">${j.onTime ? '✓' : '✗'}</span></td>
+        <td><span class="${j.callbacks > 0 ? 'm-fail' : 'm-pass'}">${j.callbacks > 0 ? '✗ ' + j.callbacks : '✓ 0'}</span></td>
+        <td>${status}</td>
+        <td style="text-align:right;">${awardCell}</td>
+        <td style="text-align:right;color:var(--faint);">›</td>
+      </tr>
+    `;
+  }).join('') || `<tr><td colspan="9" style="text-align:center;color:var(--faint);padding:30px;">No jobs match the current filter.</td></tr>`;
+}
+
+function setFilter(f) {
+  perfFilter = f;
+  ['all','elig','inelig'].forEach(k => {
+    const id = k === 'elig' ? 'eligible' : k === 'inelig' ? 'ineligible' : 'all';
+    document.getElementById('chip-' + k).classList.toggle('active', id === f);
+  });
+  renderPerformance();
+}
+
+// ═══════════════════ DRAWER ═══════════════════
+const drawerKinds = {
+  elig: () => {
+    const d = SCEN[scenario];
+    return {
+      eyebrow: 'Eligibility',
+      title: 'Eligibility Configuration',
+      body: `
+        <div class="dr-section">
+          <div class="dr-section-title">Mode</div>
+          <div style="font-size:14px;font-weight:500;">${d.eligMode}</div>
+        </div>
+        <div class="dr-section">
+          <div class="dr-section-title">Criteria</div>
+          ${d.elig.map(e => `<div class="dr-kv"><span class="k">${e.label}</span><span class="v">${e.tail || 'Enabled'}</span></div>`).join('')}
+        </div>
+        <div class="dr-section">
+          <div class="dr-section-title">Recent eligibility decisions (last 5 jobs)</div>
+          <table class="dr-table">
+            <thead><tr><th>Job #</th><th>GP%</th><th>Callbacks</th><th>Result</th></tr></thead>
+            <tbody>
+              <tr><td>#1058</td><td>75%</td><td>0</td><td style="color:var(--green);font-weight:600;">✓ Eligible</td></tr>
+              <tr><td>#1057</td><td>42%</td><td>0</td><td style="color:var(--green);font-weight:600;">✓ Eligible</td></tr>
+              <tr><td>#1056</td><td>28%</td><td>0</td><td style="color:var(--red);">✗ GP% threshold</td></tr>
+              <tr><td>#1055</td><td>51%</td><td>1</td><td style="color:var(--red);">✗ Callback flagged</td></tr>
+              <tr><td>#1054</td><td>40%</td><td>0</td><td style="color:var(--green);font-weight:600;">✓ Eligible</td></tr>
+            </tbody>
+          </table>
+        </div>
+      `,
+    };
+  },
+  award: () => ({
+    eyebrow: 'Job Award Rules',
+    title: 'Award Rules',
+    body: `
+      <div class="dr-section">
+        <div class="dr-section-title">Award Mode</div>
+        <div style="font-size:14px;font-weight:500;">${SCEN[scenario].rail.mode} · ${SCEN[scenario].rail.comp}</div>
+      </div>
+      <div class="dr-section">
+        <div class="dr-section-title">Rules</div>
+        ${SCEN[scenario].award.map(r => `
+          <div style="padding:14px 0;border-bottom:1px solid var(--hairline);">
+            <div style="font-weight:600;margin-bottom:4px;">${r.name}</div>
+            <div style="font-size:12px;color:var(--muted);margin-bottom:8px;">${r.type} · ${r.sub}</div>
+            <div><span class="formula">${r.formula}</span></div>
+          </div>
+        `).join('')}
+      </div>
+    `,
+  }),
+  split: () => ({
+    eyebrow: 'Crew Split',
+    title: 'Crew Split Configuration',
+    body: `
+      <div class="dr-section">
+        <div class="dr-section-title">Pool Deduction</div>
+        <div class="dr-kv"><span class="k">Type</span><span class="v">Column reference</span></div>
+        <div class="dr-kv"><span class="k">Column</span><span class="v"><code>lead_share_amount</code></span></div>
+        <div class="dr-kv"><span class="k">Avg deducted / job</span><span class="v">$60.00</span></div>
+        <div class="dr-kv"><span class="k">Destination</span><span class="v" style="text-align:right;">Crew Chief Bonus plan<br/><span style="color:var(--faint);font-size:11px;font-weight:400;">(separate plan — not paid from this one)</span></span></div>
+      </div>
+      <div class="dr-section">
+        <div class="dr-section-title">Distribution</div>
+        <div class="dr-kv"><span class="k">Method</span><span class="v">By % of time on job</span></div>
+        <div class="dr-kv"><span class="k">Timesheet source</span><span class="v">Gusto Export</span></div>
+        <div class="dr-kv"><span class="k">Join key</span><span class="v"><code>Work Order #</code></span></div>
+      </div>
+      <div class="dr-section">
+        <div class="dr-section-title">Recent splits (last 3 jobs)</div>
+        <table class="dr-table">
+          <thead><tr><th>Job</th><th>Pool</th><th>Deduct</th><th>Crew Pool</th><th>Per Tech</th></tr></thead>
+          <tbody>
+            <tr><td>#1058</td><td>$240</td><td>−$60</td><td>$180</td><td>$60 ✕ 3</td></tr>
+            <tr><td>#1057</td><td>$192</td><td>−$60</td><td>$132</td><td>$44 ✕ 3</td></tr>
+            <tr><td>#1054</td><td>$276</td><td>−$60</td><td>$216</td><td>$72 ✕ 3</td></tr>
+          </tbody>
+        </table>
+      </div>
+    `,
+  }),
+  scorecard: () => ({
+    eyebrow: 'Scorecard Items',
+    title: 'Scorecard Items',
+    body: SCEN[scenario].sc.map(it => `
+      <div class="dr-section">
+        <div class="dr-section-title">${it.name}${it.attention ? '<span class="pill-attention">⚠ Stale</span>' : ''}</div>
+        <div style="font-size:13px;color:var(--muted);margin-bottom:8px;">${it.sub}</div>
+        <div><span class="formula">${it.formula}</span></div>
+        ${it.attention ? `<div class="callout-warn" style="margin-top:14px;"><strong>Data feed is stale.</strong> Last sync 3 days ago. Until resynced, payouts for this item will be excluded from the May 12–18 run.</div><button class="btn-primary" style="margin-top:12px;">Resync now →</button>` : ''}
+      </div>
+    `).join(''),
+  }),
+};
+
+function ruleDrawer(idx) {
+  const r = SCEN[scenario].award[idx - 1];
+  if (!r) return null;
+  return {
+    eyebrow: 'Rule Detail',
+    title: r.name,
+    body: `
+      <div class="dr-section">
+        <div class="dr-section-title">Type</div>
+        <div style="font-size:14px;font-weight:500;">${r.type}</div>
+        <div style="font-size:12px;color:var(--muted);margin-top:3px;">${r.sub}</div>
+      </div>
+      <div class="dr-section">
+        <div class="dr-section-title">Calculation</div>
+        <span class="formula" style="font-size:14px;padding:8px 12px;">${r.formula}</span>
+      </div>
+      <div class="dr-section">
+        <div class="dr-section-title">Dataset Configuration</div>
+        <div class="dr-kv"><span class="k">Source</span><span class="v">ServiceTitan</span></div>
+        <div class="dr-kv"><span class="k">Table</span><span class="v"><code>jobs.completed</code></span></div>
+        <div class="dr-kv"><span class="k">Join key</span><span class="v"><code>job_id</code></span></div>
+        <div class="dr-kv"><span class="k">Aggregation</span><span class="v">Sum per crew member per period</span></div>
+        <div class="dr-kv"><span class="k">Last sync</span><span class="v">${r.sync}</span></div>
+      </div>
+      <div class="dr-section">
+        <div class="dr-section-title">Last 5 eligible jobs</div>
+        <table class="dr-table">
+          <thead><tr><th>Job</th><th>Date</th><th>${scenario === 'b' ? 'Pool' : 'Award'}</th><th>Notes</th></tr></thead>
+          <tbody>
+            <tr><td>#1058</td><td>May 18</td><td>$${scenario === 'b' ? '240' : '290'}</td><td style="color:var(--muted);">${scenario === 'b' ? '$2k labor savings × 12%' : 'Anthony H. · GP $9.3k'}</td></tr>
+            <tr><td>#1057</td><td>May 17</td><td>$${scenario === 'b' ? '192' : '95'}</td><td style="color:var(--muted);">${scenario === 'b' ? '$1.6k labor savings × 12%' : 'Austin H. · GP $5.4k'}</td></tr>
+            <tr><td>#1054</td><td>May 16</td><td>$${scenario === 'b' ? '276' : '235'}</td><td style="color:var(--muted);">${scenario === 'b' ? '$2.3k labor savings × 12%' : 'Anthony H. · GP $8.2k'}</td></tr>
+            <tr><td>#1052</td><td>May 15</td><td>$${scenario === 'b' ? '180' : '170'}</td><td style="color:var(--muted);">${scenario === 'b' ? '$1.5k labor savings × 12%' : 'Brooke J. · GP $6.9k'}</td></tr>
+            <tr><td>#1050</td><td>May 14</td><td>$${scenario === 'b' ? '216' : '200'}</td><td style="color:var(--muted);">${scenario === 'b' ? '$1.8k labor savings × 12%' : 'Austin H. · GP $7.5k'}</td></tr>
+          </tbody>
+        </table>
+      </div>
+    `,
+  };
+}
+
+function scDrawer(idx) {
+  const it = SCEN[scenario].sc[idx - 1];
+  if (!it) return null;
+  return {
+    eyebrow: 'Scorecard Item',
+    title: it.name,
+    body: `
+      <div class="dr-section">
+        <div class="dr-section-title">Description</div>
+        <div style="font-size:13px;color:var(--muted);">${it.sub}</div>
+      </div>
+      <div class="dr-section">
+        <div class="dr-section-title">Formula</div>
+        <span class="formula" style="font-size:14px;padding:8px 12px;">${it.formula}</span>
+      </div>
+      ${it.attention ? `
+      <div class="dr-section">
+        <div class="dr-section-title">Issue</div>
+        <div class="callout-warn"><strong>Data feed is stale.</strong> Last sync was 3 days ago. Until resynced, payouts for this item will be excluded from the May 12–18 run.</div>
+        <button class="btn-primary" style="margin-top:12px;">Resync now →</button>
+      </div>` : ''}
+      <div class="dr-section">
+        <div class="dr-section-title">Recent events (last 30d)</div>
+        <table class="dr-table">
+          <thead><tr><th>Date</th><th>Employee</th><th>Job</th><th>Amount</th></tr></thead>
+          <tbody>
+            <tr><td>May 18</td><td>Anthony H.</td><td>#1058</td><td>+$25</td></tr>
+            <tr><td>May 17</td><td>Austin H.</td><td>#1057</td><td>+$25</td></tr>
+            <tr><td>May 16</td><td>Anthony H.</td><td>#1054</td><td>+$25</td></tr>
+            <tr><td>May 15</td><td>Brooke J.</td><td>#1052</td><td>+$25</td></tr>
+          </tbody>
+        </table>
+      </div>
+    `,
+  };
+}
+
+function jobDrawer(jobId) {
+  // Find job in current period
+  const period = document.getElementById('perf-period').value;
+  const j = PERF_JOBS[period].find(x => x.id === '#' + jobId);
+  if (!j) return null;
+  const e = evalElig(j);
+  const award = computeAward(j, e.ok);
+
+  return {
+    eyebrow: `Job ${j.id}`,
+    title: j.customer,
+    body: `
+      <div class="dr-section">
+        <div class="dr-section-title">Job Details</div>
+        <div class="dr-kv"><span class="k">Date</span><span class="v">${j.date}, 2026</span></div>
+        <div class="dr-kv"><span class="k">Revenue</span><span class="v">$${(j.gpAmt / (j.gpPct/100)).toLocaleString(undefined,{maximumFractionDigits:0})}</span></div>
+        <div class="dr-kv"><span class="k">Gross Profit</span><span class="v">$${j.gpAmt.toLocaleString()} (${j.gpPct}%)</span></div>
+        <div class="dr-kv"><span class="k">Labor Savings</span><span class="v">$${j.savings.toLocaleString()}</span></div>
+        <div class="dr-kv"><span class="k">Callbacks (30d)</span><span class="v">${j.callbacks}</span></div>
+        <div class="dr-kv"><span class="k">On-time</span><span class="v">${j.onTime ? '✓ Yes' : '✗ No'}</span></div>
+      </div>
+      <div class="dr-section">
+        <div class="dr-section-title">Eligibility Evaluation</div>
+        <div class="dr-kv"><span class="k">GP% ≥ 35%</span><span class="v" style="color:${j.gpPct >= 35 ? 'var(--green)' : 'var(--red)'};">${j.gpPct >= 35 ? '✓ Passed' : '✗ Failed (' + j.gpPct + '%)'}</span></div>
+        <div class="dr-kv"><span class="k">On-time completion</span><span class="v" style="color:${j.onTime ? 'var(--green)' : 'var(--red)'};">${j.onTime ? '✓ Passed' : '✗ Failed'}</span></div>
+        <div class="dr-kv"><span class="k">No callbacks 30d</span><span class="v" style="color:${j.callbacks === 0 ? 'var(--green)' : 'var(--red)'};">${j.callbacks === 0 ? '✓ Passed' : '✗ Failed (' + j.callbacks + ')'}</span></div>
+      </div>
+      <div class="dr-section">
+        <div class="dr-section-title">${e.ok ? 'Award Calculation' : 'Result'}</div>
+        ${e.ok && award ? `
+          ${scenario === 'a' ? `
+            <div class="dr-kv"><span class="k">Piece Rate</span><span class="v">$75</span></div>
+            <div class="dr-kv"><span class="k">GP Bonus (5% × (gp − $5k))</span><span class="v">$${award.total - 75}</span></div>
+            <div class="dr-kv" style="font-weight:700;"><span class="k">Total to ${j.customer.split(' ')[0] === 'Smith' ? 'Anthony H.' : 'Lead'}</span><span class="v" style="color:var(--green);">$${award.total}</span></div>
+          ` : `
+            <div class="dr-kv"><span class="k">Pool (12% × labor_savings)</span><span class="v">$${award.total}</span></div>
+            <div class="dr-kv"><span class="k">Pool Deduction (lead share)</span><span class="v" style="color:var(--amber);">−$60</span></div>
+            <div class="dr-kv"><span class="k">Crew Pool</span><span class="v">$${award.total - 60}</span></div>
+            <div class="dr-kv"><span class="k">Crew Size</span><span class="v">3 techs</span></div>
+            <div class="dr-kv" style="font-weight:700;"><span class="k">Per tech (equal hours)</span><span class="v" style="color:var(--green);">$${Math.round((award.total - 60) / 3)}</span></div>
+          `}
+        ` : `<div class="callout-warn"><strong>Job ineligible.</strong> Failed criterion: ${e.reasons.join(', ')}. No award paid from this plan.</div>`}
+      </div>
+    `,
+  };
+}
+
+function openDrawer(kind) {
+  let cfg = null;
+  if (drawerKinds[kind]) cfg = drawerKinds[kind]();
+  else if (kind.startsWith('rule-')) cfg = ruleDrawer(parseInt(kind.split('-')[1]));
+  else if (kind.startsWith('sc-')) cfg = scDrawer(parseInt(kind.split('-')[1]));
+  else if (kind.startsWith('job-')) cfg = jobDrawer(kind.split('-')[1]);
+  if (!cfg) return;
+  document.getElementById('dr-eyebrow').textContent = cfg.eyebrow;
+  document.getElementById('dr-title').innerHTML = cfg.title;
+  document.getElementById('dr-body').innerHTML = cfg.body;
+  document.getElementById('drawer').classList.add('open');
+  document.getElementById('drawer-bg').classList.add('open');
+}
+
+function closeDrawer() {
+  document.getElementById('drawer').classList.remove('open');
+  document.getElementById('drawer-bg').classList.remove('open');
+}
+
+document.addEventListener('keydown', e => { if (e.key === 'Escape') closeDrawer(); });
+
+// ═══════════════════ INIT ═══════════════════
+const fromParam = new URLSearchParams(window.location.search).get('from');
+if (fromParam === 'b') scenario = 'b';
+document.getElementById('tab-a').classList.toggle('active', scenario === 'a');
+document.getElementById('tab-b').classList.toggle('active', scenario === 'b');
+render();
+</script>
+
+</body>
+</html>

@@ -1,0 +1,1417 @@
+<!DOCTYPE html>
+<html lang="en"><head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Job Based Plan Builder — ShareWillow Prototype</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link href="https://use.typekit.net/mgx2gxv.css" rel="stylesheet">
+  <style>
+    :root { --mushroom-50: 20 43% 99%; --slate-800: 0 0% 10%; }
+    body { font-family: 'Matter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; background: hsl(var(--mushroom-50)); }
+    h1,h2,h3,h4,h5 { font-family: 'p22-mackinac-pro', serif; }
+
+    /* Step indicator dots */
+    .step-dot { width:24px;height:24px;border-radius:50%;display:inline-flex;align-items:center;justify-content:center;font-size:11px;font-weight:600;flex-shrink:0; }
+    .step-dot.active { background:#1a1a1a;color:#fff; }
+    .step-dot.done { background:#10b981;color:#fff; }
+    .step-dot.pending { background:#e5e7eb;color:#6b7280; }
+
+    /* Toggle switch */
+    .toggle-switch { position:relative;display:inline-block;width:40px;height:22px;flex-shrink:0; }
+    .toggle-switch input { opacity:0;width:0;height:0; }
+    .toggle-slider { position:absolute;cursor:pointer;inset:0;background:#d1d5db;border-radius:22px;transition:.2s; }
+    .toggle-slider:before { position:absolute;content:"";height:16px;width:16px;left:3px;bottom:3px;background:white;border-radius:50%;transition:.2s; }
+    input:checked + .toggle-slider { background:#1a1a1a; }
+    input:checked + .toggle-slider:before { transform:translateX(18px); }
+
+    /* Criteria card */
+    .criteria-card { border:1.5px solid #e5e7eb;border-radius:12px;padding:16px;transition:border-color .15s,background .15s; }
+    .criteria-card.active { border-color:#1a1a1a;background:#fafafa; }
+
+    /* Plan category card */
+    .plan-card { border:2px solid #e5e7eb;border-radius:14px;padding:20px;cursor:pointer;transition:all .15s;position:relative; }
+    .plan-card:hover { border-color:#9ca3af; }
+    .plan-card.selected { border-color:#1a1a1a;background:#f9fafb; }
+
+    /* Award type card */
+    .award-card { border:2px solid #e5e7eb;border-radius:12px;padding:18px 20px;cursor:pointer;transition:all .15s; }
+    .award-card:hover { border-color:#9ca3af; }
+    .award-card.selected { border-color:#1a1a1a;background:#f9fafb; }
+
+    /* Split card */
+    .split-card { border:2px solid #e5e7eb;border-radius:12px;padding:16px 20px;cursor:pointer;transition:all .15s; }
+    .split-card:hover { border-color:#9ca3af; }
+    .split-card.selected { border-color:#1a1a1a;background:#f9fafb; }
+
+    /* Scorecard item card */
+    .scorecard-card { border:1.5px solid #e5e7eb;border-radius:12px;padding:16px;position:relative; }
+
+    /* Participant tabs */
+    .ptab { padding:10px 16px;font-size:14px;font-weight:500;color:#6b7280;cursor:pointer;border-bottom:2px solid transparent;transition:all .15s;background:none;border-top:none;border-left:none;border-right:none;font-family:inherit; }
+    .ptab.active { color:#1a1a1a;border-bottom-color:#1a1a1a;font-weight:600; }
+    .ptab:hover:not(.active) { color:#374151; }
+
+    /* Threshold buttons */
+    .thresh-btn { display:inline-flex;align-items:center;gap:6px;border:1.5px solid #e5e7eb;border-radius:8px;padding:8px 16px;font-size:13px;font-weight:500;color:#374151;background:white;cursor:pointer;font-family:inherit;transition:all .15s; }
+    .thresh-btn:hover { border-color:#9ca3af;background:#f9fafb; }
+
+    /* Threshold card */
+    .thresh-card { border:1.5px solid #e5e7eb;border-radius:12px;padding:16px 20px;position:relative; }
+
+    /* Quick-add chips */
+    .qa-chip { display:inline-flex;align-items:center;gap:6px;border:1.5px solid #e5e7eb;border-radius:20px;padding:6px 14px;font-size:12px;font-weight:500;color:#374151;background:white;cursor:pointer;font-family:inherit;transition:all .15s; }
+    .qa-chip:hover { border-color:#9ca3af;background:#f9fafb; }
+
+    /* Qualifier card */
+    .qual-card { border:1.5px solid #e5e7eb;border-radius:12px;padding:16px;position:relative; }
+
+    /* Step panel */
+    .step-panel { display:none; }
+    .step-panel.active { display:block; }
+
+    /* Table */
+    .data-table { width:100%;border-collapse:collapse;font-size:13px; }
+    .data-table th { background:#f3f4f6;padding:10px 14px;text-align:left;font-weight:600;font-size:12px;color:#6b7280;letter-spacing:.3px;border-bottom:1px solid #e5e7eb; }
+    .data-table td { padding:12px 14px;border-bottom:1px solid #f3f4f6;color:#1a1a1a; }
+    .data-table tr:hover td { background:#fafafa; }
+
+    /* Join preview table */
+    .join-table { width:100%;border-collapse:collapse;font-size:12px; }
+    .join-table th { background:#f9fafb;padding:8px 12px;text-align:left;font-weight:600;border-bottom:1px solid #e5e7eb;color:#374151; }
+    .join-table td { padding:8px 12px;border-bottom:1px solid #f3f4f6;color:#6b7280; }
+
+    /* Input helpers */
+    select, input[type=text], input[type=number] { border:1.5px solid #e5e7eb;border-radius:8px;padding:8px 12px;font-size:13px;font-family:inherit;outline:none;background:white;color:#1a1a1a;width:100%; }
+    select:focus, input:focus { border-color:#1a1a1a; }
+    .input-with-suffix { display:flex;align-items:center; }
+    .input-with-suffix input { border-radius:8px 0 0 8px;border-right:none;width:80px; }
+    .input-suffix { background:#f9fafb;border:1.5px solid #e5e7eb;border-left:none;border-radius:0 8px 8px 0;padding:8px 12px;font-size:13px;color:#6b7280;white-space:nowrap; }
+    .input-with-prefix { display:flex;align-items:center; }
+    .input-prefix { background:#f9fafb;border:1.5px solid #e5e7eb;border-right:none;border-radius:8px 0 0 8px;padding:8px 12px;font-size:13px;color:#6b7280; }
+    .input-with-prefix input { border-radius:0 8px 8px 0;width:100px; }
+
+    /* Callout boxes */
+    .info-box { background:#eff6ff;border:1px solid #bfdbfe;border-radius:10px;padding:12px 14px;font-size:13px;color:#1e40af; }
+    .warn-box { background:#fffbeb;border:1px solid #fde68a;border-radius:10px;padding:12px 14px;font-size:13px;color:#92400e; }
+    .success-box { background:#f0fdf4;border:1px solid #bbf7d0;border-radius:10px;padding:12px 14px;font-size:13px;color:#166534; }
+
+    /* Badges */
+    .badge-new { background:#dcfce7;color:#166534;font-size:10px;font-weight:700;padding:2px 7px;border-radius:9999px;letter-spacing:.3px; }
+    .badge-job { background:#fff7ed;color:#9a3412;font-size:10px;font-weight:600;padding:2px 7px;border-radius:9999px; }
+    .badge-opt { background:#f3f4f6;color:#9ca3af;font-size:10px;font-weight:500;padding:2px 7px;border-radius:9999px; }
+
+    /* Participant chip */
+    .p-chip { display:inline-flex;align-items:center;gap:6px;background:#f3f4f6;border-radius:20px;padding:4px 10px 4px 6px;font-size:12px;font-weight:500;color:#374151; }
+    .p-chip .av { width:20px;height:20px;border-radius:50%;background:#1a1a1a;color:white;font-size:9px;display:flex;align-items:center;justify-content:center;font-weight:700; }
+
+    /* Confidence */
+    .conf-high { background:#d1fae5;color:#065f46;font-size:10px;padding:2px 7px;border-radius:9999px;font-weight:600;white-space:nowrap; }
+    .conf-med { background:#fef3c7;color:#92400e;font-size:10px;padding:2px 7px;border-radius:9999px;font-weight:600;white-space:nowrap; }
+
+    /* Dataset col row */
+    .ds-row { display:flex;align-items:center;gap:10px;padding:10px 0;border-bottom:1px solid #f3f4f6; }
+    .ds-row:last-child { border-bottom:none; }
+
+    /* Eligible/ineligible */
+    .elig-yes { color:#059669;font-weight:600; }
+    .elig-no { color:#dc2626;font-weight:600; }
+
+    /* Review */
+    .rev-row { display:flex;align-items:flex-start;gap:12px;padding:14px 0;border-bottom:1px solid #f3f4f6; }
+    .rev-row:last-child { border-bottom:none; }
+    .rev-label { font-size:11px;font-weight:700;color:#9ca3af;text-transform:uppercase;letter-spacing:.5px;width:160px;flex-shrink:0;padding-top:3px; }
+    .rev-value { font-size:14px;color:#1a1a1a; }
+
+    /* Scenario tabs */
+    .sc-tab { padding:8px 18px;border-radius:8px;font-size:13px;font-weight:500;cursor:pointer;transition:all .15s;border:1.5px solid #e5e7eb;background:white;color:#374151;font-family:inherit; }
+    .sc-tab.active { background:#1a1a1a;color:white;border-color:#1a1a1a; }
+
+    /* Role group row */
+    .role-group { border:1.5px solid #e5e7eb;border-radius:10px;overflow:hidden;margin-bottom:8px; }
+    .role-group-header { display:flex;align-items:center;gap:12px;padding:12px 16px;background:#f9fafb;cursor:pointer; }
+    .role-group-body { padding:4px 0;border-top:1px solid #f3f4f6; }
+
+    /* Dept badge */
+    .dept-badge { display:inline-flex;padding:2px 8px;border-radius:9999px;font-size:11px;font-weight:600; }
+    .dept-ops { background:#dbeafe;color:#1e40af; }
+    .dept-office { background:#f3e8ff;color:#7e22ce; }
+    .dept-recon { background:#dcfce7;color:#166534; }
+    .dept-mktg { background:#fef3c7;color:#92400e; }
+
+    /* Secondary award section */
+    .second-award-wrap { border:2px dashed #e5e7eb;border-radius:12px;padding:16px 20px;margin-top:12px; }
+
+    /* ── Full-page app shell layout ── */
+    body { background: white !important; }
+    #app-shell { min-height: 100vh; display: flex; flex-direction: column; background: white; }
+    #top-bar { padding: 14px 28px; display: flex; align-items: center; justify-content: space-between; background: white; }
+    #step-content { flex: 1; overflow-y: auto; padding: 52px 24px 120px; }
+
+    /* Centered step panels */
+    .step-panel { max-width: 660px; margin: 0 auto; }
+    .step-panel h3 { font-size: 30px !important; text-align: center !important; margin: 0 0 10px !important; font-family: 'p22-mackinac-pro', serif !important; font-weight: 600 !important; color: #1a1a1a !important; }
+
+    /* Fixed bottom bar + progress bar */
+    #bottom-bar { position: fixed; bottom: 4px; left: 0; right: 0; background: #f5f4f0; padding: 14px 28px; display: flex; align-items: center; justify-content: space-between; z-index: 50; }
+    #progress-wrap { position: fixed; bottom: 0; left: 0; right: 0; height: 4px; background: #e5e7eb; z-index: 51; }
+    #progress-fill { height: 4px; background: #3a7a50; transition: width .3s ease; }
+
+    /* Nav buttons matching app */
+    .btn-back { background: white; border: 1.5px solid #d1d5db; border-radius: 8px; padding: 10px 20px; font-size: 13px; font-weight: 500; cursor: pointer; font-family: inherit; color: #374151; display: flex; align-items: center; gap: 6px; }
+    .btn-back:hover { border-color: #9ca3af; }
+    .btn-next { background: #1a1a1a; color: white; border: none; border-radius: 8px; padding: 10px 24px; font-size: 13px; font-weight: 600; cursor: pointer; font-family: inherit; display: flex; align-items: center; gap: 6px; }
+    .btn-next:hover { background: #333; }
+
+    /* Hide original sidebar from main flow */
+    #sidebar { display: none !important; }
+
+    /* Floating step navigator (prototype-only) */
+    #step-nav-pill { position: fixed; left: 16px; bottom: 68px; background: rgba(0,0,0,.82); color: white; border-radius: 8px; padding: 7px 12px; font-size: 11px; font-weight: 600; cursor: pointer; z-index: 200; border: none; font-family: inherit; letter-spacing: .3px; }
+    #sidebar-float { position: fixed; left: 16px; bottom: 108px; background: white; border: 1px solid #e5e7eb; border-radius: 12px; padding: 16px; width: 220px; box-shadow: 0 4px 20px rgba(0,0,0,.15); z-index: 200; max-height: 60vh; overflow-y: auto; display: none; }
+
+    /* Scenario tabs on proto bar */
+    .sc-tab { padding: 6px 14px; border-radius: 6px; font-size: 12px; font-weight: 500; cursor: pointer; transition: all .15s; border: 1.5px solid #e5e7eb; background: white; color: #374151; font-family: inherit; white-space: nowrap; }
+    .sc-tab.active { background: #1a1a1a; color: white; border-color: #1a1a1a; }
+  </style>
+<style>*, ::before, ::after{--tw-border-spacing-x:0;--tw-border-spacing-y:0;--tw-translate-x:0;--tw-translate-y:0;--tw-rotate:0;--tw-skew-x:0;--tw-skew-y:0;--tw-scale-x:1;--tw-scale-y:1;--tw-pan-x: ;--tw-pan-y: ;--tw-pinch-zoom: ;--tw-scroll-snap-strictness:proximity;--tw-gradient-from-position: ;--tw-gradient-via-position: ;--tw-gradient-to-position: ;--tw-ordinal: ;--tw-slashed-zero: ;--tw-numeric-figure: ;--tw-numeric-spacing: ;--tw-numeric-fraction: ;--tw-ring-inset: ;--tw-ring-offset-width:0px;--tw-ring-offset-color:#fff;--tw-ring-color:rgb(59 130 246 / 0.5);--tw-ring-offset-shadow:0 0 #0000;--tw-ring-shadow:0 0 #0000;--tw-shadow:0 0 #0000;--tw-shadow-colored:0 0 #0000;--tw-blur: ;--tw-brightness: ;--tw-contrast: ;--tw-grayscale: ;--tw-hue-rotate: ;--tw-invert: ;--tw-saturate: ;--tw-sepia: ;--tw-drop-shadow: ;--tw-backdrop-blur: ;--tw-backdrop-brightness: ;--tw-backdrop-contrast: ;--tw-backdrop-grayscale: ;--tw-backdrop-hue-rotate: ;--tw-backdrop-invert: ;--tw-backdrop-opacity: ;--tw-backdrop-saturate: ;--tw-backdrop-sepia: ;--tw-contain-size: ;--tw-contain-layout: ;--tw-contain-paint: ;--tw-contain-style: }::backdrop{--tw-border-spacing-x:0;--tw-border-spacing-y:0;--tw-translate-x:0;--tw-translate-y:0;--tw-rotate:0;--tw-skew-x:0;--tw-skew-y:0;--tw-scale-x:1;--tw-scale-y:1;--tw-pan-x: ;--tw-pan-y: ;--tw-pinch-zoom: ;--tw-scroll-snap-strictness:proximity;--tw-gradient-from-position: ;--tw-gradient-via-position: ;--tw-gradient-to-position: ;--tw-ordinal: ;--tw-slashed-zero: ;--tw-numeric-figure: ;--tw-numeric-spacing: ;--tw-numeric-fraction: ;--tw-ring-inset: ;--tw-ring-offset-width:0px;--tw-ring-offset-color:#fff;--tw-ring-color:rgb(59 130 246 / 0.5);--tw-ring-offset-shadow:0 0 #0000;--tw-ring-shadow:0 0 #0000;--tw-shadow:0 0 #0000;--tw-shadow-colored:0 0 #0000;--tw-blur: ;--tw-brightness: ;--tw-contrast: ;--tw-grayscale: ;--tw-hue-rotate: ;--tw-invert: ;--tw-saturate: ;--tw-sepia: ;--tw-drop-shadow: ;--tw-backdrop-blur: ;--tw-backdrop-brightness: ;--tw-backdrop-contrast: ;--tw-backdrop-grayscale: ;--tw-backdrop-hue-rotate: ;--tw-backdrop-invert: ;--tw-backdrop-opacity: ;--tw-backdrop-saturate: ;--tw-backdrop-sepia: ;--tw-contain-size: ;--tw-contain-layout: ;--tw-contain-paint: ;--tw-contain-style: }/* ! tailwindcss v3.4.17 | MIT License | https://tailwindcss.com */*,::after,::before{box-sizing:border-box;border-width:0;border-style:solid;border-color:#e5e7eb}::after,::before{--tw-content:''}:host,html{line-height:1.5;-webkit-text-size-adjust:100%;-moz-tab-size:4;tab-size:4;font-family:ui-sans-serif, system-ui, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";font-feature-settings:normal;font-variation-settings:normal;-webkit-tap-highlight-color:transparent}body{margin:0;line-height:inherit}hr{height:0;color:inherit;border-top-width:1px}abbr:where([title]){-webkit-text-decoration:underline dotted;text-decoration:underline dotted}h1,h2,h3,h4,h5,h6{font-size:inherit;font-weight:inherit}a{color:inherit;text-decoration:inherit}b,strong{font-weight:bolder}code,kbd,pre,samp{font-family:ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;font-feature-settings:normal;font-variation-settings:normal;font-size:1em}small{font-size:80%}sub,sup{font-size:75%;line-height:0;position:relative;vertical-align:baseline}sub{bottom:-.25em}sup{top:-.5em}table{text-indent:0;border-color:inherit;border-collapse:collapse}button,input,optgroup,select,textarea{font-family:inherit;font-feature-settings:inherit;font-variation-settings:inherit;font-size:100%;font-weight:inherit;line-height:inherit;letter-spacing:inherit;color:inherit;margin:0;padding:0}button,select{text-transform:none}button,input:where([type=button]),input:where([type=reset]),input:where([type=submit]){-webkit-appearance:button;background-color:transparent;background-image:none}:-moz-focusring{outline:auto}:-moz-ui-invalid{box-shadow:none}progress{vertical-align:baseline}::-webkit-inner-spin-button,::-webkit-outer-spin-button{height:auto}[type=search]{-webkit-appearance:textfield;outline-offset:-2px}::-webkit-search-decoration{-webkit-appearance:none}::-webkit-file-upload-button{-webkit-appearance:button;font:inherit}summary{display:list-item}blockquote,dd,dl,figure,h1,h2,h3,h4,h5,h6,hr,p,pre{margin:0}fieldset{margin:0;padding:0}legend{padding:0}menu,ol,ul{list-style:none;margin:0;padding:0}dialog{padding:0}textarea{resize:vertical}input::placeholder,textarea::placeholder{opacity:1;color:#9ca3af}[role=button],button{cursor:pointer}:disabled{cursor:default}audio,canvas,embed,iframe,img,object,svg,video{display:block;vertical-align:middle}img,video{max-width:100%;height:auto}[hidden]:where(:not([hidden=until-found])){display:none}</style></head>
+<body>
+
+<!-- PROTOTYPE CONTROLS -->
+<div style="padding:9px 24px;display:flex;align-items:center;gap:10px;border-bottom:1px solid #e5e7eb;background:#fafafa;">
+  <span style="font-size:11px;font-weight:700;color:#9ca3af;text-transform:uppercase;letter-spacing:.4px;">Prototype:</span>
+  <button class="sc-tab active" id="tab-a" onclick="setScenario('a')">A — Crew Chief: $75 Piece Rate per Job</button>
+  <button class="sc-tab" id="tab-b" onclick="setScenario('b')">B — Field Tech Crew: 12% Labor Pool</button>
+  <span style="margin-left:auto;font-size:11px;color:#9ca3af;">New: <span class="badge-new" style="vertical-align:middle;">NEW</span> &nbsp; Opt: <span class="badge-opt" style="vertical-align:middle;">opt</span></span>
+</div>
+
+<!-- APP SHELL -->
+<div id="app-shell">
+
+  <!-- TOP BAR (matches app) -->
+  <div id="top-bar">
+    <span id="plan-name-display" style="font-size:14px;font-weight:500;color:#1a1a1a;">HVAC Install Crew Chief Bonus</span>
+    <div style="display:flex;align-items:center;gap:20px;">
+      <button style="background:none;border:none;font-size:14px;color:#374151;cursor:pointer;font-family:inherit;">Cancel</button>
+      <button style="background:none;border:none;font-size:14px;color:#2563eb;font-weight:500;cursor:pointer;font-family:inherit;">Save &amp; Exit</button>
+    </div>
+  </div>
+
+  <!-- Hidden spans kept for JS compatibility -->
+  <span id="step-counter" style="display:none;"></span>
+  <span id="modal-title" style="display:none;"></span>
+
+  <!-- CONTENT AREA -->
+  <div id="step-content">
+
+      <!-- SIDEBAR (rendered by JS, shown in floating navigator) -->
+      <div style="width:216px;flex-shrink:0;border-right:1px solid #f3f4f6;padding:20px 16px;overflow-y:auto;background:#fafafa;" id="sidebar"><div style="cursor:pointer;" onclick="jumpTo(0)"><div style="display:flex;align-items:center;gap:8px;"><span class="step-dot done">✓</span><span style="font-size:12px;font-weight:500;color:#374151;line-height:1.3;">Plan Setup</span></div><div style="width:2px;height:14px;background:#e5e7eb;margin-left:11px;"></div></div><div style="cursor:pointer;" onclick="jumpTo(1)"><div style="display:flex;align-items:center;gap:8px;"><span class="step-dot done">✓</span><span style="font-size:12px;font-weight:500;color:#374151;line-height:1.3;">Plan Category</span></div><div style="width:2px;height:14px;background:#e5e7eb;margin-left:11px;"></div></div><div style="cursor:pointer;" onclick="jumpTo(2)"><div style="display:flex;align-items:center;gap:8px;"><span class="step-dot done">✓</span><span style="font-size:12px;font-weight:500;color:#374151;line-height:1.3;">Select Participants</span></div><div style="width:2px;height:14px;background:#e5e7eb;margin-left:11px;"></div></div><div style="cursor:pointer;" onclick="jumpTo(3)"><div style="display:flex;align-items:center;gap:8px;"><span class="step-dot active">4</span><span style="font-size:12px;font-weight:600;color:#1a1a1a;line-height:1.3;">Award Mode<span style="font-size:9px;font-weight:700;background:#d1fae5;color:#166534;padding:1px 5px;border-radius:99px;margin-left:4px;">NEW</span></span></div><div style="width:2px;height:14px;background:#e5e7eb;margin-left:11px;"></div></div><div style="cursor:pointer;" onclick="jumpTo(4)"><div style="display:flex;align-items:center;gap:8px;"><span class="step-dot pending">5</span><span style="font-size:12px;font-weight:500;color:#9ca3af;line-height:1.3;">Company Thresholds<span style="font-size:9px;color:#d1d5db;margin-left:4px;">(opt)</span></span></div><div style="width:2px;height:14px;background:#e5e7eb;margin-left:11px;"></div></div><div style="cursor:pointer;" onclick="jumpTo(5)"><div style="display:flex;align-items:center;gap:8px;"><span class="step-dot pending">6</span><span style="font-size:12px;font-weight:500;color:#9ca3af;line-height:1.3;">Job Eligibility<span style="font-size:9px;font-weight:700;background:#d1fae5;color:#166534;padding:1px 5px;border-radius:99px;margin-left:4px;">NEW</span></span></div><div style="width:2px;height:14px;background:#e5e7eb;margin-left:11px;"></div></div><div style="cursor:pointer;" onclick="jumpTo(6)"><div style="display:flex;align-items:center;gap:8px;"><span class="step-dot pending">7</span><span style="font-size:12px;font-weight:500;color:#9ca3af;line-height:1.3;">Job Award<span style="font-size:9px;font-weight:700;background:#d1fae5;color:#166534;padding:1px 5px;border-radius:99px;margin-left:4px;">NEW</span></span></div><div style="width:2px;height:14px;background:#e5e7eb;margin-left:11px;"></div></div><div style="cursor:pointer;" onclick="jumpTo(7)"><div style="display:flex;align-items:center;gap:8px;"><span class="step-dot pending">8</span><span style="font-size:12px;font-weight:500;color:#9ca3af;line-height:1.3;">Scorecard Items<span style="font-size:9px;font-weight:700;background:#d1fae5;color:#166534;padding:1px 5px;border-radius:99px;margin-left:4px;">NEW</span><span style="font-size:9px;color:#d1d5db;margin-left:4px;">(opt)</span></span></div><div style="width:2px;height:14px;background:#e5e7eb;margin-left:11px;"></div></div><div style="cursor:pointer;" onclick="jumpTo(8)"><div style="display:flex;align-items:center;gap:8px;"><span class="step-dot pending">9</span><span style="font-size:12px;font-weight:500;color:#9ca3af;line-height:1.3;">Dataset Config<span style="font-size:9px;font-weight:700;background:#d1fae5;color:#166534;padding:1px 5px;border-radius:99px;margin-left:4px;">NEW</span></span></div><div style="width:2px;height:14px;background:#e5e7eb;margin-left:11px;"></div></div><div style="cursor:pointer;" onclick="jumpTo(9)"><div style="display:flex;align-items:center;gap:8px;"><span class="step-dot pending">10</span><span style="font-size:12px;font-weight:500;color:#9ca3af;line-height:1.3;">Individual Qualifiers<span style="font-size:9px;color:#d1d5db;margin-left:4px;">(opt)</span></span></div><div style="width:2px;height:14px;background:#e5e7eb;margin-left:11px;"></div></div><div style="cursor:pointer;" onclick="jumpTo(10)"><div style="display:flex;align-items:center;gap:8px;"><span class="step-dot pending">11</span><span style="font-size:12px;font-weight:500;color:#9ca3af;line-height:1.3;">Review &amp; Publish</span></div></div></div>
+
+
+        <!-- ══════════════════════════════════════
+             PANEL 1: PLAN SETUP
+        ══════════════════════════════════════ -->
+        <div class="step-panel" id="panel-1">
+          <h3 style="font-size:18px;margin:0 0 6px;">Set up your plan</h3>
+          <p style="font-size:14px;color:#6b7280;margin:0 0 28px;">Give your plan a name and set the performance period.</p>
+          <div style="max-width:460px;display:flex;flex-direction:column;gap:18px;">
+            <div>
+              <label style="font-size:12px;font-weight:600;color:#374151;display:block;margin-bottom:6px;">Plan Name</label>
+              <input type="text" id="plan-name" value="HVAC Install Crew Chief Bonus">
+            </div>
+            <div>
+              <label style="font-size:12px;font-weight:600;color:#374151;display:block;margin-bottom:6px;">Performance Period</label>
+              <select><option selected="">Monthly</option><option>Quarterly</option><option>Annually</option><option>Weekly</option></select>
+            </div>
+            <div>
+              <label style="font-size:12px;font-weight:600;color:#374151;display:block;margin-bottom:6px;">Plan Year</label>
+              <select><option selected="">2026</option><option>2025</option></select>
+            </div>
+          </div>
+        </div>
+
+        <!-- ══════════════════════════════════════
+             PANEL 2: PLAN CATEGORY
+        ══════════════════════════════════════ -->
+        <div class="step-panel" id="panel-2">
+          <h3>Which type of plan would you like to create?</h3>
+          <p style="font-size:14px;color:#6b7280;margin:0 0 32px;text-align:center;">Select a plan type that best fits your incentive structure. You can modify details in the next steps.</p>
+          <div style="display:flex;flex-direction:column;gap:12px;">
+
+            <div class="plan-card" onclick="selectPlanCard(this)">
+              <div style="display:flex;align-items:center;gap:16px;">
+                <div class="radio-dot" style="width:20px;height:20px;border-radius:50%;border:2px solid #d1d5db;flex-shrink:0;"></div>
+                <div style="width:44px;height:44px;border-radius:10px;background:#1a1a1a;display:flex;align-items:center;justify-content:center;flex-shrink:0;">
+                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M23 21v-2a4 4 0 0 0-3-3.87"></path><path d="M16 3.13a4 4 0 0 1 0 7.75"></path></svg>
+                </div>
+                <div style="flex:1;"><div style="font-size:15px;font-weight:600;color:#1a1a1a;margin-bottom:3px;">Team Performance Plan</div><div style="font-size:13px;color:#6b7280;">Reward the whole team based on shared results from a common incentive pool.</div></div>
+              </div>
+            </div>
+
+            <div class="plan-card" onclick="selectPlanCard(this)">
+              <div style="display:flex;align-items:center;gap:16px;">
+                <div class="radio-dot" style="width:20px;height:20px;border-radius:50%;border:2px solid #d1d5db;flex-shrink:0;"></div>
+                <div style="width:44px;height:44px;border-radius:10px;background:#1a1a1a;display:flex;align-items:center;justify-content:center;flex-shrink:0;">
+                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>
+                </div>
+                <div style="flex:1;"><div style="font-size:15px;font-weight:600;color:#1a1a1a;margin-bottom:3px;">Individual-Based Performance Plan</div><div style="font-size:13px;color:#6b7280;">Reward employees individually through a shared pool or uncapped earnings.</div></div>
+              </div>
+            </div>
+
+            <div class="plan-card selected" id="job-plan-card" onclick="selectPlanCard(this)">
+              <div style="display:flex;align-items:center;gap:16px;">
+                <div class="radio-dot" id="job-card-radio" style="width:20px;height:20px;border-radius:50%;border:2px solid #1a1a1a;background:#1a1a1a;display:flex;align-items:center;justify-content:center;flex-shrink:0;"><div style="width:8px;height:8px;border-radius:50%;background:white;"></div></div>
+                <div style="width:44px;height:44px;border-radius:10px;background:#1a1a1a;display:flex;align-items:center;justify-content:center;flex-shrink:0;">
+                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2"><rect x="2" y="7" width="20" height="14" rx="2"></rect><path d="M16 7V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v2"></path><line x1="12" y1="12" x2="12" y2="16"></line><line x1="10" y1="14" x2="14" y2="14"></line></svg>
+                </div>
+                <div style="flex:1;">
+                  <div style="display:flex;align-items:center;gap:8px;margin-bottom:3px;"><span style="font-size:15px;font-weight:600;color:#1a1a1a;">Job-Based Performance Plan</span><span class="badge-new">NEW</span></div>
+                  <div style="font-size:13px;color:#6b7280;">Reward crew members based on job-by-job eligibility — payout tied to who was on that job.</div>
+                </div>
+              </div>
+              <div class="info-box" style="margin-top:14px;">
+                <strong>How it works:</strong> ShareWillow evaluates each job against your eligibility criteria. Qualifying jobs generate an award paid to enrolled crew members who were on that job.
+              </div>
+            </div>
+
+          </div>
+        </div>
+
+        <!-- ══════════════════════════════════════
+             PANEL 3: SELECT PARTICIPANTS (tabs UI)
+        ══════════════════════════════════════ -->
+        <div class="step-panel" id="panel-3">
+          <h3 style="font-size:18px;margin:0 0 6px;">Who would you like to include in this plan?</h3>
+          <p style="font-size:14px;color:#6b7280;margin:0 0 16px;">Select one or more employees to continue.</p>
+
+          <div class="info-box" style="margin-bottom:20px;max-width:680px;">
+            💡 <strong>For job based plans, we recommend enrolling one role at a time.</strong> Use "Select by Role" to enroll all employees in a specific role, then create a separate plan for each role (e.g., one plan for Crew Chiefs, another for Field Techs).
+          </div>
+
+          <!-- Tabs -->
+          <div style="border-bottom:1px solid #e5e7eb;display:flex;gap:0;max-width:680px;margin-bottom:0;">
+            <button class="ptab active" id="ptab-individual" onclick="selectPTab('individual')">Select by Individual</button>
+            <button class="ptab" id="ptab-role" onclick="selectPTab('role')">Select by Role</button>
+            <button class="ptab" id="ptab-dept" onclick="selectPTab('dept')">Select by Department</button>
+          </div>
+
+          <!-- Tab: Individual -->
+          <div id="pcontent-individual" style="max-width: 680px; display: block;">
+            <div style="padding:12px 0;border-bottom:1px solid #f3f4f6;">
+              <div style="display:flex;align-items:center;gap:8px;border:1.5px solid #e5e7eb;border-radius:8px;padding:8px 12px;">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#9ca3af" stroke-width="2"><circle cx="11" cy="11" r="8"></circle><path d="m21 21-4.35-4.35"></path></svg>
+                <input type="text" placeholder="Search employees…" style="border:none;padding:0;font-size:13px;outline:none;background:transparent;">
+              </div>
+            </div>
+            <table class="data-table" style="max-width:680px;">
+              <thead><tr><th style="width:36px;"><input type="checkbox" style="width:16px;height:16px;accent-color:#1a1a1a;"></th><th>Name</th><th>Role</th><th>Department</th></tr></thead>
+              <tbody id="individual-table-body">
+                <tr><td><input type="checkbox" style="width:16px;height:16px;accent-color:#1a1a1a;" id="chk-a1" checked=""></td><td style="font-weight:500;">Angelina Brown</td><td>Field Tech</td><td><span class="dept-badge dept-ops">Ops</span></td></tr>
+                <tr><td><input type="checkbox" style="width:16px;height:16px;accent-color:#1a1a1a;" id="chk-a2" checked=""></td><td style="font-weight:500;">Anthony Headen</td><td>Crew Chief</td><td><span class="dept-badge dept-ops">Ops</span></td></tr>
+                <tr><td><input type="checkbox" style="width:16px;height:16px;accent-color:#1a1a1a;" id="chk-a3"></td><td style="font-weight:500;">Austin Hughes</td><td>Crew Chief</td><td><span class="dept-badge dept-ops">Ops</span></td></tr>
+                <tr><td><input type="checkbox" style="width:16px;height:16px;accent-color:#1a1a1a;" id="chk-a4"></td><td style="font-weight:500;">Allie Moody</td><td>AR/JFC</td><td><span class="dept-badge dept-office">Office</span></td></tr>
+                <tr><td><input type="checkbox" style="width:16px;height:16px;accent-color:#1a1a1a;" id="chk-a5"></td><td style="font-weight:500;">Brooke Jamison</td><td>Manager</td><td><span class="dept-badge dept-recon">Recon</span></td></tr>
+                <tr><td><input type="checkbox" style="width:16px;height:16px;accent-color:#1a1a1a;" id="chk-a6"></td><td style="font-weight:500;">Dory Cantillano</td><td>Field Tech</td><td><span class="dept-badge dept-ops">Ops</span></td></tr>
+                <tr><td><input type="checkbox" style="width:16px;height:16px;accent-color:#1a1a1a;" id="chk-a7"></td><td style="font-weight:500;">Daniel McAlister</td><td>Field Tech</td><td><span class="dept-badge dept-ops">Ops</span></td></tr>
+                <tr><td><input type="checkbox" style="width:16px;height:16px;accent-color:#1a1a1a;" id="chk-a8"></td><td style="font-weight:500;">Emma Blakely</td><td>JFC</td><td><span class="dept-badge dept-recon">Recon</span></td></tr>
+                <tr><td><input type="checkbox" style="width:16px;height:16px;accent-color:#1a1a1a;" id="chk-a9"></td><td style="font-weight:500;">Gregory Sellers</td><td>Marketer</td><td><span class="dept-badge dept-mktg">Marketing</span></td></tr>
+                <tr><td><input type="checkbox" style="width:16px;height:16px;accent-color:#1a1a1a;" id="chk-a10"></td><td style="font-weight:500;">Garrett Trimnal</td><td>Field Tech</td><td><span class="dept-badge dept-ops">Ops</span></td></tr>
+              </tbody>
+            </table>
+            <div style="display:flex;align-items:center;justify-content:space-between;padding:12px 0;border-top:1px solid #f3f4f6;font-size:12px;color:#6b7280;max-width:680px;">
+              <span>Rows per page: <select style="width:auto;padding:4px 8px;font-size:12px;">
+                <option selected="">10</option><option>25</option>
+              </select></span>
+              <span>Page 1 of 3 &nbsp; <button style="border:1px solid #e5e7eb;background:white;border-radius:6px;padding:4px 8px;cursor:pointer;">‹</button> <button style="border:1px solid #e5e7eb;background:white;border-radius:6px;padding:4px 8px;cursor:pointer;">›</button></span>
+            </div>
+            <div style="padding-top:12px;border-top:1px solid #f3f4f6;max-width:680px;">
+              <button style="background:none;border:none;color:#1a1a1a;font-size:13px;font-weight:500;cursor:pointer;font-family:inherit;display:flex;align-items:center;gap:6px;">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#1a1a1a" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
+                Add New Employee
+              </button>
+            </div>
+          </div>
+
+          <!-- Tab: By Role -->
+          <div id="pcontent-role" style="display:none;max-width:680px;padding-top:4px;">
+            <div class="role-group">
+              <div class="role-group-header" id="rg-chief" onclick="toggleRoleGroup('chief')">
+                <input type="checkbox" id="chk-role-chief" style="width:16px;height:16px;accent-color:#1a1a1a;" checked="" onchange="toggleRoleGroupCheck('chief', this.checked)">
+                <div style="flex:1;"><div style="font-size:14px;font-weight:600;color:#1a1a1a;">Crew Chief</div><div style="font-size:12px;color:#6b7280;">3 employees</div></div>
+                <svg id="rg-chief-chevron" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#9ca3af" stroke-width="2"><polyline points="6 9 12 15 18 9"></polyline></svg>
+              </div>
+              <div class="role-group-body" id="rg-chief-body">
+                <div style="display:flex;align-items:center;gap:12px;padding:10px 16px;border-bottom:1px solid #f9fafb;"><input type="checkbox" checked="" style="width:15px;height:15px;accent-color:#1a1a1a;"><span style="font-size:13px;font-weight:500;">Anthony Headen</span></div>
+                <div style="display:flex;align-items:center;gap:12px;padding:10px 16px;border-bottom:1px solid #f9fafb;"><input type="checkbox" checked="" style="width:15px;height:15px;accent-color:#1a1a1a;"><span style="font-size:13px;font-weight:500;">Austin Hughes</span></div>
+                <div style="display:flex;align-items:center;gap:12px;padding:10px 16px;"><input type="checkbox" checked="" style="width:15px;height:15px;accent-color:#1a1a1a;"><span style="font-size:13px;font-weight:500;">Jordan Bell</span></div>
+              </div>
+            </div>
+            <div class="role-group">
+              <div class="role-group-header" onclick="toggleRoleGroup('ft')">
+                <input type="checkbox" id="chk-role-ft" style="width:16px;height:16px;accent-color:#1a1a1a;" onchange="toggleRoleGroupCheck('ft', this.checked)">
+                <div style="flex:1;"><div style="font-size:14px;font-weight:600;color:#1a1a1a;">Field Tech</div><div style="font-size:12px;color:#6b7280;">8 employees</div></div>
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#9ca3af" stroke-width="2"><polyline points="6 9 12 15 18 9"></polyline></svg>
+              </div>
+            </div>
+            <div class="role-group">
+              <div class="role-group-header" onclick="toggleRoleGroup('mgr')">
+                <input type="checkbox" id="chk-role-mgr" style="width:16px;height:16px;accent-color:#1a1a1a;" onchange="toggleRoleGroupCheck('mgr', this.checked)">
+                <div style="flex:1;"><div style="font-size:14px;font-weight:600;color:#1a1a1a;">Manager</div><div style="font-size:12px;color:#6b7280;">2 employees</div></div>
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#9ca3af" stroke-width="2"><polyline points="6 9 12 15 18 9"></polyline></svg>
+              </div>
+            </div>
+            <div class="role-group">
+              <div class="role-group-header" onclick="">
+                <input type="checkbox" id="chk-role-arjfc" style="width:16px;height:16px;accent-color:#1a1a1a;">
+                <div style="flex:1;"><div style="font-size:14px;font-weight:600;color:#1a1a1a;">AR/JFC</div><div style="font-size:12px;color:#6b7280;">1 employee</div></div>
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#9ca3af" stroke-width="2"><polyline points="6 9 12 15 18 9"></polyline></svg>
+              </div>
+            </div>
+          </div>
+
+          <!-- Tab: By Department -->
+          <div id="pcontent-dept" style="display:none;max-width:680px;padding-top:4px;">
+            <div class="role-group">
+              <div class="role-group-header">
+                <input type="checkbox" style="width:16px;height:16px;accent-color:#1a1a1a;">
+                <div style="flex:1;"><div style="font-size:14px;font-weight:600;color:#1a1a1a;">Ops</div><div style="font-size:12px;color:#6b7280;">14 employees</div></div>
+              </div>
+            </div>
+            <div class="role-group">
+              <div class="role-group-header">
+                <input type="checkbox" style="width:16px;height:16px;accent-color:#1a1a1a;">
+                <div style="flex:1;"><div style="font-size:14px;font-weight:600;color:#1a1a1a;">Office</div><div style="font-size:12px;color:#6b7280;">5 employees</div></div>
+              </div>
+            </div>
+            <div class="role-group">
+              <div class="role-group-header">
+                <input type="checkbox" style="width:16px;height:16px;accent-color:#1a1a1a;">
+                <div style="flex:1;"><div style="font-size:14px;font-weight:600;color:#1a1a1a;">Recon</div><div style="font-size:12px;color:#6b7280;">4 employees</div></div>
+              </div>
+            </div>
+            <div class="role-group">
+              <div class="role-group-header">
+                <input type="checkbox" style="width:16px;height:16px;accent-color:#1a1a1a;">
+                <div style="flex:1;"><div style="font-size:14px;font-weight:600;color:#1a1a1a;">Marketing</div><div style="font-size:12px;color:#6b7280;">2 employees</div></div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- ══════════════════════════════════════
+             PANEL 13: AWARD MODE (NEW)
+        ══════════════════════════════════════ -->
+        <div class="step-panel" id="panel-13">
+          <h3 style="font-size:26px;margin:0 0 8px;text-align:center;">Select the type of award</h3>
+          <p style="font-size:14px;color:#6b7280;margin:0 0 36px;text-align:center;">You can select how job-based bonuses are structured and delivered to participants.</p>
+
+          <div style="max-width:600px;margin:0 auto;display:flex;flex-direction:column;gap:14px;">
+
+            <!-- Card 1: Individual -->
+            <div id="mode-card-individual" onclick="selectAwardMode('individual')" style="border:1.5px solid #e5e7eb;border-radius:14px;padding:22px 24px;cursor:pointer;transition:border-color .15s;">
+              <div style="display:flex;align-items:center;gap:16px;">
+                <div id="rdot-mode-individual" style="width:20px;height:20px;border-radius:50%;border:2px solid #d1d5db;flex-shrink:0;display:flex;align-items:center;justify-content:center;transition:all .15s;"></div>
+                <div style="width:44px;height:44px;background:#1a1a1a;border-radius:10px;display:flex;align-items:center;justify-content:center;flex-shrink:0;">
+                  <svg width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+                </div>
+                <div style="flex:1;">
+                  <div style="font-size:17px;font-weight:600;color:#1a1a1a;margin-bottom:4px;">Individual</div>
+                  <div style="font-size:13px;color:#6b7280;line-height:1.5;">Each enrolled person earns their own award for eligible jobs they worked. No pool, no splitting.</div>
+                </div>
+              </div>
+
+              <!-- Compensation Model sub-options (shown when Individual selected) -->
+              <div id="compmodel-individual" style="display:none;margin-top:20px;padding-top:18px;border-top:1px solid #f3f4f6;">
+                <div style="font-size:11px;font-weight:700;color:#9ca3af;text-transform:uppercase;letter-spacing:.5px;margin-bottom:14px;">Compensation Model</div>
+                <div style="display:flex;flex-direction:column;gap:14px;">
+                  <label style="display:flex;align-items:flex-start;gap:12px;cursor:pointer;" onclick="event.stopPropagation()">
+                    <input type="radio" name="compmodel-ind" value="perf" checked style="margin-top:3px;flex-shrink:0;width:auto;">
+                    <div>
+                      <div style="font-size:14px;font-weight:600;color:#1a1a1a;">Performance Pay</div>
+                      <div style="font-size:12px;color:#6b7280;margin-top:3px;">Each person earns a per-job award (piece rate or fixed amount) for eligible jobs. Optional scorecard bonuses stack on top.</div>
+                    </div>
+                  </label>
+                  <label style="display:flex;align-items:flex-start;gap:12px;cursor:pointer;" onclick="event.stopPropagation()">
+                    <input type="radio" name="compmodel-ind" value="scorecard" style="margin-top:3px;flex-shrink:0;width:auto;">
+                    <div>
+                      <div style="font-size:14px;font-weight:600;color:#1a1a1a;">Scorecard Only</div>
+                      <div style="font-size:12px;color:#6b7280;margin-top:3px;">Awards are tied entirely to scorecard events — 5-star reviews, upsells, callbacks avoided. No base job award per eligible job.</div>
+                    </div>
+                  </label>
+                </div>
+              </div>
+            </div>
+
+            <!-- Card 2: Job Pool -->
+            <div id="mode-card-pool" onclick="selectAwardMode('pool')" style="border:1.5px solid #e5e7eb;border-radius:14px;padding:22px 24px;cursor:pointer;transition:border-color .15s;">
+              <div style="display:flex;align-items:center;gap:16px;">
+                <div id="rdot-mode-pool" style="width:20px;height:20px;border-radius:50%;border:2px solid #d1d5db;flex-shrink:0;display:flex;align-items:center;justify-content:center;transition:all .15s;"></div>
+                <div style="width:44px;height:44px;background:#1a1a1a;border-radius:10px;display:flex;align-items:center;justify-content:center;flex-shrink:0;">
+                  <svg width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+                </div>
+                <div style="flex:1;">
+                  <div style="font-size:17px;font-weight:600;color:#1a1a1a;margin-bottom:4px;">Job Pool</div>
+                  <div style="font-size:13px;color:#6b7280;line-height:1.5;">Each eligible job generates a shared pool, divided among the crew who worked that job based on your split rules.</div>
+                </div>
+              </div>
+
+              <!-- Compensation Model sub-options (shown when Pool selected) -->
+              <div id="compmodel-pool" style="display:none;margin-top:20px;padding-top:18px;border-top:1px solid #f3f4f6;">
+                <div style="font-size:11px;font-weight:700;color:#9ca3af;text-transform:uppercase;letter-spacing:.5px;margin-bottom:14px;">Compensation Model</div>
+                <div style="display:flex;flex-direction:column;gap:14px;">
+                  <label style="display:flex;align-items:flex-start;gap:12px;cursor:pointer;" onclick="event.stopPropagation()">
+                    <input type="radio" name="compmodel-pool" value="perf" checked style="margin-top:3px;flex-shrink:0;width:auto;">
+                    <div>
+                      <div style="font-size:14px;font-weight:600;color:#1a1a1a;">Performance Pay</div>
+                      <div style="font-size:12px;color:#6b7280;margin-top:3px;">Pool calculated from job performance metrics (% of revenue, gross profit, labor savings). Split among crew per your rules.</div>
+                    </div>
+                  </label>
+                  <label style="display:flex;align-items:flex-start;gap:12px;cursor:pointer;" onclick="event.stopPropagation()">
+                    <input type="radio" name="compmodel-pool" value="scorecard" style="margin-top:3px;flex-shrink:0;width:auto;">
+                    <div>
+                      <div style="font-size:14px;font-weight:600;color:#1a1a1a;">Scorecard Only</div>
+                      <div style="font-size:12px;color:#6b7280;margin-top:3px;">Crew shares a pool generated from scorecard events only (reviews, upsells, etc.). No job eligibility evaluation required.</div>
+                    </div>
+                  </label>
+                </div>
+              </div>
+            </div>
+
+          </div>
+        </div>
+
+        <!-- ══════════════════════════════════════
+             PANEL 4: THRESHOLDS (matching real app)
+        ══════════════════════════════════════ -->
+        <div class="step-panel" id="panel-4">
+          <h3 style="font-size:22px;margin:0 0 10px;text-align:center;">What thresholds must be achieved before awards are paid out?</h3>
+          <p style="font-size:14px;color:#6b7280;margin:0 0 32px;text-align:center;">For best results, we recommend setting no more than three. If you'd prefer not to set any, you can skip this step.</p>
+
+          <!-- Threshold type buttons -->
+          <div style="display:flex;gap:10px;justify-content:center;flex-wrap:wrap;margin-bottom:28px;" id="thresh-buttons">
+            <button class="thresh-btn" onclick="addThreshold('revenue')">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>Revenue
+            </button>
+            <button class="thresh-btn" onclick="addThreshold('profit')">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>Profit
+            </button>
+            <button class="thresh-btn" onclick="addThreshold('margin')">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>Margin
+            </button>
+            <button class="thresh-btn" onclick="addThreshold('custom')">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>Custom
+            </button>
+          </div>
+
+          <!-- Added threshold cards -->
+          <div id="thresh-cards" style="max-width:560px;margin:0 auto 24px;display:flex;flex-direction:column;gap:12px;"></div>
+
+          <div style="border-top:1px solid #e5e7eb;padding-top:24px;text-align:center;">
+            <button onclick="advanceStep()" style="background:none;border:none;font-size:14px;font-weight:600;color:#1a1a1a;cursor:pointer;font-family:inherit;">
+              Or, continue without setting thresholds &nbsp;→
+            </button>
+          </div>
+        </div>
+
+        <!-- ══════════════════════════════════════
+             PANEL 5: JOB ELIGIBILITY
+        ══════════════════════════════════════ -->
+        <div class="step-panel" id="panel-5">
+          <div style="display:flex;align-items:center;gap:10px;margin-bottom:6px;">
+            <h3 style="font-size:18px;margin:0;">Job eligibility criteria</h3>
+            <span class="badge-new">NEW</span>
+          </div>
+          <p style="font-size:14px;color:#6b7280;margin:0 0 8px;">All enabled criteria must be met for a job to generate a bonus. Jobs that don't qualify are shown as ineligible in employee dashboards.</p>
+
+          <!-- Reference plan option (shown for scenario B) -->
+          <div id="ref-plan-box" style="display:none;margin-bottom:20px;max-width:600px;">
+            <div style="border:1.5px solid #e5e7eb;border-radius:12px;padding:16px;">
+              <label style="display:flex;align-items:center;gap:10px;cursor:pointer;">
+                <input type="checkbox" id="ref-plan-chk" onchange="toggleRefPlan()" style="width:16px;height:16px;accent-color:#1a1a1a;">
+                <div>
+                  <div style="font-size:14px;font-weight:600;color:#1a1a1a;">Use eligibility from an existing plan</div>
+                  <div style="font-size:12px;color:#6b7280;">Sync criteria from another job based plan so the same jobs qualify for both plans.</div>
+                </div>
+              </label>
+              <div id="ref-plan-select" style="display:none;margin-top:12px;margin-left:26px;">
+                <select style="max-width:340px;"><option>HVAC Install Crew Chief Bonus (Monthly)</option><option>Plumbing Install Lead Bonus (Monthly)</option></select>
+                <div class="success-box" style="margin-top:10px;">✓ Criteria copied from <strong>HVAC Install Crew Chief Bonus</strong>. You can override any criteria below.</div>
+              </div>
+            </div>
+          </div>
+
+          <div style="display:flex;flex-direction:column;gap:10px;max-width:620px;">
+
+            <div class="criteria-card active" id="crit-gp">
+              <div style="display:flex;align-items:center;gap:14px;">
+                <label class="toggle-switch"><input type="checkbox" checked="" onchange="toggleCrit('gp',this.checked)"><span class="toggle-slider"></span></label>
+                <div style="flex:1;"><div style="font-size:14px;font-weight:600;color:#1a1a1a;">Minimum gross profit percentage</div><div style="font-size:12px;color:#6b7280;">The job's gross profit must meet or exceed this threshold.</div></div>
+                <div id="crit-gp-input" style="display:flex;align-items:center;gap:6px;flex-shrink:0;">
+                  <span style="font-size:12px;color:#6b7280;">GP% ≥</span>
+                  <div class="input-with-suffix"><input type="number" value="35" style="width:60px;border-radius:8px 0 0 8px;border-right:none;"><span class="input-suffix">%</span></div>
+                </div>
+              </div>
+            </div>
+
+            <div class="criteria-card" id="crit-ontime">
+              <div style="display:flex;align-items:center;gap:14px;">
+                <label class="toggle-switch"><input type="checkbox" onchange="toggleCrit('ontime',this.checked)"><span class="toggle-slider"></span></label>
+                <div style="flex:1;"><div style="font-size:14px;font-weight:600;color:#1a1a1a;">Completed on time or early</div><div style="font-size:12px;color:#6b7280;">Job completion date must be on or before the scheduled date.</div></div>
+                <div id="crit-ontime-input" style="display:none;"><span style="font-size:12px;color:#10b981;font-weight:600;">✓ No config needed</span></div>
+              </div>
+            </div>
+
+            <div class="criteria-card active" id="crit-cb">
+              <div style="display:flex;align-items:center;gap:14px;">
+                <label class="toggle-switch"><input type="checkbox" checked="" onchange="toggleCrit('cb',this.checked)"><span class="toggle-slider"></span></label>
+                <div style="flex:1;"><div style="font-size:14px;font-weight:600;color:#1a1a1a;">No callbacks within window</div><div style="font-size:12px;color:#6b7280;">No callback job logged for this customer within the specified days.</div></div>
+                <div id="crit-cb-input" style="display:flex;align-items:center;gap:6px;flex-shrink:0;">
+                  <span style="font-size:12px;color:#6b7280;">Within</span>
+                  <div class="input-with-suffix"><input type="number" value="30" style="width:60px;border-radius:8px 0 0 8px;border-right:none;"><span class="input-suffix">days</span></div>
+                </div>
+              </div>
+            </div>
+
+            <div class="criteria-card" id="crit-revhr">
+              <div style="display:flex;align-items:center;gap:14px;">
+                <label class="toggle-switch"><input type="checkbox" onchange="toggleCrit('revhr',this.checked)"><span class="toggle-slider"></span></label>
+                <div style="flex:1;"><div style="font-size:14px;font-weight:600;color:#1a1a1a;">Minimum revenue per hour</div><div style="font-size:12px;color:#6b7280;">Job revenue divided by hours worked must meet this threshold.</div></div>
+                <div id="crit-revhr-input" style="display:none;align-items:center;gap:6px;">
+                  <span style="font-size:12px;color:#6b7280;">≥</span>
+                  <div class="input-with-prefix"><span class="input-prefix">$</span><input type="number" value="250" style="width:70px;border-radius:0 8px 8px 0;"></div>
+                  <span style="font-size:12px;color:#6b7280;">/hr</span>
+                </div>
+              </div>
+            </div>
+
+            <div class="criteria-card" id="crit-labor">
+              <div style="display:flex;align-items:center;gap:14px;">
+                <label class="toggle-switch"><input type="checkbox" onchange="toggleCrit('labor',this.checked)"><span class="toggle-slider"></span></label>
+                <div style="flex:1;"><div style="font-size:14px;font-weight:600;color:#1a1a1a;">Within labor budget</div><div style="font-size:12px;color:#6b7280;">Actual labor hours within a percentage of the budgeted hours.</div></div>
+                <div id="crit-labor-input" style="display:none;align-items:center;gap:6px;">
+                  <span style="font-size:12px;color:#6b7280;">Actual ≤</span>
+                  <div class="input-with-suffix"><input type="number" value="100" style="width:60px;border-radius:8px 0 0 8px;border-right:none;"><span class="input-suffix">% of budget</span></div>
+                </div>
+              </div>
+            </div>
+
+            <div class="criteria-card" id="crit-custom">
+              <div style="display:flex;align-items:flex-start;gap:14px;">
+                <label class="toggle-switch" style="margin-top:2px;"><input type="checkbox" onchange="toggleCrit('custom',this.checked)"><span class="toggle-slider"></span></label>
+                <div style="flex:1;"><div style="font-size:14px;font-weight:600;color:#1a1a1a;">Custom eligibility rule</div><div style="font-size:12px;color:#6b7280;">Describe a rule — our system will identify the column or apply an AI transform.</div></div>
+                <div id="crit-custom-input" style="display:none;width:200px;"><input type="text" placeholder="e.g. Job type is 'Install'"></div>
+              </div>
+            </div>
+
+          </div>
+        </div>
+
+        <!-- ══════════════════════════════════════
+             PANEL 6: JOB AWARD (with stacking)
+        ══════════════════════════════════════ -->
+        <div class="step-panel" id="panel-6">
+          <div style="display:flex;align-items:center;gap:10px;margin-bottom:6px;">
+            <h3 style="font-size:18px;margin:0;">How is each eligible job awarded?</h3>
+            <span class="badge-new">NEW</span>
+          </div>
+          <p style="font-size:14px;color:#6b7280;margin:0 0 20px;">Choose how the bonus for each qualifying job is calculated. You can add more than one award type.</p>
+
+          <!-- PRIMARY AWARD -->
+          <div style="max-width:600px;" id="award-section-primary">
+            <div style="font-size:11px;font-weight:700;color:#9ca3af;text-transform:uppercase;letter-spacing:.5px;margin-bottom:10px;">Primary Award</div>
+            <div style="display:flex;flex-direction:column;gap:10px;">
+
+              <div class="award-card selected" id="award-piece" onclick="selectAward('piece','primary')">
+                <div style="display:flex;align-items:flex-start;gap:12px;">
+                  <div style="margin-top:2px;width:18px;height:18px;border-radius:50%;border:2px solid #1a1a1a;background:#1a1a1a;display:flex;align-items:center;justify-content:center;flex-shrink:0;"><div style="width:8px;height:8px;border-radius:50%;background:white;"></div></div>
+                  <div style="flex:1;">
+                    <div style="font-size:14px;font-weight:600;color:#1a1a1a;margin-bottom:3px;">Piece Rate — Fixed amount per eligible job</div>
+                    <div style="font-size:12px;color:#6b7280;margin-bottom:12px;">Each enrolled crew member in this role receives a fixed dollar amount for every eligible job they are on.</div>
+                    <div id="award-piece-config" style="display:flex;align-items:center;gap:8px;">
+                      <span style="font-size:13px;color:#374151;font-weight:500;">Amount:</span>
+                      <div class="input-with-prefix"><span class="input-prefix">$</span><input type="number" value="75" style="width:80px;border-radius:0 8px 8px 0;"></div>
+                      <span style="font-size:13px;color:#6b7280;">per eligible job</span>
+                    </div>
+                    <div class="success-box" style="margin-top:10px;font-size:12px;">Best for: One person in this role per job (e.g., the crew lead on each install).</div>
+                  </div>
+                </div>
+              </div>
+
+              <div class="award-card" id="award-pool" onclick="selectAward('pool','primary')">
+                <div style="display:flex;align-items:flex-start;gap:12px;">
+                  <div style="margin-top:2px;width:18px;height:18px;border-radius:50%;border:2px solid #d1d5db;flex-shrink:0;" id="award-pool-radio"></div>
+                  <div style="flex:1;">
+                    <div style="font-size:14px;font-weight:600;color:#1a1a1a;margin-bottom:3px;">Percentage of Job Metric — Creates a job pool</div>
+                    <div style="font-size:12px;color:#6b7280;margin-bottom:12px;">A percentage of a job-level metric generates an award pool for each eligible job. The pool is then split among enrolled crew on that job.</div>
+                    <div id="award-pool-config" style="display:none;flex-direction:column;gap:10px;">
+                      <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;">
+                        <span style="font-size:13px;color:#374151;font-weight:500;">Take</span>
+                        <div class="input-with-suffix"><input type="number" value="12" style="width:60px;border-radius:8px 0 0 8px;border-right:none;"><span class="input-suffix">%</span></div>
+                        <span style="font-size:13px;color:#374151;font-weight:500;">of</span>
+                        <select style="width:auto;min-width:200px;"><option>Revenue</option><option>Gross Profit</option><option>GP over Minimum GP%</option><option selected="">Labor Budget Savings</option><option>Labor Hours Saved (piece rate)</option></select>
+                      </div>
+                      <div class="info-box" style="font-size:12px;"><strong>Labor Budget Savings</strong> = (Budgeted Hours − Actual Hours) × Labor Rate.</div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <div class="award-card" id="award-flat" onclick="selectAward('flat','primary')">
+                <div style="display:flex;align-items:flex-start;gap:12px;">
+                  <div style="margin-top:2px;width:18px;height:18px;border-radius:50%;border:2px solid #d1d5db;flex-shrink:0;" id="award-flat-radio"></div>
+                  <div style="flex:1;">
+                    <div style="font-size:14px;font-weight:600;color:#1a1a1a;margin-bottom:3px;">Flat Rate — Fixed total per eligible job</div>
+                    <div style="font-size:12px;color:#6b7280;margin-bottom:12px;">A fixed dollar total per eligible job, split among crew per your split rules.</div>
+                    <div id="award-flat-config" style="display:none;align-items:center;gap:8px;">
+                      <div class="input-with-prefix"><span class="input-prefix">$</span><input type="number" value="200" style="width:80px;border-radius:0 8px 8px 0;"></div>
+                      <span style="font-size:13px;color:#6b7280;">per eligible job (split among crew)</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+            </div>
+          </div>
+
+          <!-- SECONDARY AWARD (stacking) -->
+          <div id="second-award-wrap" style="display:none;max-width:600px;margin-top:4px;">
+            <div class="second-award-wrap">
+              <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;">
+                <div style="font-size:11px;font-weight:700;color:#9ca3af;text-transform:uppercase;letter-spacing:.5px;">Additional Award</div>
+                <button onclick="removeSecondAward()" style="background:none;border:none;color:#9ca3af;font-size:12px;cursor:pointer;font-family:inherit;">✕ Remove</button>
+              </div>
+              <div style="display:flex;flex-direction:column;gap:10px;">
+                <div class="award-card selected" id="award2-pct" onclick="selectAward2('pct')">
+                  <div style="display:flex;align-items:flex-start;gap:12px;">
+                    <div style="margin-top:2px;width:18px;height:18px;border-radius:50%;border:2px solid #1a1a1a;background:#1a1a1a;display:flex;align-items:center;justify-content:center;flex-shrink:0;"><div style="width:8px;height:8px;border-radius:50%;background:white;"></div></div>
+                    <div style="flex:1;">
+                      <div style="font-size:14px;font-weight:600;color:#1a1a1a;margin-bottom:3px;">Percentage of Job Metric</div>
+                      <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-top:10px;">
+                        <span style="font-size:13px;font-weight:500;color:#374151;">Take</span>
+                        <div class="input-with-suffix"><input type="number" value="5" style="width:55px;border-radius:8px 0 0 8px;border-right:none;"><span class="input-suffix">%</span></div>
+                        <span style="font-size:13px;font-weight:500;color:#374151;">of</span>
+                        <select style="width:auto;min-width:160px;"><option selected="">Gross Profit</option><option>Revenue</option><option>GP over Minimum GP%</option></select>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+                <div class="award-card" id="award2-piece" onclick="selectAward2('piece')">
+                  <div style="display:flex;align-items:flex-start;gap:12px;">
+                    <div style="margin-top:2px;width:18px;height:18px;border-radius:50%;border:2px solid #d1d5db;flex-shrink:0;" id="award2-piece-radio"></div>
+                    <div style="flex:1;"><div style="font-size:14px;font-weight:600;color:#1a1a1a;margin-bottom:3px;">Piece Rate</div><div style="font-size:12px;color:#6b7280;">Additional fixed $ amount per eligible job.</div></div>
+                  </div>
+                </div>
+              </div>
+              <div class="info-box" style="margin-top:12px;font-size:12px;">Total award per eligible job = Primary Award + Additional Award. Both are evaluated on the same job eligibility criteria.</div>
+            </div>
+          </div>
+
+          <!-- Add stacking button -->
+          <div style="max-width:600px;margin-top:16px;" id="add-award-row">
+            <button id="add-award-btn" onclick="addSecondAward()" style="display:flex;align-items:center;gap:8px;background:white;border:1.5px dashed #d1d5db;border-radius:10px;padding:12px 20px;width:100%;font-size:13px;font-weight:500;color:#6b7280;cursor:pointer;font-family:inherit;transition:all .15s;" onmouseover="this.style.borderColor='#9ca3af'" onmouseout="this.style.borderColor='#d1d5db'">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
+              Add another award type
+            </button>
+          </div>
+        </div>
+
+        <!-- ══════════════════════════════════════
+             PANEL 7: CREW SPLIT (Scenario B only)
+        ══════════════════════════════════════ -->
+        <div class="step-panel" id="panel-7">
+          <div style="display:flex;align-items:center;gap:10px;margin-bottom:6px;">
+            <h3 style="font-size:18px;margin:0;">How is the job pool split?</h3>
+            <span class="badge-new">NEW</span>
+          </div>
+          <p style="font-size:14px;color:#6b7280;margin:0 0 20px;">Define how each eligible job's award pool is divided among the enrolled crew members who were on that job.</p>
+          <div style="display:flex;flex-direction:column;gap:10px;max-width:600px;">
+
+            <div class="split-card" id="split-equal" onclick="selectSplit('equal')">
+              <div style="display:flex;align-items:center;gap:12px;">
+                <div style="width:18px;height:18px;border-radius:50%;border:2px solid #d1d5db;flex-shrink:0;" id="split-equal-radio"></div>
+                <div><div style="font-size:14px;font-weight:600;color:#1a1a1a;">Equal share among all crew on the job</div><div style="font-size:12px;color:#6b7280;">Pool divided evenly regardless of hours or role.</div></div>
+              </div>
+            </div>
+
+            <div class="split-card selected" id="split-hours" onclick="selectSplit('hours')">
+              <div style="display:flex;align-items:flex-start;gap:12px;">
+                <div style="margin-top:2px;width:18px;height:18px;border-radius:50%;border:2px solid #1a1a1a;background:#1a1a1a;display:flex;align-items:center;justify-content:center;flex-shrink:0;"><div style="width:8px;height:8px;border-radius:50%;background:white;"></div></div>
+                <div>
+                  <div style="font-size:14px;font-weight:600;color:#1a1a1a;">By percentage of time on job</div>
+                  <div style="font-size:12px;color:#6b7280;margin-bottom:10px;">Each crew member's share is proportional to their hours on the job. Requires timesheet data.</div>
+                  <div class="info-box" style="font-size:12px;">Example: Pool = $134.40 · Carlos 4.5h of 9h total = 50% → <strong>$67.20</strong> · Derek 4.5h = 50% → <strong>$67.20</strong></div>
+                </div>
+              </div>
+            </div>
+
+            <div class="split-card" id="split-role" onclick="selectSplit('role')">
+              <div style="display:flex;align-items:flex-start;gap:12px;">
+                <div style="margin-top:2px;width:18px;height:18px;border-radius:50%;border:2px solid #d1d5db;flex-shrink:0;" id="split-role-radio"></div>
+                <div style="flex:1;">
+                  <div style="font-size:14px;font-weight:600;color:#1a1a1a;">Fixed percentage by role</div>
+                  <div style="font-size:12px;color:#6b7280;margin-bottom:10px;">Assign set percentages to each role. Roles not present on a job are excluded and percentages rescaled.</div>
+                  <div id="split-role-config" style="display:none;">
+                    <table style="border:1px solid #e5e7eb;border-radius:8px;overflow:hidden;border-collapse:collapse;font-size:13px;width:340px;">
+                      <thead><tr style="background:#f9fafb;"><th style="padding:8px 12px;text-align:left;font-weight:600;border-bottom:1px solid #e5e7eb;">Role</th><th style="padding:8px 12px;text-align:left;font-weight:600;border-bottom:1px solid #e5e7eb;">% of Pool</th></tr></thead>
+                      <tbody>
+                        <tr><td style="padding:8px 12px;">Crew Chief</td><td style="padding:8px 12px;"><div class="input-with-suffix"><input type="number" value="60" style="width:60px;border-radius:8px 0 0 8px;border-right:none;"><span class="input-suffix">%</span></div></td></tr>
+                        <tr><td style="padding:8px 12px;">Field Tech</td><td style="padding:8px 12px;"><div class="input-with-suffix"><input type="number" value="40" style="width:60px;border-radius:8px 0 0 8px;border-right:none;"><span class="input-suffix">%</span></div></td></tr>
+                      </tbody>
+                    </table>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div class="split-card" id="split-combo" onclick="selectSplit('combo')">
+              <div style="display:flex;align-items:flex-start;gap:12px;">
+                <div style="margin-top:2px;width:18px;height:18px;border-radius:50%;border:2px solid #d1d5db;flex-shrink:0;" id="split-combo-radio"></div>
+                <div style="flex:1;">
+                  <div style="font-size:14px;font-weight:600;color:#1a1a1a;">Combination — Lead gets fixed cut, crew splits remainder</div>
+                  <div style="font-size:12px;color:#6b7280;margin-bottom:10px;">Most common for lead+crew setups.</div>
+                  <div id="split-combo-config" style="display:none;flex-direction:column;gap:10px;">
+                    <div style="display:flex;align-items:center;gap:8px;"><span style="font-size:12px;color:#374151;width:160px;">Lead / Primary takes:</span><div class="input-with-suffix"><input type="number" value="60" style="width:60px;border-radius:8px 0 0 8px;border-right:none;"><span class="input-suffix">%</span></div></div>
+                    <div style="display:flex;align-items:center;gap:8px;"><span style="font-size:12px;color:#374151;width:160px;">Remaining 40% split by:</span><select style="width:auto;min-width:180px;"><option>Equal share among crew</option><option selected="">% of time on job</option></select></div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+          </div>
+          <div class="warn-box" style="margin-top:20px;max-width:600px;">⏱ <strong>Splitting by time on job</strong> requires a timesheet dataset linked by job ID. Configure this in the Dataset Config step.</div>
+        </div>
+
+        <!-- ══════════════════════════════════════
+             PANEL 8: SCORECARD ITEMS (NEW)
+        ══════════════════════════════════════ -->
+        <div class="step-panel" id="panel-8">
+          <div style="display:flex;align-items:center;gap:10px;margin-bottom:6px;">
+            <h3 style="font-size:18px;margin:0;">Add scorecard items</h3>
+            <span class="badge-new">NEW</span>
+            <span class="badge-opt">Optional</span>
+          </div>
+          <p style="font-size:14px;color:#6b7280;margin:0 0 20px;">Layer individual performance bonuses on top of the job award. These are paid per qualifying event, not per job.</p>
+
+          <!-- Quick-add chips -->
+          <div style="margin-bottom:24px;max-width:640px;">
+            <div style="font-size:12px;font-weight:600;color:#374151;margin-bottom:10px;">Quick add common items:</div>
+            <div style="display:flex;flex-wrap:wrap;gap:8px;">
+              <button class="qa-chip" onclick="addScorecardItem('review')">⭐ 5-Star Review</button>
+              <button class="qa-chip" onclick="addScorecardItem('upsell')">📈 Upsell</button>
+              <button class="qa-chip" onclick="addScorecardItem('return')">🔁 Return Visit Booked</button>
+              <button class="qa-chip" onclick="addScorecardItem('safety')">🦺 Safety Compliance</button>
+              <button class="qa-chip" onclick="addScorecardItem('custom')">+ Custom</button>
+            </div>
+          </div>
+
+          <!-- Pre-populated scorecard item (5-star review example) -->
+          <div id="scorecard-cards" style="max-width:620px;display:flex;flex-direction:column;gap:12px;">
+
+            <div class="scorecard-card" id="sc-card-review">
+              <button onclick="removeSCCard('sc-card-review')" style="position:absolute;top:12px;right:12px;background:none;border:none;color:#d1d5db;font-size:16px;cursor:pointer;font-family:inherit;" title="Remove">✕</button>
+              <div style="display:flex;align-items:center;gap:10px;margin-bottom:14px;">
+                <span style="font-size:18px;">⭐</span>
+                <div style="font-size:14px;font-weight:600;color:#1a1a1a;">5-Star Review</div>
+                <span style="font-size:11px;color:#9ca3af;">· per qualifying event</span>
+              </div>
+              <div style="display:flex;align-items:center;gap:14px;flex-wrap:wrap;">
+                <div style="display:flex;align-items:center;gap:8px;">
+                  <span style="font-size:12px;color:#374151;font-weight:500;">Pays</span>
+                  <div class="input-with-prefix"><span class="input-prefix">$</span><input type="number" value="25" style="width:70px;border-radius:0 8px 8px 0;"></div>
+                  <span style="font-size:12px;color:#6b7280;">per 5-star review on an eligible job</span>
+                </div>
+                <div style="display:flex;align-items:center;gap:8px;">
+                  <span style="font-size:12px;color:#374151;font-weight:500;">Metric:</span>
+                  <select style="width:auto;min-width:180px;"><option selected="">Customer Review Score (dataset)</option><option>Google Review Rating</option></select>
+                </div>
+                <div style="display:flex;align-items:center;gap:8px;">
+                  <span style="font-size:12px;color:#374151;font-weight:500;">Condition:</span>
+                  <select style="width:auto;"><option selected="">= 5 stars</option><option>≥ 4 stars</option></select>
+                </div>
+              </div>
+            </div>
+
+          </div>
+
+          <div id="sc-empty" style="display:none;max-width:620px;border:1.5px dashed #e5e7eb;border-radius:12px;padding:32px;text-align:center;">
+            <div style="font-size:14px;color:#9ca3af;margin-bottom:8px;">No scorecard items added yet</div>
+            <div style="font-size:12px;color:#d1d5db;">Use the quick-add buttons above to add items like 5-star reviews or upsells.</div>
+          </div>
+
+          <div style="margin-top:24px;border-top:1px solid #f3f4f6;padding-top:18px;max-width:620px;">
+            <button onclick="advanceStep()" style="background:none;border:none;font-size:14px;font-weight:600;color:#1a1a1a;cursor:pointer;font-family:inherit;">No scorecard items, continue without &nbsp;→</button>
+          </div>
+        </div>
+
+        <!-- ══════════════════════════════════════
+             PANEL 9: DATASET CONFIGURATION
+        ══════════════════════════════════════ -->
+        <div class="step-panel" id="panel-9">
+          <div style="display:flex;align-items:center;gap:10px;margin-bottom:6px;">
+            <h3 style="font-size:18px;margin:0;">Connect your data sources</h3>
+            <span class="badge-new">NEW</span>
+          </div>
+          <p style="font-size:14px;color:#6b7280;margin:0 0 20px;">Tell ShareWillow which datasets to use when evaluating eligibility, calculating awards, and identifying crew on each job.</p>
+
+          <!-- Jobs Dataset -->
+          <div style="border:1.5px solid #1a1a1a;border-radius:14px;padding:20px;max-width:620px;margin-bottom:18px;">
+            <div style="display:flex;align-items:center;gap:10px;margin-bottom:16px;">
+              <div style="width:30px;height:30px;border-radius:8px;background:#1a1a1a;display:flex;align-items:center;justify-content:center;flex-shrink:0;">
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2"><ellipse cx="12" cy="5" rx="9" ry="3"></ellipse><path d="M21 12c0 1.66-4 3-9 3s-9-1.34-9-3"></path><path d="M3 5v14c0 1.66 4 3 9 3s9-1.34 9-3V5"></path></svg>
+              </div>
+              <div><div style="font-size:14px;font-weight:700;color:#1a1a1a;">Jobs Dataset</div><div style="font-size:11px;color:#9ca3af;">Required · Primary data source</div></div>
+            </div>
+            <div style="margin-bottom:14px;">
+              <label style="font-size:12px;font-weight:600;color:#374151;display:block;margin-bottom:6px;">Select dataset</label>
+              <select><option selected="">HCP Jobs Report — May 2026 (1,847 records)</option><option>HCP Jobs Report — Apr 2026</option><option>ServiceTitan Invoice Items — May 2026</option><option>+ Add new dataset...</option></select>
+              <div style="font-size:11px;color:#9ca3af;margin-top:6px;">📡 HouseCallPro · Last synced: May 6, 2026 · 1,847 job records</div>
+            </div>
+            <div style="border-top:1px solid #f3f4f6;padding-top:14px;">
+              <div style="font-size:12px;font-weight:600;color:#374151;margin-bottom:10px;">Map columns</div>
+              <div style="display:flex;flex-direction:column;gap:2px;">
+                <div class="ds-row"><span style="font-size:12px;color:#6b7280;width:190px;flex-shrink:0;">Unique Job ID</span><select style="flex:1;font-size:12px;"><option selected="">Job # (string)</option></select><span class="conf-high">Auto-detected</span></div>
+                <div class="ds-row"><span style="font-size:12px;color:#6b7280;width:190px;flex-shrink:0;">Completion date</span><select style="flex:1;font-size:12px;"><option selected="">Completed Date (date)</option></select><span class="conf-high">Auto-detected</span></div>
+                <div class="ds-row"><span style="font-size:12px;color:#6b7280;width:190px;flex-shrink:0;">Gross Profit %</span><select style="flex:1;font-size:12px;"><option selected="">Gross Profit Pct (number)</option></select><span class="conf-high">Auto-detected</span></div>
+                <div class="ds-row"><span style="font-size:12px;color:#6b7280;width:190px;flex-shrink:0;">Assigned technician(s)</span><select style="flex:1;font-size:12px;"><option selected="">Assigned Technicians (string)</option></select><span class="conf-med">Review</span></div>
+                <div class="ds-row" id="labor-row-1" style="display:none;"><span style="font-size:12px;color:#6b7280;width:190px;flex-shrink:0;">Budgeted labor hours</span><select style="flex:1;font-size:12px;"><option selected="">Estimated Hours (number)</option></select><span class="conf-med">Review</span></div>
+                <div class="ds-row" id="labor-row-2" style="display:none;"><span style="font-size:12px;color:#6b7280;width:190px;flex-shrink:0;">Actual labor hours</span><select style="flex:1;font-size:12px;"><option selected="">Duration Hours (number)</option></select><span class="conf-high">Auto-detected</span></div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Timesheet Dataset (Scenario B only) -->
+          <div id="timesheet-section" style="display:none;border:1.5px solid #e5e7eb;border-radius:14px;padding:20px;max-width:620px;margin-bottom:16px;">
+            <div style="display:flex;align-items:center;gap:10px;margin-bottom:16px;">
+              <div style="width:30px;height:30px;border-radius:8px;background:#374151;display:flex;align-items:center;justify-content:center;flex-shrink:0;">
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>
+              </div>
+              <div><div style="font-size:14px;font-weight:700;color:#1a1a1a;">Timesheet Dataset</div><div style="font-size:11px;color:#9ca3af;">Required for split by hours · Joined to Jobs Dataset</div></div>
+            </div>
+            <div style="margin-bottom:14px;">
+              <select><option selected="">Gusto Timesheet Export — May 2026 (3,204 records)</option><option>ServiceTitan Timesheet — May 2026</option><option>+ Add new dataset...</option></select>
+            </div>
+            <div class="warn-box" style="margin-bottom:14px;">💡 We found <strong>"Job #"</strong> in your Jobs dataset and <strong>"Work Order #"</strong> in your timesheet — these look like the same Job ID. Please confirm below.</div>
+            <div style="border-top:1px solid #f3f4f6;padding-top:14px;">
+              <div style="font-size:12px;font-weight:600;color:#374151;margin-bottom:10px;">Map timesheet columns</div>
+              <div style="display:flex;flex-direction:column;gap:2px;">
+                <div class="ds-row"><span style="font-size:12px;color:#dc2626;width:190px;flex-shrink:0;">Job ID ← must match Jobs</span><select style="flex:1;font-size:12px;"><option selected="">Work Order # (string)</option><option>Job Number</option></select><span class="conf-med">Review</span></div>
+                <div class="ds-row"><span style="font-size:12px;color:#6b7280;width:190px;flex-shrink:0;">Employee identifier</span><select style="flex:1;font-size:12px;"><option selected="">Employee Name (string)</option></select><span class="conf-high">Auto-detected</span></div>
+                <div class="ds-row"><span style="font-size:12px;color:#6b7280;width:190px;flex-shrink:0;">Hours worked</span><select style="flex:1;font-size:12px;"><option selected="">Regular Hours (number)</option></select><span class="conf-high">Auto-detected</span></div>
+              </div>
+            </div>
+            <div style="border-top:1px solid #f3f4f6;padding-top:14px;margin-top:4px;">
+              <div style="font-size:12px;font-weight:600;color:#374151;margin-bottom:10px;">Join preview <span style="font-weight:400;color:#9ca3af;">(5 of 24 matched records)</span></div>
+              <table class="join-table">
+                <thead><tr><th>Job ID</th><th>Employee</th><th>Hours on Job</th><th>Job GP%</th><th>Eligible?</th></tr></thead>
+                <tbody>
+                  <tr><td>JOB-10821</td><td>Anthony Headen</td><td>4.5h</td><td>41%</td><td class="elig-yes">✓ Yes</td></tr>
+                  <tr><td>JOB-10821</td><td>Angelina Brown</td><td>4.5h</td><td>41%</td><td class="elig-yes">✓ Yes</td></tr>
+                  <tr><td>JOB-10834</td><td>Anthony Headen</td><td>6.0h</td><td>28%</td><td class="elig-no">✗ GP% low</td></tr>
+                  <tr><td>JOB-10851</td><td>Dory Cantillano</td><td>3.0h</td><td>38%</td><td class="elig-yes">✓ Yes</td></tr>
+                  <tr><td>JOB-10851</td><td>Garrett Trimnal</td><td>5.0h</td><td>38%</td><td class="elig-yes">✓ Yes</td></tr>
+                </tbody>
+              </table>
+              <div class="success-box" style="margin-top:10px;font-size:12px;">✓ All enrolled participants matched in the timesheet. Hours will be used to calculate job pool splits.</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- ══════════════════════════════════════
+             PANEL 10: INDIVIDUAL QUALIFIERS (NEW)
+        ══════════════════════════════════════ -->
+        <div class="step-panel" id="panel-10">
+          <h3 style="font-size:18px;margin:0 0 6px;">Individual qualifiers <span class="badge-opt" style="vertical-align:middle;">Optional</span></h3>
+          <p style="font-size:14px;color:#6b7280;margin:0 0 16px;">Set conditions individual employees must meet to receive their award for a period. These are in addition to job-level eligibility.</p>
+
+          <div class="info-box" style="max-width:600px;margin-bottom:24px;">
+            <strong>Example:</strong> "Employee must maintain a minimum 4.0 average review score to receive their award this month" — an employee who doesn't meet this qualifier receives $0 for the period, even if their jobs were eligible.
+          </div>
+
+          <div style="max-width:600px;">
+            <button onclick="addQualifier()" style="display:flex;align-items:center;gap:8px;background:white;border:1.5px solid #e5e7eb;border-radius:8px;padding:10px 18px;font-size:13px;font-weight:500;color:#374151;cursor:pointer;font-family:inherit;margin-bottom:16px;">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
+              Add qualifier
+            </button>
+
+            <div id="qual-cards" style="display:flex;flex-direction:column;gap:10px;">
+              <!-- Example qualifier (pre-populated to show the pattern) -->
+              <div class="qual-card" id="qc-1">
+                <button onclick="document.getElementById('qc-1').remove()" style="position:absolute;top:10px;right:12px;background:none;border:none;color:#d1d5db;font-size:16px;cursor:pointer;">✕</button>
+                <div style="font-size:12px;font-weight:600;color:#9ca3af;text-transform:uppercase;letter-spacing:.4px;margin-bottom:12px;">Qualifier 1</div>
+                <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;">
+                  <select style="width:auto;min-width:200px;"><option selected="">Average Review Score</option><option>Callback Rate</option><option>Jobs Completed</option><option>Custom metric…</option></select>
+                  <select style="width:auto;"><option selected="">≥</option><option>&gt;</option><option>=</option><option>≤</option></select>
+                  <div class="input-with-suffix"><input type="number" value="4.0" style="width:70px;border-radius:8px 0 0 8px;border-right:none;"><span class="input-suffix">stars</span></div>
+                  <span style="font-size:12px;color:#6b7280;">for the period</span>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div style="margin-top:28px;border-top:1px solid #f3f4f6;padding-top:18px;max-width:600px;">
+            <button onclick="advanceStep()" style="background:none;border:none;font-size:14px;font-weight:600;color:#1a1a1a;cursor:pointer;font-family:inherit;">No qualifiers, continue without &nbsp;→</button>
+          </div>
+        </div>
+
+        <!-- ══════════════════════════════════════
+             PANEL 11: REVIEW — SCENARIO A
+        ══════════════════════════════════════ -->
+        <div class="step-panel" id="panel-11">
+          <h3 style="font-size:18px;margin:0 0 6px;">Review your plan</h3>
+          <p style="font-size:14px;color:#6b7280;margin:0 0 20px;">Check everything looks right before publishing. Employees will see a job-by-job breakdown once the plan is live.</p>
+          <div style="max-width:560px;border:1.5px solid #e5e7eb;border-radius:14px;overflow:hidden;">
+            <div style="padding:16px 20px;background:#f9fafb;border-bottom:1px solid #e5e7eb;display:flex;align-items:center;gap:10px;">
+              <div style="font-size:16px;font-weight:700;color:#1a1a1a;">HVAC Install Crew Chief Bonus</div><span class="badge-job">Job Based</span>
+            </div>
+            <div style="padding:4px 20px;">
+              <div class="rev-row"><span class="rev-label">Period</span><span class="rev-value">Monthly · 2026</span></div>
+              <div class="rev-row"><span class="rev-label">Structure</span><span class="rev-value">Job Based</span></div>
+              <div class="rev-row"><span class="rev-label">Participants</span><span class="rev-value"><div style="display:flex;flex-wrap:wrap;gap:6px;margin-top:2px;"><span class="p-chip"><span class="av">AH</span>Anthony H.</span><span class="p-chip"><span class="av">AU</span>Austin H.</span><span class="p-chip"><span class="av">JB</span>Jordan B.</span></div><div style="font-size:12px;color:#9ca3af;margin-top:6px;">3 Crew Chiefs enrolled</div></span></div>
+              <div class="rev-row"><span class="rev-label">Eligibility</span><span class="rev-value"><div style="display:flex;flex-direction:column;gap:3px;"><span>✓ GP% ≥ 35%</span><span>✓ No callbacks within 30 days</span></div></span></div>
+              <div class="rev-row"><span class="rev-label">Primary Award</span><span class="rev-value"><strong>$75.00</strong> piece rate per eligible job</span></div>
+              <div class="rev-row"><span class="rev-label">Scorecard Items</span><span class="rev-value">⭐ 5-Star Review: $25 per review on eligible job</span></div>
+              <div class="rev-row"><span class="rev-label">Crew Split</span><span class="rev-value" style="color:#9ca3af;">None (piece rate to each crew chief)</span></div>
+              <div class="rev-row"><span class="rev-label">Data Source</span><span class="rev-value">HCP Jobs Report · Job # → GP% → Completed Date</span></div>
+              <div class="rev-row"><span class="rev-label">Thresholds</span><span class="rev-value" style="color:#9ca3af;">None</span></div>
+              <div class="rev-row"><span class="rev-label">Qualifiers</span><span class="rev-value">Review Score ≥ 4.0 stars</span></div>
+            </div>
+          </div>
+          <div class="success-box" style="margin-top:18px;max-width:560px;">📊 <strong>Estimated impact (last 30 days):</strong> 42 jobs processed → 31 eligible → Avg <strong>$225 + $50 in reviews / crew chief / month</strong></div>
+          <div style="margin-top:20px;"><button onclick="window.location.href='./admin.html?from=' + scenario" style="background:#1a1a1a;color:white;border:none;border-radius:10px;padding:12px 28px;font-size:14px;font-weight:600;cursor:pointer;font-family:inherit;">Publish Plan →</button></div>
+        </div>
+
+        <!-- ══════════════════════════════════════
+             PANEL 12: REVIEW — SCENARIO B
+        ══════════════════════════════════════ -->
+        <div class="step-panel" id="panel-12">
+          <h3 style="font-size:18px;margin:0 0 6px;">Review your plan</h3>
+          <p style="font-size:14px;color:#6b7280;margin:0 0 20px;">Check everything looks right before publishing.</p>
+          <div style="max-width:560px;border:1.5px solid #e5e7eb;border-radius:14px;overflow:hidden;">
+            <div style="padding:16px 20px;background:#f9fafb;border-bottom:1px solid #e5e7eb;display:flex;align-items:center;gap:10px;">
+              <div style="font-size:16px;font-weight:700;color:#1a1a1a;">HVAC Install Field Tech Bonus</div><span class="badge-job">Job Based</span>
+            </div>
+            <div style="padding:4px 20px;">
+              <div class="rev-row"><span class="rev-label">Period</span><span class="rev-value">Monthly · 2026</span></div>
+              <div class="rev-row"><span class="rev-label">Structure</span><span class="rev-value">Job Based · Pool per Job</span></div>
+              <div class="rev-row"><span class="rev-label">Participants</span><span class="rev-value"><div style="display:flex;flex-wrap:wrap;gap:6px;margin-top:2px;"><span class="p-chip"><span class="av">AB</span>Angelina B.</span><span class="p-chip"><span class="av">DC</span>Dory C.</span><span class="p-chip"><span class="av">DM</span>Daniel M.</span><span class="p-chip"><span class="av">+5</span></span></div><div style="font-size:12px;color:#9ca3af;margin-top:6px;">8 Field Techs enrolled</div></span></div>
+              <div class="rev-row"><span class="rev-label">Eligibility</span><span class="rev-value"><div style="display:flex;flex-direction:column;gap:3px;"><span>✓ GP% ≥ 35% <span style="font-size:11px;color:#9ca3af;">(from Crew Chief Bonus plan)</span></span><span>✓ No callbacks within 30 days <span style="font-size:11px;color:#9ca3af;">(from Crew Chief Bonus plan)</span></span></div></span></div>
+              <div class="rev-row"><span class="rev-label">Primary Award</span><span class="rev-value"><strong>12% of Labor Budget Savings</strong> → job pool per eligible job</span></div>
+              <div class="rev-row"><span class="rev-label">Scorecard Items</span><span class="rev-value">⭐ 5-Star Review: $25 per review on eligible job</span></div>
+              <div class="rev-row"><span class="rev-label">Crew Split</span><span class="rev-value">By % of time on job (from timesheet)</span></div>
+              <div class="rev-row"><span class="rev-label">Data Sources</span><span class="rev-value"><div style="display:flex;flex-direction:column;gap:3px;"><span>Jobs: HCP Jobs Report · Join key: <code style="background:#f3f4f6;padding:1px 5px;border-radius:4px;font-size:11px;">Job #</code></span><span>Timesheet: Gusto Export · Join key: <code style="background:#f3f4f6;padding:1px 5px;border-radius:4px;font-size:11px;">Work Order #</code></span></div></span></div>
+              <div class="rev-row"><span class="rev-label">Qualifiers</span><span class="rev-value">Review Score ≥ 4.0 stars</span></div>
+            </div>
+          </div>
+          <div class="success-box" style="margin-top:18px;max-width:560px;">📊 <strong>Estimated impact (last 30 days):</strong> 31 eligible jobs → Avg job pool $134 → Avg <strong>$67 + $25 reviews / field tech / month</strong></div>
+          <div style="margin-top:20px;"><button onclick="window.location.href='./admin.html?from=' + scenario" style="background:#1a1a1a;color:white;border:none;border-radius:10px;padding:12px 28px;font-size:14px;font-weight:600;cursor:pointer;font-family:inherit;">Publish Plan →</button></div>
+        </div>
+
+      </div><!-- end step-content -->
+  </div><!-- end app-shell -->
+
+  <!-- FIXED BOTTOM BAR (matches app) -->
+  <div id="bottom-bar">
+    <button onclick="goBack()" id="back-btn" class="btn-back">← Back</button>
+    <button onclick="goNext()" id="next-btn" class="btn-next">Next →</button>
+  </div>
+  <!-- Progress bar at absolute bottom -->
+  <div id="progress-wrap"><div id="progress-fill" style="width:9%;"></div></div>
+
+  <!-- FLOATING STEP NAVIGATOR (prototype only) -->
+  <button id="step-nav-pill" onclick="document.getElementById('sidebar-float').style.display=document.getElementById('sidebar-float').style.display==='none'?'block':'none'">☰ Steps</button>
+  <div id="sidebar-float">
+    <div style="font-size:10px;font-weight:700;color:#9ca3af;text-transform:uppercase;letter-spacing:.5px;margin-bottom:12px;">Prototype Navigator</div>
+    <div id="sidebar-nav"></div>
+  </div>
+
+<script>
+// ─── State ────────────────────────────────────────────────────────────────────
+let scenario = 'a';
+let stepIndex = 1; // start at Plan Category
+
+// Sequences reference panel IDs
+// A (Individual): Plan Setup → Category → Participants → Award Mode → Thresholds →
+//    Job Eligibility → Job Award → Scorecard Items → Dataset Config → Qualifiers → Review A
+const seqA = [
+  { id: 1,  label: 'Plan Setup',             isNew: false, isOpt: false },
+  { id: 2,  label: 'Plan Category',          isNew: false, isOpt: false },
+  { id: 3,  label: 'Select Participants',    isNew: false, isOpt: false },
+  { id: 13, label: 'Award Mode',             isNew: true,  isOpt: false },
+  { id: 4,  label: 'Company Thresholds',     isNew: false, isOpt: true  },
+  { id: 5,  label: 'Job Eligibility',        isNew: true,  isOpt: false },
+  { id: 6,  label: 'Job Award',              isNew: true,  isOpt: false },
+  { id: 8,  label: 'Scorecard Items',        isNew: true,  isOpt: true  },
+  { id: 9,  label: 'Dataset Config',         isNew: true,  isOpt: false },
+  { id: 10, label: 'Individual Qualifiers',  isNew: false, isOpt: true  },
+  { id: 11, label: 'Review & Publish',       isNew: false, isOpt: false },
+];
+
+// B (Job Pool): adds Award Mode + Crew Split
+const seqB = [
+  { id: 1,  label: 'Plan Setup',             isNew: false, isOpt: false },
+  { id: 2,  label: 'Plan Category',          isNew: false, isOpt: false },
+  { id: 3,  label: 'Select Participants',    isNew: false, isOpt: false },
+  { id: 13, label: 'Award Mode',             isNew: true,  isOpt: false },
+  { id: 4,  label: 'Company Thresholds',     isNew: false, isOpt: true  },
+  { id: 5,  label: 'Job Eligibility',        isNew: true,  isOpt: false },
+  { id: 6,  label: 'Job Award',              isNew: true,  isOpt: false },
+  { id: 7,  label: 'Crew Split',             isNew: true,  isOpt: false },
+  { id: 8,  label: 'Scorecard Items',        isNew: true,  isOpt: true  },
+  { id: 9,  label: 'Dataset Config',         isNew: true,  isOpt: false },
+  { id: 10, label: 'Individual Qualifiers',  isNew: false, isOpt: true  },
+  { id: 12, label: 'Review & Publish',       isNew: false, isOpt: false },
+];
+
+function getSeq() { return scenario === 'a' ? seqA : seqB; }
+
+// ─── Navigation ───────────────────────────────────────────────────────────────
+function goNext() {
+  const s = getSeq();
+  if (stepIndex < s.length - 1) { stepIndex++; render(); }
+  else { window.location.href = './admin.html?from=' + scenario; }
+}
+function goBack() { if (stepIndex > 0) { stepIndex--; render(); } }
+function advanceStep() { goNext(); }
+function jumpTo(i) { stepIndex = i; render(); }
+
+function setScenario(s) {
+  scenario = s;
+  stepIndex = 1;
+  document.getElementById('tab-a').className = 'sc-tab' + (s === 'a' ? ' active' : '');
+  document.getElementById('tab-b').className = 'sc-tab' + (s === 'b' ? ' active' : '');
+
+  if (s === 'b') {
+    // Pre-select Field Tech role tab
+    selectPTab('role');
+    document.getElementById('chk-role-ft').checked = true;
+    // Pre-select pool award
+    selectAward('pool', 'primary');
+    // Show timesheet section
+    document.getElementById('timesheet-section').style.display = 'block';
+    document.getElementById('labor-row-1').style.display = '';
+    document.getElementById('labor-row-2').style.display = '';
+    // Ref plan option
+    document.getElementById('ref-plan-box').style.display = 'block';
+    // Plan name
+    document.getElementById('plan-name').value = 'HVAC Install Field Tech Bonus';
+    // Pre-configure Award Mode: Job Pool → Performance Pay
+    awardMode = 'pool';
+    setTimeout(() => selectAwardMode('pool'), 50);
+  } else {
+    selectPTab('individual');
+    selectAward('piece', 'primary');
+    document.getElementById('timesheet-section').style.display = 'none';
+    document.getElementById('labor-row-1').style.display = 'none';
+    document.getElementById('labor-row-2').style.display = 'none';
+    document.getElementById('ref-plan-box').style.display = 'none';
+    document.getElementById('plan-name').value = 'HVAC Install Crew Chief Bonus';
+    // Pre-configure Award Mode: individual
+    awardMode = 'individual';
+    leadRole = null;
+    setTimeout(() => selectAwardMode('individual'), 50);
+  }
+  render();
+}
+
+// ─── Render ───────────────────────────────────────────────────────────────────
+function render() {
+  const seq = getSeq();
+  const meta = seq[stepIndex];
+
+  // Hide all panels, show active
+  document.querySelectorAll('.step-panel').forEach(p => p.classList.remove('active'));
+  const panel = document.getElementById('panel-' + meta.id);
+  if (panel) panel.classList.add('active');
+
+  // Top bar plan name
+  const nameEl = document.getElementById('plan-name-display');
+  const nameInput = document.getElementById('plan-name');
+  if (nameEl && nameInput) nameEl.textContent = nameInput.value || 'New Plan';
+
+  // Progress bar
+  const pct = Math.round(((stepIndex + 1) / seq.length) * 100);
+  const fill = document.getElementById('progress-fill');
+  if (fill) fill.style.width = pct + '%';
+
+  // Back button: hide on first step
+  document.getElementById('back-btn').style.display = stepIndex === 0 ? 'none' : '';
+
+  // Next button label
+  const isLast = stepIndex === seq.length - 1;
+  const nextBtn = document.getElementById('next-btn');
+  nextBtn.textContent = isLast ? 'Publish Plan →' : 'Next →';
+
+  renderSidebar();
+}
+
+function renderSidebar() {
+  const seq = getSeq();
+  const sb = document.getElementById('sidebar-nav');
+  if (!sb) return;
+  sb.innerHTML = '';
+  seq.forEach((s, i) => {
+    const done = i < stepIndex, active = i === stepIndex, pending = i > stepIndex;
+    const dotCls = done ? 'done' : active ? 'active' : 'pending';
+    const color = active ? '#1a1a1a' : done ? '#374151' : '#9ca3af';
+    const weight = active ? '600' : '500';
+    const newTag = s.isNew ? '<span style="font-size:9px;font-weight:700;background:#d1fae5;color:#166534;padding:1px 5px;border-radius:99px;margin-left:4px;">NEW</span>' : '';
+    const optTag = s.isOpt && pending ? '<span style="font-size:9px;color:#d1d5db;margin-left:4px;">(opt)</span>' : '';
+    const line = i < seq.length - 1 ? '<div style="width:2px;height:14px;background:#e5e7eb;margin-left:11px;"></div>' : '';
+    sb.innerHTML += `<div style="cursor:pointer;" onclick="jumpTo(${i})"><div style="display:flex;align-items:center;gap:8px;"><span class="step-dot ${dotCls}">${done ? '✓' : i+1}</span><span style="font-size:12px;font-weight:${weight};color:${color};line-height:1.3;">${s.label}${newTag}${optTag}</span></div>${line}</div>`;
+  });
+}
+
+// ─── Award Mode ───────────────────────────────────────────────────────────────
+let awardMode = 'individual'; // 'individual' | 'pool'
+let leadRole = null;          // 'together' | 'separate' | 'none'
+
+function selectAwardMode(mode) {
+  awardMode = mode;
+
+  // Update card borders
+  const cI = document.getElementById('mode-card-individual');
+  const cP = document.getElementById('mode-card-pool');
+  if (cI) cI.style.borderColor = mode === 'individual' ? '#1a1a1a' : '#e5e7eb';
+  if (cP) cP.style.borderColor = mode === 'pool'       ? '#1a1a1a' : '#e5e7eb';
+
+  // Update radio dots
+  function fillDot(id, filled) {
+    const el = document.getElementById(id);
+    if (!el) return;
+    el.style.background  = filled ? '#1a1a1a' : '';
+    el.style.borderColor = filled ? '#1a1a1a' : '#d1d5db';
+    el.innerHTML = filled ? '<div style="width:8px;height:8px;border-radius:50%;background:white;"></div>' : '';
+  }
+  fillDot('rdot-mode-individual', mode === 'individual');
+  fillDot('rdot-mode-pool',       mode === 'pool');
+
+  // Show/hide Compensation Model sub-section inside each card
+  const cmI = document.getElementById('compmodel-individual');
+  const cmP = document.getElementById('compmodel-pool');
+  if (cmI) cmI.style.display = mode === 'individual' ? 'block' : 'none';
+  if (cmP) cmP.style.display = mode === 'pool'       ? 'block' : 'none';
+
+  // Dynamically switch sequence so sidebar shows/hides Crew Split step
+  const wasScenario = scenario;
+  scenario = mode === 'pool' ? 'b' : 'a';
+  if (scenario !== wasScenario) {
+    stepIndex = 3; // keep pointing at Award Mode (index 3 in both sequences)
+    document.getElementById('tab-a').className = 'sc-tab' + (scenario === 'a' ? ' active' : '');
+    document.getElementById('tab-b').className = 'sc-tab' + (scenario === 'b' ? ' active' : '');
+    renderSidebar();
+  }
+}
+
+function selectLeadRole(role) {
+  leadRole = role; // kept for setScenario compatibility
+}
+
+// ─── Plan Category ────────────────────────────────────────────────────────────
+function selectPlanCard(el) {
+  document.querySelectorAll('.plan-card').forEach(c => {
+    c.classList.remove('selected');
+    const d = c.querySelector('.radio-dot');
+    if (d) { d.style.background=''; d.style.borderColor='#d1d5db'; d.innerHTML=''; }
+  });
+  el.classList.add('selected');
+  const d = el.querySelector('.radio-dot');
+  if (d) { d.style.background='#1a1a1a'; d.style.borderColor='#1a1a1a'; d.innerHTML='<div style="width:8px;height:8px;border-radius:50%;background:white;"></div>'; }
+}
+
+// ─── Participant Tabs ─────────────────────────────────────────────────────────
+function selectPTab(tab) {
+  ['individual','role','dept'].forEach(t => {
+    document.getElementById('ptab-' + t).className = 'ptab' + (t === tab ? ' active' : '');
+    document.getElementById('pcontent-' + t).style.display = t === tab ? 'block' : 'none';
+  });
+}
+
+function toggleRoleGroup(id) {
+  const body = document.getElementById('rg-' + id + '-body');
+  if (body) body.style.display = body.style.display === 'none' ? 'block' : 'none';
+}
+
+function toggleRoleGroupCheck(id, checked) {
+  const body = document.getElementById('rg-' + id + '-body');
+  if (body) { body.querySelectorAll('input[type=checkbox]').forEach(c => c.checked = checked); }
+}
+
+// ─── Thresholds ───────────────────────────────────────────────────────────────
+let threshCount = 0;
+const threshLabels = { revenue:'Revenue', profit:'Profit', margin:'Margin', custom:'Custom' };
+const threshDefaults = { revenue:'$500,000', profit:'$100,000', margin:'30%', custom:'' };
+
+function addThreshold(type) {
+  threshCount++;
+  const id = 'tc-' + threshCount;
+  const card = document.createElement('div');
+  card.className = 'thresh-card';
+  card.id = id;
+  card.innerHTML = `
+    <button onclick="document.getElementById('${id}').remove()" style="position:absolute;top:10px;right:12px;background:none;border:none;color:#d1d5db;font-size:16px;cursor:pointer;">✕</button>
+    <div style="font-size:11px;font-weight:700;color:#9ca3af;text-transform:uppercase;letter-spacing:.5px;margin-bottom:12px;">${threshLabels[type]} Threshold</div>
+    <div style="display:flex;align-items:center;gap:12px;flex-wrap:wrap;">
+      <div>
+        <div style="font-size:11px;color:#6b7280;margin-bottom:4px;">Target</div>
+        <input type="text" value="${threshDefaults[type]}" style="width:130px;">
+      </div>
+      <div>
+        <div style="font-size:11px;color:#6b7280;margin-bottom:4px;">Operator</div>
+        <select style="width:auto;"><option selected>Must reach</option><option>Must exceed</option><option>Must be below</option></select>
+      </div>
+      <div>
+        <div style="font-size:11px;color:#6b7280;margin-bottom:4px;">Period</div>
+        <select style="width:auto;"><option selected>Monthly</option><option>Quarterly</option><option>YTD</option></select>
+      </div>
+    </div>`;
+  document.getElementById('thresh-cards').appendChild(card);
+}
+
+// ─── Eligibility Criteria ─────────────────────────────────────────────────────
+function toggleCrit(id, on) {
+  const card = document.getElementById('crit-' + id);
+  const inp = document.getElementById('crit-' + id + '-input');
+  card.classList.toggle('active', on);
+  if (inp) inp.style.display = on ? 'flex' : 'none';
+}
+
+function toggleRefPlan() {
+  const chk = document.getElementById('ref-plan-chk');
+  document.getElementById('ref-plan-select').style.display = chk.checked ? 'block' : 'none';
+}
+
+// ─── Job Award Selection ──────────────────────────────────────────────────────
+function selectAward(type, group) {
+  ['piece','pool','flat'].forEach(t => {
+    const card = document.getElementById('award-' + t);
+    const radio = document.getElementById('award-' + t + '-radio');
+    const cfg = document.getElementById('award-' + t + '-config');
+    if (!card) return;
+    if (t === type) {
+      card.classList.add('selected');
+      if (radio) { radio.style.background='#1a1a1a'; radio.style.borderColor='#1a1a1a'; radio.innerHTML='<div style="width:8px;height:8px;border-radius:50%;background:white;"></div>'; }
+      if (cfg) cfg.style.display = 'flex';
+    } else {
+      card.classList.remove('selected');
+      if (radio) { radio.style.background=''; radio.style.borderColor='#d1d5db'; radio.innerHTML=''; }
+      if (cfg) cfg.style.display = 'none';
+    }
+  });
+}
+
+// ─── Second Award (Stacking) ──────────────────────────────────────────────────
+function addSecondAward() {
+  document.getElementById('second-award-wrap').style.display = 'block';
+  document.getElementById('add-award-btn').style.display = 'none';
+}
+function removeSecondAward() {
+  document.getElementById('second-award-wrap').style.display = 'none';
+  document.getElementById('add-award-btn').style.display = '';
+}
+function selectAward2(type) {
+  ['pct','piece'].forEach(t => {
+    const c = document.getElementById('award2-' + t);
+    const r = document.getElementById('award2-' + t + '-radio');
+    if (t === type) {
+      if (c) c.classList.add('selected');
+      if (r) { r.style.background='#1a1a1a'; r.style.borderColor='#1a1a1a'; r.innerHTML='<div style="width:8px;height:8px;border-radius:50%;background:white;"></div>'; }
+    } else {
+      if (c) c.classList.remove('selected');
+      if (r) { r.style.background=''; r.style.borderColor='#d1d5db'; r.innerHTML=''; }
+    }
+  });
+}
+
+// ─── Crew Split ───────────────────────────────────────────────────────────────
+function selectSplit(type) {
+  ['equal','hours','role','combo'].forEach(t => {
+    const c = document.getElementById('split-' + t);
+    const r = document.getElementById('split-' + t + '-radio');
+    const cfg = document.getElementById('split-' + t + '-config');
+    if (!c) return;
+    if (t === type) {
+      c.classList.add('selected');
+      if (r) { r.style.background='#1a1a1a'; r.style.borderColor='#1a1a1a'; r.innerHTML='<div style="width:8px;height:8px;border-radius:50%;background:white;"></div>'; }
+      if (cfg) cfg.style.display = 'flex';
+    } else {
+      c.classList.remove('selected');
+      if (r) { r.style.background=''; r.style.borderColor='#d1d5db'; r.innerHTML=''; }
+      if (cfg) cfg.style.display = 'none';
+    }
+  });
+}
+
+// ─── Scorecard Items ──────────────────────────────────────────────────────────
+let scCount = 1;
+const scItems = {
+  upsell:  { icon:'📈', label:'Upsell', pays:'$50 per upsell over $500 on an eligible job', metric:'Upsell Amount (dataset)', cond:'> $500' },
+  return:  { icon:'🔁', label:'Return Visit Booked', pays:'$15 per return visit booked at job close', metric:'Return Visit Flag (dataset)', cond:'= Yes' },
+  safety:  { icon:'🦺', label:'Safety Compliance', pays:'$10 per job with safety checklist completed', metric:'Safety Checklist (dataset)', cond:'= Complete' },
+  custom:  { icon:'⚙️', label:'Custom Item', pays:'', metric:'', cond:'' },
+};
+
+function addScorecardItem(type) {
+  scCount++;
+  const id = 'sc-card-' + scCount;
+  const it = scItems[type] || scItems.custom;
+  const card = document.createElement('div');
+  card.className = 'scorecard-card';
+  card.id = id;
+  card.innerHTML = `
+    <button onclick="removeSCCard('${id}')" style="position:absolute;top:12px;right:12px;background:none;border:none;color:#d1d5db;font-size:16px;cursor:pointer;">✕</button>
+    <div style="display:flex;align-items:center;gap:10px;margin-bottom:14px;">
+      <span style="font-size:18px;">${it.icon}</span>
+      <div style="font-size:14px;font-weight:600;color:#1a1a1a;">${it.label}</div>
+      <span style="font-size:11px;color:#9ca3af;">· per qualifying event</span>
+    </div>
+    <div style="display:flex;align-items:center;gap:14px;flex-wrap:wrap;">
+      <div style="display:flex;align-items:center;gap:8px;">
+        <span style="font-size:12px;color:#374151;font-weight:500;">Pays</span>
+        <div class="input-with-prefix"><span class="input-prefix">$</span><input type="number" value="${type === 'upsell' ? 50 : type === 'return' ? 15 : type === 'safety' ? 10 : ''}" style="width:70px;border-radius:0 8px 8px 0;"></div>
+        <span style="font-size:12px;color:#6b7280;">per event on an eligible job</span>
+      </div>
+      <div style="display:flex;align-items:center;gap:8px;">
+        <span style="font-size:12px;color:#374151;font-weight:500;">Metric:</span>
+        <select style="width:auto;min-width:160px;"><option selected>${it.metric || 'Select metric...'}</option></select>
+      </div>
+      <div style="display:flex;align-items:center;gap:8px;">
+        <span style="font-size:12px;color:#374151;font-weight:500;">Condition:</span>
+        <select style="width:auto;"><option selected>${it.cond || 'Set condition...'}</option></select>
+      </div>
+    </div>`;
+  document.getElementById('scorecard-cards').appendChild(card);
+}
+
+function removeSCCard(id) {
+  const el = document.getElementById(id);
+  if (el) el.remove();
+}
+
+// ─── Qualifiers ───────────────────────────────────────────────────────────────
+let qualCount = 1;
+function addQualifier() {
+  qualCount++;
+  const id = 'qc-' + qualCount;
+  const card = document.createElement('div');
+  card.className = 'qual-card';
+  card.id = id;
+  card.innerHTML = `
+    <button onclick="document.getElementById('${id}').remove()" style="position:absolute;top:10px;right:12px;background:none;border:none;color:#d1d5db;font-size:16px;cursor:pointer;">✕</button>
+    <div style="font-size:12px;font-weight:600;color:#9ca3af;text-transform:uppercase;letter-spacing:.4px;margin-bottom:12px;">Qualifier ${qualCount}</div>
+    <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;">
+      <select style="width:auto;min-width:200px;"><option selected>Select metric…</option><option>Average Review Score</option><option>Callback Rate</option><option>Jobs Completed</option></select>
+      <select style="width:auto;"><option selected>≥</option><option>></option><option>=</option><option>≤</option></select>
+      <input type="number" style="width:80px;" placeholder="Value">
+      <span style="font-size:12px;color:#6b7280;">for the period</span>
+    </div>`;
+  document.getElementById('qual-cards').appendChild(card);
+}
+
+// ─── Init ─────────────────────────────────────────────────────────────────────
+render();
+setTimeout(() => {
+  selectPlanCard(document.getElementById('job-plan-card'));
+}, 30);
+</script>
+
+
+</body></html>
