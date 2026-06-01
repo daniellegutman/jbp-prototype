@@ -402,11 +402,11 @@
         ══════════════════════════════════════ -->
         <div class="step-panel" id="panel-13">
           <h3 style="font-size:26px;margin:0 0 8px;text-align:center;">Select the type of award</h3>
-          <p style="font-size:14px;color:#6b7280;margin:0 0 36px;text-align:center;">You can select how job-based bonuses are structured and delivered to participants.</p>
+          <p style="font-size:14px;color:#6b7280;margin:0 0 36px;text-align:center;">Choose how job-based bonuses are structured for this plan, then set the compensation model.</p>
 
           <div style="max-width:600px;margin:0 auto;display:flex;flex-direction:column;gap:14px;">
 
-            <!-- Card 1: Individual -->
+            <!-- Card 1: Single Role By Job -->
             <div id="mode-card-individual" onclick="selectAwardMode('individual')" style="border:1.5px solid #e5e7eb;border-radius:14px;padding:22px 24px;cursor:pointer;transition:border-color .15s;">
               <div style="display:flex;align-items:center;gap:16px;">
                 <div id="rdot-mode-individual" style="width:20px;height:20px;border-radius:50%;border:2px solid #d1d5db;flex-shrink:0;display:flex;align-items:center;justify-content:center;transition:all .15s;"></div>
@@ -414,34 +414,41 @@
                   <svg width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
                 </div>
                 <div style="flex:1;">
-                  <div style="font-size:17px;font-weight:600;color:#1a1a1a;margin-bottom:4px;">Individual</div>
-                  <div style="font-size:13px;color:#6b7280;line-height:1.5;">Each enrolled person earns their own award for eligible jobs they worked. No pool, no splitting.</div>
+                  <div style="font-size:17px;font-weight:600;color:#1a1a1a;margin-bottom:4px;">Single Role By Job</div>
+                  <div style="font-size:13px;color:#6b7280;line-height:1.5;">Each enrolled person earns their own award per eligible job. Best when one role is responsible per job — e.g. <strong style="color:#374151;">Crew Lead, Project Manager, Primary Tech</strong>.</div>
                 </div>
               </div>
 
-              <!-- Compensation Model sub-options (shown when Individual selected) -->
+              <!-- Compensation Model sub-options (shown when Single-Role selected) -->
               <div id="compmodel-individual" style="display:none;margin-top:20px;padding-top:18px;border-top:1px solid #f3f4f6;">
                 <div style="font-size:11px;font-weight:700;color:#9ca3af;text-transform:uppercase;letter-spacing:.5px;margin-bottom:14px;">Compensation Model</div>
                 <div style="display:flex;flex-direction:column;gap:14px;">
                   <label style="display:flex;align-items:flex-start;gap:12px;cursor:pointer;" onclick="event.stopPropagation()">
-                    <input type="radio" name="compmodel-ind" value="perf" checked style="margin-top:3px;flex-shrink:0;width:auto;">
+                    <input type="radio" name="compmodel-ind" value="standard" checked style="margin-top:3px;flex-shrink:0;width:auto;">
                     <div>
-                      <div style="font-size:14px;font-weight:600;color:#1a1a1a;">Performance Pay</div>
-                      <div style="font-size:12px;color:#6b7280;margin-top:3px;">Each person earns a per-job award (piece rate or fixed amount) for eligible jobs. Optional scorecard bonuses stack on top.</div>
+                      <div style="font-size:14px;font-weight:600;color:#1a1a1a;">Standard</div>
+                      <div style="font-size:12px;color:#6b7280;margin-top:3px;">Traditional KPI-based payouts on top of existing pay. Per-job awards stack with optional scorecard bonuses.</div>
                     </div>
                   </label>
                   <label style="display:flex;align-items:flex-start;gap:12px;cursor:pointer;" onclick="event.stopPropagation()">
-                    <input type="radio" name="compmodel-ind" value="scorecard" style="margin-top:3px;flex-shrink:0;width:auto;">
+                    <input type="radio" name="compmodel-ind" value="perf-full" style="margin-top:3px;flex-shrink:0;width:auto;">
                     <div>
-                      <div style="font-size:14px;font-weight:600;color:#1a1a1a;">Scorecard Only</div>
-                      <div style="font-size:12px;color:#6b7280;margin-top:3px;">Awards are tied entirely to scorecard events — 5-star reviews, upsells, callbacks avoided. No base job award per eligible job.</div>
+                      <div style="font-size:14px;font-weight:600;color:#1a1a1a;">Performance Pay — Full</div>
+                      <div style="font-size:12px;color:#6b7280;margin-top:3px;">Base pay is calculated from hours worked and employee hourly rate. Performance KPIs determine additional awards.</div>
+                    </div>
+                  </label>
+                  <label style="display:flex;align-items:flex-start;gap:12px;cursor:pointer;" onclick="event.stopPropagation()">
+                    <input type="radio" name="compmodel-ind" value="perf-trueup" style="margin-top:3px;flex-shrink:0;width:auto;">
+                    <div>
+                      <div style="font-size:14px;font-weight:600;color:#1a1a1a;">Performance Pay — True Up</div>
+                      <div style="font-size:12px;color:#6b7280;margin-top:3px;">Similar to Full, but awards are calculated as a true-up above base pay rather than including base pay.</div>
                     </div>
                   </label>
                 </div>
               </div>
             </div>
 
-            <!-- Card 2: Job Pool -->
+            <!-- Card 2: Multi-Role by Job -->
             <div id="mode-card-pool" onclick="selectAwardMode('pool')" style="border:1.5px solid #e5e7eb;border-radius:14px;padding:22px 24px;cursor:pointer;transition:border-color .15s;">
               <div style="display:flex;align-items:center;gap:16px;">
                 <div id="rdot-mode-pool" style="width:20px;height:20px;border-radius:50%;border:2px solid #d1d5db;flex-shrink:0;display:flex;align-items:center;justify-content:center;transition:all .15s;"></div>
@@ -449,27 +456,34 @@
                   <svg width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
                 </div>
                 <div style="flex:1;">
-                  <div style="font-size:17px;font-weight:600;color:#1a1a1a;margin-bottom:4px;">Job Pool</div>
-                  <div style="font-size:13px;color:#6b7280;line-height:1.5;">Each eligible job generates a shared pool, divided among the crew who worked that job based on your split rules.</div>
+                  <div style="font-size:17px;font-weight:600;color:#1a1a1a;margin-bottom:4px;">Multi-Role by Job</div>
+                  <div style="font-size:13px;color:#6b7280;line-height:1.5;">Each eligible job creates a shared pool divided among the people who worked it. Best for plans with multiple people per job — e.g. <strong style="color:#374151;">Crew Members, Multiple Assigned Technicians</strong>.</div>
                 </div>
               </div>
 
-              <!-- Compensation Model sub-options (shown when Pool selected) -->
+              <!-- Compensation Model sub-options (shown when Multi-Role selected) -->
               <div id="compmodel-pool" style="display:none;margin-top:20px;padding-top:18px;border-top:1px solid #f3f4f6;">
                 <div style="font-size:11px;font-weight:700;color:#9ca3af;text-transform:uppercase;letter-spacing:.5px;margin-bottom:14px;">Compensation Model</div>
                 <div style="display:flex;flex-direction:column;gap:14px;">
                   <label style="display:flex;align-items:flex-start;gap:12px;cursor:pointer;" onclick="event.stopPropagation()">
-                    <input type="radio" name="compmodel-pool" value="perf" checked style="margin-top:3px;flex-shrink:0;width:auto;">
+                    <input type="radio" name="compmodel-pool" value="standard" checked style="margin-top:3px;flex-shrink:0;width:auto;">
                     <div>
-                      <div style="font-size:14px;font-weight:600;color:#1a1a1a;">Performance Pay</div>
-                      <div style="font-size:12px;color:#6b7280;margin-top:3px;">Pool calculated from job performance metrics (% of revenue, gross profit, labor savings). Split among crew per your rules.</div>
+                      <div style="font-size:14px;font-weight:600;color:#1a1a1a;">Standard</div>
+                      <div style="font-size:12px;color:#6b7280;margin-top:3px;">Traditional KPI-based pool on top of existing pay. Pool is split among crew per your distribution rules.</div>
                     </div>
                   </label>
                   <label style="display:flex;align-items:flex-start;gap:12px;cursor:pointer;" onclick="event.stopPropagation()">
-                    <input type="radio" name="compmodel-pool" value="scorecard" style="margin-top:3px;flex-shrink:0;width:auto;">
+                    <input type="radio" name="compmodel-pool" value="perf-full" style="margin-top:3px;flex-shrink:0;width:auto;">
                     <div>
-                      <div style="font-size:14px;font-weight:600;color:#1a1a1a;">Scorecard Only</div>
-                      <div style="font-size:12px;color:#6b7280;margin-top:3px;">Crew shares a pool generated from scorecard events only (reviews, upsells, etc.). No job eligibility evaluation required.</div>
+                      <div style="font-size:14px;font-weight:600;color:#1a1a1a;">Performance Pay — Full</div>
+                      <div style="font-size:12px;color:#6b7280;margin-top:3px;">Base pay is hours × hourly rate. Performance KPIs generate the pool that gets split among crew.</div>
+                    </div>
+                  </label>
+                  <label style="display:flex;align-items:flex-start;gap:12px;cursor:pointer;" onclick="event.stopPropagation()">
+                    <input type="radio" name="compmodel-pool" value="perf-trueup" style="margin-top:3px;flex-shrink:0;width:auto;">
+                    <div>
+                      <div style="font-size:14px;font-weight:600;color:#1a1a1a;">Performance Pay — True Up</div>
+                      <div style="font-size:12px;color:#6b7280;margin-top:3px;">Pool is a true-up above base pay rather than including base. Same split mechanics.</div>
                     </div>
                   </label>
                 </div>
@@ -516,30 +530,72 @@
              PANEL 5: JOB ELIGIBILITY
         ══════════════════════════════════════ -->
         <div class="step-panel" id="panel-5">
-          <div style="display:flex;align-items:center;gap:10px;margin-bottom:6px;">
-            <h3 style="font-size:18px;margin:0;">Job eligibility criteria</h3>
-            <span class="badge-new">NEW</span>
-          </div>
-          <p style="font-size:14px;color:#6b7280;margin:0 0 8px;">All enabled criteria must be met for a job to generate a bonus. Jobs that don't qualify are shown as ineligible in employee dashboards.</p>
+          <h3 style="font-size:22px;margin:0 0 6px;text-align:center;">Which jobs should qualify for a bonus?</h3>
+          <p style="font-size:14px;color:#6b7280;margin:0 0 28px;text-align:center;">Pick how this plan decides which imported jobs are eligible. You can change this later.</p>
 
-          <!-- Reference plan option (shown for scenario B) -->
-          <div id="ref-plan-box" style="display:none;margin-bottom:20px;max-width:600px;">
-            <div style="border:1.5px solid #e5e7eb;border-radius:12px;padding:16px;">
-              <label style="display:flex;align-items:center;gap:10px;cursor:pointer;">
-                <input type="checkbox" id="ref-plan-chk" onchange="toggleRefPlan()" style="width:16px;height:16px;accent-color:#1a1a1a;">
-                <div>
-                  <div style="font-size:14px;font-weight:600;color:#1a1a1a;">Use eligibility from an existing plan</div>
-                  <div style="font-size:12px;color:#6b7280;">Sync criteria from another job based plan so the same jobs qualify for both plans.</div>
-                </div>
-              </label>
-              <div id="ref-plan-select" style="display:none;margin-top:12px;margin-left:26px;">
-                <select style="max-width:340px;"><option>HVAC Install Crew Chief Bonus (Monthly)</option><option>Plumbing Install Lead Bonus (Monthly)</option></select>
-                <div class="success-box" style="margin-top:10px;">✓ Criteria copied from <strong>HVAC Install Crew Chief Bonus</strong>. You can override any criteria below.</div>
+          <!-- Mode selector (3-up grid) -->
+          <div style="max-width:760px;margin:0 auto 24px;display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px;">
+            <div class="elig-mode-card" id="emode-preset" onclick="setEligMode('preset')" style="border:1.5px solid #e5e7eb;border-radius:12px;padding:16px;cursor:pointer;text-align:center;transition:all .15s;">
+              <div style="width:36px;height:36px;background:#f3f4f6;border-radius:9px;margin:0 auto 10px;display:flex;align-items:center;justify-content:center;">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#374151" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
               </div>
+              <div style="font-size:14px;font-weight:600;color:#1a1a1a;margin-bottom:3px;">Use a preset</div>
+              <div style="font-size:12px;color:#6b7280;line-height:1.4;">Inherit eligibility from a saved template or another plan.</div>
+            </div>
+            <div class="elig-mode-card active" id="emode-custom" onclick="setEligMode('custom')" style="border:1.5px solid #1a1a1a;background:#fafafa;border-radius:12px;padding:16px;cursor:pointer;text-align:center;transition:all .15s;">
+              <div style="width:36px;height:36px;background:#1a1a1a;border-radius:9px;margin:0 auto 10px;display:flex;align-items:center;justify-content:center;">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 21v-7"/><path d="M4 10V3"/><path d="M12 21v-9"/><path d="M12 8V3"/><path d="M20 21v-5"/><path d="M20 12V3"/><line x1="1" y1="14" x2="7" y2="14"/><line x1="9" y1="8" x2="15" y2="8"/><line x1="17" y1="16" x2="23" y2="16"/></svg>
+              </div>
+              <div style="font-size:14px;font-weight:600;color:#1a1a1a;margin-bottom:3px;">Set custom criteria</div>
+              <div style="font-size:12px;color:#6b7280;line-height:1.4;">Pick which conditions a job must meet to qualify.</div>
+            </div>
+            <div class="elig-mode-card" id="emode-all" onclick="setEligMode('all')" style="border:1.5px solid #e5e7eb;border-radius:12px;padding:16px;cursor:pointer;text-align:center;transition:all .15s;">
+              <div style="width:36px;height:36px;background:#f3f4f6;border-radius:9px;margin:0 auto 10px;display:flex;align-items:center;justify-content:center;">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#374151" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+              </div>
+              <div style="font-size:14px;font-weight:600;color:#1a1a1a;margin-bottom:3px;">All imported jobs</div>
+              <div style="font-size:12px;color:#6b7280;line-height:1.4;">Every job in the dataset qualifies. No filtering.</div>
             </div>
           </div>
 
-          <div style="display:flex;flex-direction:column;gap:10px;max-width:620px;">
+          <!-- Mode: Preset -->
+          <div id="emode-preset-body" style="display:none;max-width:620px;margin:0 auto;">
+            <div style="border:1.5px solid #e5e7eb;border-radius:12px;padding:18px;background:#fafafa;">
+              <div style="font-size:11px;font-weight:700;color:#6b7280;text-transform:uppercase;letter-spacing:.5px;margin-bottom:12px;">Source</div>
+              <div style="display:flex;flex-direction:column;gap:10px;">
+                <label style="display:flex;align-items:flex-start;gap:10px;cursor:pointer;">
+                  <input type="radio" name="presetSource" value="template" checked style="margin-top:3px;width:auto;">
+                  <div style="flex:1;">
+                    <div style="font-size:13px;font-weight:600;color:#1a1a1a;">Eligibility template</div>
+                    <div style="font-size:12px;color:#6b7280;margin-bottom:8px;">A saved company template. Stays pinned to the version copied at plan creation.</div>
+                    <select style="max-width:340px;"><option>HVAC Install Standard (GP% ≥ 35%, no callbacks 30d)</option><option>Service Call Standard (GP% ≥ 40%)</option><option>Install Quick-Win (revenue ≥ $5k)</option></select>
+                  </div>
+                </label>
+                <label style="display:flex;align-items:flex-start;gap:10px;cursor:pointer;">
+                  <input type="radio" name="presetSource" value="plan" style="margin-top:3px;width:auto;">
+                  <div style="flex:1;">
+                    <div style="font-size:13px;font-weight:600;color:#1a1a1a;">Another plan (live-synced)</div>
+                    <div style="font-size:12px;color:#6b7280;margin-bottom:8px;">Reference another plan's eligibility. When the source plan changes, this plan updates automatically.</div>
+                    <select style="max-width:340px;"><option>HVAC Install Crew Chief Bonus (Monthly)</option><option>Plumbing Install Lead Bonus (Monthly)</option></select>
+                  </div>
+                </label>
+              </div>
+              <div class="success-box" style="margin-top:14px;">✓ Eligibility configured. <strong>3 criteria</strong> will be evaluated: GP% ≥ 35%, on-time completion, no callbacks within 30 days.</div>
+            </div>
+          </div>
+
+          <!-- Mode: All jobs eligible -->
+          <div id="emode-all-body" style="display:none;max-width:620px;margin:0 auto;">
+            <div class="info-box" style="font-size:14px;">
+              ✓ <strong>All imported jobs will be eligible.</strong> Every row in your jobs dataset will trigger the job-award rules from the next step. Best for performance pay plans that pay on every completed job.
+            </div>
+          </div>
+
+          <!-- Mode: Custom criteria -->
+          <div id="emode-custom-body" style="display:block;">
+          <p style="font-size:13px;color:#6b7280;margin:0 0 14px;text-align:center;">All enabled criteria must be met for a job to qualify.</p>
+
+          <div style="display:flex;flex-direction:column;gap:10px;max-width:620px;margin:0 auto;">
 
             <div class="criteria-card active" id="crit-gp">
               <div style="display:flex;align-items:center;gap:14px;">
@@ -603,6 +659,7 @@
             </div>
 
           </div>
+          </div><!-- end emode-custom-body -->
         </div>
 
         <!-- ══════════════════════════════════════
@@ -712,10 +769,62 @@
               Add another award type
             </button>
           </div>
+
+          <!-- DISTRIBUTION (shown only for Multi-Role by Job plans) -->
+          <div id="distribution-section" style="display:none;max-width:600px;margin-top:32px;padding-top:24px;border-top:1px solid #e5e7eb;">
+            <div style="display:flex;align-items:center;gap:10px;margin-bottom:6px;">
+              <h4 style="font-size:16px;margin:0;font-family:'p22-mackinac-pro',serif;">Distribution</h4>
+              <span class="badge-new">NEW</span>
+            </div>
+            <p style="font-size:13px;color:#6b7280;margin:0 0 16px;">For multi-role plans, decide whether each person gets the full award amount or whether the award is split among the crew who worked the job.</p>
+
+            <!-- Full vs Split -->
+            <div style="display:flex;flex-direction:column;gap:10px;margin-bottom:18px;">
+              <div class="split-card" id="dist-full" onclick="selectDist('full')">
+                <div style="display:flex;align-items:center;gap:12px;">
+                  <div style="width:18px;height:18px;border-radius:50%;border:2px solid #d1d5db;flex-shrink:0;" id="dist-full-radio"></div>
+                  <div><div style="font-size:14px;font-weight:600;color:#1a1a1a;">Each person gets the full amount</div><div style="font-size:12px;color:#6b7280;">The job award above is paid in full to every enrolled person on that job. No splitting.</div></div>
+                </div>
+              </div>
+              <div class="split-card selected" id="dist-split" onclick="selectDist('split')">
+                <div style="display:flex;align-items:center;gap:12px;">
+                  <div style="margin-top:2px;width:18px;height:18px;border-radius:50%;border:2px solid #1a1a1a;background:#1a1a1a;display:flex;align-items:center;justify-content:center;flex-shrink:0;"><div style="width:8px;height:8px;border-radius:50%;background:white;"></div></div>
+                  <div><div style="font-size:14px;font-weight:600;color:#1a1a1a;">Split the award among the crew</div><div style="font-size:12px;color:#6b7280;">Pool the job award and divide it among everyone on the job based on the rule below.</div></div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Split-by selector (visible when 'split' is selected) -->
+            <div id="split-by-box" style="display:block;background:#fafafa;border:1px solid #e5e7eb;border-radius:12px;padding:18px;">
+              <div style="font-size:11px;font-weight:700;color:#6b7280;text-transform:uppercase;letter-spacing:.5px;margin-bottom:14px;">Split by</div>
+              <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;">
+                <label class="split-by-opt" data-by="role" onclick="selectSplitBy(this,'role')" style="display:flex;align-items:center;gap:10px;border:1.5px solid #e5e7eb;background:white;border-radius:10px;padding:12px;cursor:pointer;transition:all .15s;">
+                  <div class="rdot" style="width:16px;height:16px;border-radius:50%;border:2px solid #d1d5db;flex-shrink:0;"></div>
+                  <div><div style="font-size:13px;font-weight:600;color:#1a1a1a;">Role</div><div style="font-size:11px;color:#6b7280;">Fixed % by job role</div></div>
+                </label>
+                <label class="split-by-opt active" data-by="hours" onclick="selectSplitBy(this,'hours')" style="display:flex;align-items:center;gap:10px;border:1.5px solid #1a1a1a;background:white;border-radius:10px;padding:12px;cursor:pointer;transition:all .15s;">
+                  <div class="rdot" style="width:16px;height:16px;border-radius:50%;border:2px solid #1a1a1a;background:#1a1a1a;display:flex;align-items:center;justify-content:center;flex-shrink:0;"><div style="width:6px;height:6px;border-radius:50%;background:white;"></div></div>
+                  <div><div style="font-size:13px;font-weight:600;color:#1a1a1a;">Hours</div><div style="font-size:11px;color:#6b7280;">% of time worked on job</div></div>
+                </label>
+                <label class="split-by-opt" data-by="comp" onclick="selectSplitBy(this,'comp')" style="display:flex;align-items:center;gap:10px;border:1.5px solid #e5e7eb;background:white;border-radius:10px;padding:12px;cursor:pointer;transition:all .15s;">
+                  <div class="rdot" style="width:16px;height:16px;border-radius:50%;border:2px solid #d1d5db;flex-shrink:0;"></div>
+                  <div><div style="font-size:13px;font-weight:600;color:#1a1a1a;">Compensation</div><div style="font-size:11px;color:#6b7280;">Weighted by base pay rate</div></div>
+                </label>
+                <label class="split-by-opt" data-by="multi" onclick="selectSplitBy(this,'multi')" style="display:flex;align-items:center;gap:10px;border:1.5px solid #e5e7eb;background:white;border-radius:10px;padding:12px;cursor:pointer;transition:all .15s;">
+                  <div class="rdot" style="width:16px;height:16px;border-radius:50%;border:2px solid #d1d5db;flex-shrink:0;"></div>
+                  <div><div style="font-size:13px;font-weight:600;color:#1a1a1a;">Multi (combination)</div><div style="font-size:11px;color:#6b7280;">e.g., role share + hours</div></div>
+                </label>
+              </div>
+              <div class="info-box" style="font-size:12px;margin-top:14px;" id="split-by-preview">
+                Example: $200 job pool · Carlos 4.5h of 9h crew total = 50% → <strong>$100</strong> · Derek 4.5h = 50% → <strong>$100</strong>
+              </div>
+            </div>
+
+          </div>
         </div>
 
         <!-- ══════════════════════════════════════
-             PANEL 7: CREW SPLIT (Scenario B only)
+             PANEL 7: CREW SPLIT (legacy — kept for reference, not in step sequence)
         ══════════════════════════════════════ -->
         <div class="step-panel" id="panel-7">
           <div style="display:flex;align-items:center;gap:10px;margin-bottom:6px;">
@@ -785,11 +894,10 @@
         ══════════════════════════════════════ -->
         <div class="step-panel" id="panel-8">
           <div style="display:flex;align-items:center;gap:10px;margin-bottom:6px;">
-            <h3 style="font-size:18px;margin:0;">Add scorecard items</h3>
-            <span class="badge-new">NEW</span>
+            <h3 style="font-size:18px;margin:0;">Add additional KPIs</h3>
             <span class="badge-opt">Optional</span>
           </div>
-          <p style="font-size:14px;color:#6b7280;margin:0 0 20px;">Layer individual performance bonuses on top of the job award. These are paid per qualifying event, not per job.</p>
+          <p style="font-size:14px;color:#6b7280;margin:0 0 20px;">Layer per-event KPIs on top of the job award — 5-star reviews, upsells, callbacks avoided, etc. These are paid per qualifying event, not per job.</p>
 
           <!-- Quick-add chips -->
           <div style="margin-bottom:24px;max-width:640px;">
@@ -1031,37 +1139,25 @@ let stepIndex = 1; // start at Plan Category
 // Sequences reference panel IDs
 // A (Individual): Plan Setup → Category → Participants → Award Mode → Thresholds →
 //    Job Eligibility → Job Award → Scorecard Items → Dataset Config → Qualifiers → Review A
-const seqA = [
-  { id: 1,  label: 'Plan Setup',             isNew: false, isOpt: false },
-  { id: 2,  label: 'Plan Category',          isNew: false, isOpt: false },
-  { id: 3,  label: 'Select Participants',    isNew: false, isOpt: false },
-  { id: 13, label: 'Award Mode',             isNew: true,  isOpt: false },
-  { id: 4,  label: 'Company Thresholds',     isNew: false, isOpt: true  },
-  { id: 5,  label: 'Job Eligibility',        isNew: true,  isOpt: false },
-  { id: 6,  label: 'Job Award',              isNew: true,  isOpt: false },
-  { id: 8,  label: 'Scorecard Items',        isNew: true,  isOpt: true  },
-  { id: 9,  label: 'Dataset Config',         isNew: true,  isOpt: false },
-  { id: 10, label: 'Individual Qualifiers',  isNew: false, isOpt: true  },
+// Unified 10-step flow that consolidates both Single-Role and Multi-Role job-based plans.
+// Step 5 (Job Based Plan Type) is the branch point; Step 7 (Job Awards) reveals
+// Distribution sub-options when Multi-Role is selected (formerly the separate Crew Split step).
+const seq = [
+  { id: 1,  label: 'Plan Details',           isNew: false, isOpt: false },
+  { id: 2,  label: 'Plan Type',              isNew: false, isOpt: false },
+  { id: 3,  label: 'Participants',           isNew: false, isOpt: false },
+  { id: 4,  label: 'Thresholds',             isNew: false, isOpt: true  },
+  { id: 13, label: 'Job Based Plan Type',    isNew: true,  isOpt: false },
+  { id: 5,  label: 'Job Eligibility',        isNew: true,  isOpt: true  },
+  { id: 6,  label: 'Job Awards',             isNew: true,  isOpt: false },
+  { id: 8,  label: 'Additional KPIs',        isNew: false, isOpt: true  },
+  { id: 10, label: 'Qualifiers',             isNew: false, isOpt: true  },
   { id: 11, label: 'Review & Publish',       isNew: false, isOpt: false },
 ];
+const seqA = seq;
+const seqB = seq;
 
-// B (Job Pool): adds Award Mode + Crew Split
-const seqB = [
-  { id: 1,  label: 'Plan Setup',             isNew: false, isOpt: false },
-  { id: 2,  label: 'Plan Category',          isNew: false, isOpt: false },
-  { id: 3,  label: 'Select Participants',    isNew: false, isOpt: false },
-  { id: 13, label: 'Award Mode',             isNew: true,  isOpt: false },
-  { id: 4,  label: 'Company Thresholds',     isNew: false, isOpt: true  },
-  { id: 5,  label: 'Job Eligibility',        isNew: true,  isOpt: false },
-  { id: 6,  label: 'Job Award',              isNew: true,  isOpt: false },
-  { id: 7,  label: 'Crew Split',             isNew: true,  isOpt: false },
-  { id: 8,  label: 'Scorecard Items',        isNew: true,  isOpt: true  },
-  { id: 9,  label: 'Dataset Config',         isNew: true,  isOpt: false },
-  { id: 10, label: 'Individual Qualifiers',  isNew: false, isOpt: true  },
-  { id: 12, label: 'Review & Publish',       isNew: false, isOpt: false },
-];
-
-function getSeq() { return scenario === 'a' ? seqA : seqB; }
+function getSeq() { return seq; }
 
 // ─── Navigation ───────────────────────────────────────────────────────────────
 function goNext() {
@@ -1190,11 +1286,16 @@ function selectAwardMode(mode) {
   if (cmI) cmI.style.display = mode === 'individual' ? 'block' : 'none';
   if (cmP) cmP.style.display = mode === 'pool'       ? 'block' : 'none';
 
-  // Dynamically switch sequence so sidebar shows/hides Crew Split step
+  // Toggle the Distribution sub-section inside Job Awards (only for Multi-Role)
+  const distSection = document.getElementById('distribution-section');
+  if (distSection) distSection.style.display = mode === 'pool' ? 'block' : 'none';
+
+  // Unified flow now — selecting Multi-Role reveals Distribution sub-section
+  // inside Job Awards step (no separate Crew Split step). Scenario tracking
+  // is kept for the prototype scenario toggle and admin view linkage.
   const wasScenario = scenario;
   scenario = mode === 'pool' ? 'b' : 'a';
   if (scenario !== wasScenario) {
-    stepIndex = 3; // keep pointing at Award Mode (index 3 in both sequences)
     document.getElementById('tab-a').className = 'sc-tab' + (scenario === 'a' ? ' active' : '');
     document.getElementById('tab-b').className = 'sc-tab' + (scenario === 'b' ? ' active' : '');
     renderSidebar();
@@ -1203,6 +1304,67 @@ function selectAwardMode(mode) {
 
 function selectLeadRole(role) {
   leadRole = role; // kept for setScenario compatibility
+}
+
+// ─── Distribution (Full vs Split) for Multi-Role plans ────────────────────────
+function selectDist(d) {
+  ['full','split'].forEach(opt => {
+    const card = document.getElementById('dist-' + opt);
+    const radio = document.getElementById('dist-' + opt + '-radio');
+    if (!card) return;
+    card.classList.toggle('selected', opt === d);
+    if (radio) {
+      radio.style.background  = (opt === d) ? '#1a1a1a' : '';
+      radio.style.borderColor = (opt === d) ? '#1a1a1a' : '#d1d5db';
+      radio.innerHTML = (opt === d) ? '<div style="width:8px;height:8px;border-radius:50%;background:white;"></div>' : '';
+    }
+  });
+  const splitByBox = document.getElementById('split-by-box');
+  if (splitByBox) splitByBox.style.display = (d === 'split') ? 'block' : 'none';
+}
+
+function selectSplitBy(el, by) {
+  document.querySelectorAll('.split-by-opt').forEach(o => {
+    const active = o === el;
+    o.classList.toggle('active', active);
+    o.style.borderColor = active ? '#1a1a1a' : '#e5e7eb';
+    const rdot = o.querySelector('.rdot');
+    if (rdot) {
+      rdot.style.background  = active ? '#1a1a1a' : '';
+      rdot.style.borderColor = active ? '#1a1a1a' : '#d1d5db';
+      rdot.innerHTML = active ? '<div style="width:6px;height:6px;border-radius:50%;background:white;"></div>' : '';
+    }
+  });
+  // Update example text
+  const previews = {
+    role: 'Example: $200 pool · Crew Lead 60% → <strong>$120</strong> · Helper 1 20% → <strong>$40</strong> · Helper 2 20% → <strong>$40</strong>',
+    hours: 'Example: $200 pool · Carlos 4.5h of 9h crew total = 50% → <strong>$100</strong> · Derek 4.5h = 50% → <strong>$100</strong>',
+    comp: 'Example: $200 pool · Senior Tech ($45/hr) 60% → <strong>$120</strong> · Apprentice ($30/hr) 40% → <strong>$80</strong>',
+    multi: 'Example: 70% by hours + 30% by role weight. Configurable in dataset config.',
+  };
+  const preview = document.getElementById('split-by-preview');
+  if (preview) preview.innerHTML = previews[by] || '';
+}
+
+// ─── Eligibility Mode Selector ────────────────────────────────────────────────
+function setEligMode(mode) {
+  ['preset','custom','all'].forEach(m => {
+    const card = document.getElementById('emode-' + m);
+    const body = document.getElementById('emode-' + m + '-body');
+    if (card) {
+      card.classList.toggle('active', m === mode);
+      card.style.borderColor = (m === mode) ? '#1a1a1a' : '#e5e7eb';
+      card.style.background  = (m === mode) ? '#fafafa' : '';
+      // Recolor the icon box
+      const iconBox = card.querySelector('div[style*="border-radius:9px"]');
+      if (iconBox) {
+        iconBox.style.background = (m === mode) ? '#1a1a1a' : '#f3f4f6';
+        const svg = iconBox.querySelector('svg');
+        if (svg) svg.setAttribute('stroke', (m === mode) ? 'white' : '#374151');
+      }
+    }
+    if (body) body.style.display = (m === mode) ? 'block' : 'none';
+  });
 }
 
 // ─── Plan Category ────────────────────────────────────────────────────────────
