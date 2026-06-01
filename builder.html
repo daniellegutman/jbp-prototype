@@ -141,6 +141,18 @@
     /* Secondary award section */
     .second-award-wrap { border:2px dashed #e5e7eb;border-radius:12px;padding:16px 20px;margin-top:12px; }
 
+    /* Per-rule distribution sub-section */
+    .rule-dist { display:none;margin-top:14px;padding-top:14px;border-top:1px solid #f3f4f6; }
+    .rule-dist.show { display:block; }
+    .rule-dist .dist-pill { flex:1;border:1.5px solid #e5e7eb;border-radius:10px;padding:10px 14px;cursor:pointer;display:flex;align-items:center;gap:10px;font-size:12px;background:white;transition:all .15s; }
+    .rule-dist .dist-pill.active { border-color:#1a1a1a;background:#fafafa; }
+    .rule-dist .dist-pill .ddot { width:14px;height:14px;border-radius:50%;border:2px solid #d1d5db;flex-shrink:0;display:flex;align-items:center;justify-content:center; }
+    .rule-dist .dist-pill.active .ddot { border-color:#1a1a1a;background:#1a1a1a; }
+    .rule-dist .dist-pill.active .ddot::before { content:"";width:5px;height:5px;border-radius:50%;background:white;display:inline-block; }
+    .splitby-mini { font-size:11px;padding:5px 12px;border-radius:999px;border:1.5px solid #e5e7eb;background:white;cursor:pointer;font-family:inherit;font-weight:500;color:#374151;transition:all .15s; }
+    .splitby-mini:hover { border-color:#9ca3af; }
+    .splitby-mini.active { background:#1a1a1a;border-color:#1a1a1a;color:white; }
+
     /* ── Full-page app shell layout ── */
     body { background: white !important; }
     #app-shell { min-height: 100vh; display: flex; flex-direction: column; background: white; }
@@ -530,70 +542,11 @@
              PANEL 5: JOB ELIGIBILITY
         ══════════════════════════════════════ -->
         <div class="step-panel" id="panel-5">
-          <h3 style="font-size:22px;margin:0 0 6px;text-align:center;">Which jobs should qualify for a bonus?</h3>
-          <p style="font-size:14px;color:#6b7280;margin:0 0 28px;text-align:center;">Pick how this plan decides which imported jobs are eligible. You can change this later.</p>
+          <h3 style="font-size:22px;margin:0 0 10px;text-align:center;">Which jobs should qualify for a bonus?</h3>
+          <p style="font-size:14px;color:#6b7280;margin:0 0 28px;text-align:center;">All enabled criteria must be met for a job to qualify. To reuse eligibility from another plan, duplicate that plan first.</p>
 
-          <!-- Mode selector (3-up grid) -->
-          <div style="max-width:760px;margin:0 auto 24px;display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px;">
-            <div class="elig-mode-card" id="emode-preset" onclick="setEligMode('preset')" style="border:1.5px solid #e5e7eb;border-radius:12px;padding:16px;cursor:pointer;text-align:center;transition:all .15s;">
-              <div style="width:36px;height:36px;background:#f3f4f6;border-radius:9px;margin:0 auto 10px;display:flex;align-items:center;justify-content:center;">
-                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#374151" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
-              </div>
-              <div style="font-size:14px;font-weight:600;color:#1a1a1a;margin-bottom:3px;">Use a preset</div>
-              <div style="font-size:12px;color:#6b7280;line-height:1.4;">Inherit eligibility from a saved template or another plan.</div>
-            </div>
-            <div class="elig-mode-card active" id="emode-custom" onclick="setEligMode('custom')" style="border:1.5px solid #1a1a1a;background:#fafafa;border-radius:12px;padding:16px;cursor:pointer;text-align:center;transition:all .15s;">
-              <div style="width:36px;height:36px;background:#1a1a1a;border-radius:9px;margin:0 auto 10px;display:flex;align-items:center;justify-content:center;">
-                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 21v-7"/><path d="M4 10V3"/><path d="M12 21v-9"/><path d="M12 8V3"/><path d="M20 21v-5"/><path d="M20 12V3"/><line x1="1" y1="14" x2="7" y2="14"/><line x1="9" y1="8" x2="15" y2="8"/><line x1="17" y1="16" x2="23" y2="16"/></svg>
-              </div>
-              <div style="font-size:14px;font-weight:600;color:#1a1a1a;margin-bottom:3px;">Set custom criteria</div>
-              <div style="font-size:12px;color:#6b7280;line-height:1.4;">Pick which conditions a job must meet to qualify.</div>
-            </div>
-            <div class="elig-mode-card" id="emode-all" onclick="setEligMode('all')" style="border:1.5px solid #e5e7eb;border-radius:12px;padding:16px;cursor:pointer;text-align:center;transition:all .15s;">
-              <div style="width:36px;height:36px;background:#f3f4f6;border-radius:9px;margin:0 auto 10px;display:flex;align-items:center;justify-content:center;">
-                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#374151" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
-              </div>
-              <div style="font-size:14px;font-weight:600;color:#1a1a1a;margin-bottom:3px;">All imported jobs</div>
-              <div style="font-size:12px;color:#6b7280;line-height:1.4;">Every job in the dataset qualifies. No filtering.</div>
-            </div>
-          </div>
-
-          <!-- Mode: Preset -->
-          <div id="emode-preset-body" style="display:none;max-width:620px;margin:0 auto;">
-            <div style="border:1.5px solid #e5e7eb;border-radius:12px;padding:18px;background:#fafafa;">
-              <div style="font-size:11px;font-weight:700;color:#6b7280;text-transform:uppercase;letter-spacing:.5px;margin-bottom:12px;">Source</div>
-              <div style="display:flex;flex-direction:column;gap:10px;">
-                <label style="display:flex;align-items:flex-start;gap:10px;cursor:pointer;">
-                  <input type="radio" name="presetSource" value="template" checked style="margin-top:3px;width:auto;">
-                  <div style="flex:1;">
-                    <div style="font-size:13px;font-weight:600;color:#1a1a1a;">Eligibility template</div>
-                    <div style="font-size:12px;color:#6b7280;margin-bottom:8px;">A saved company template. Stays pinned to the version copied at plan creation.</div>
-                    <select style="max-width:340px;"><option>HVAC Install Standard (GP% ≥ 35%, no callbacks 30d)</option><option>Service Call Standard (GP% ≥ 40%)</option><option>Install Quick-Win (revenue ≥ $5k)</option></select>
-                  </div>
-                </label>
-                <label style="display:flex;align-items:flex-start;gap:10px;cursor:pointer;">
-                  <input type="radio" name="presetSource" value="plan" style="margin-top:3px;width:auto;">
-                  <div style="flex:1;">
-                    <div style="font-size:13px;font-weight:600;color:#1a1a1a;">Another plan (live-synced)</div>
-                    <div style="font-size:12px;color:#6b7280;margin-bottom:8px;">Reference another plan's eligibility. When the source plan changes, this plan updates automatically.</div>
-                    <select style="max-width:340px;"><option>HVAC Install Crew Chief Bonus (Monthly)</option><option>Plumbing Install Lead Bonus (Monthly)</option></select>
-                  </div>
-                </label>
-              </div>
-              <div class="success-box" style="margin-top:14px;">✓ Eligibility configured. <strong>3 criteria</strong> will be evaluated: GP% ≥ 35%, on-time completion, no callbacks within 30 days.</div>
-            </div>
-          </div>
-
-          <!-- Mode: All jobs eligible -->
-          <div id="emode-all-body" style="display:none;max-width:620px;margin:0 auto;">
-            <div class="info-box" style="font-size:14px;">
-              ✓ <strong>All imported jobs will be eligible.</strong> Every row in your jobs dataset will trigger the job-award rules from the next step. Best for performance pay plans that pay on every completed job.
-            </div>
-          </div>
-
-          <!-- Mode: Custom criteria -->
+          <!-- Custom criteria (default) - "All jobs" mode shown via skip link below -->
           <div id="emode-custom-body" style="display:block;">
-          <p style="font-size:13px;color:#6b7280;margin:0 0 14px;text-align:center;">All enabled criteria must be met for a job to qualify.</p>
 
           <div style="display:flex;flex-direction:column;gap:10px;max-width:620px;margin:0 auto;">
 
@@ -650,16 +603,33 @@
               </div>
             </div>
 
-            <div class="criteria-card" id="crit-custom">
-              <div style="display:flex;align-items:flex-start;gap:14px;">
-                <label class="toggle-switch" style="margin-top:2px;"><input type="checkbox" onchange="toggleCrit('custom',this.checked)"><span class="toggle-slider"></span></label>
-                <div style="flex:1;"><div style="font-size:14px;font-weight:600;color:#1a1a1a;">Custom eligibility rule</div><div style="font-size:12px;color:#6b7280;">Describe a rule — our system will identify the column or apply an AI transform.</div></div>
-                <div id="crit-custom-input" style="display:none;width:200px;"><input type="text" placeholder="e.g. Job type is 'Install'"></div>
-              </div>
-            </div>
+            <!-- Custom criteria container -->
+            <div id="custom-criteria-list" style="display:flex;flex-direction:column;gap:10px;"></div>
+
+            <!-- Add custom criterion button -->
+            <button id="add-custom-crit-btn" onclick="addCustomCriterion()" style="display:flex;align-items:center;justify-content:center;gap:8px;background:white;border:1.5px dashed #d1d5db;border-radius:10px;padding:12px 20px;width:100%;font-size:13px;font-weight:500;color:#6b7280;cursor:pointer;font-family:inherit;transition:all .15s;" onmouseover="this.style.borderColor='#9ca3af'" onmouseout="this.style.borderColor='#d1d5db'">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
+              Add custom criterion
+            </button>
 
           </div>
           </div><!-- end emode-custom-body -->
+
+          <!-- All-jobs-eligible banner (shown when toggled via the skip link) -->
+          <div id="all-jobs-banner" style="display:none;max-width:620px;margin:0 auto;">
+            <div class="info-box" style="display:flex;align-items:center;gap:12px;font-size:14px;">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#1d4ed8" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+              <div style="flex:1;"><strong>All imported jobs are eligible.</strong> Every row in the jobs dataset will trigger the job-award rules from the next step.</div>
+              <button onclick="toggleAllJobsEligible(false)" style="background:none;border:none;color:#1d4ed8;font-size:13px;font-weight:600;cursor:pointer;font-family:inherit;">Switch back to criteria</button>
+            </div>
+          </div>
+
+          <!-- Bottom skip link (matches Thresholds step pattern) -->
+          <div id="elig-skip-row" style="border-top:1px solid #e5e7eb;padding-top:22px;margin-top:28px;text-align:center;">
+            <button onclick="toggleAllJobsEligible(true)" style="background:none;border:none;font-size:14px;font-weight:600;color:#1a1a1a;cursor:pointer;font-family:inherit;">
+              Or, all imported jobs are eligible &nbsp;→
+            </button>
+          </div>
         </div>
 
         <!-- ══════════════════════════════════════
@@ -770,57 +740,6 @@
             </button>
           </div>
 
-          <!-- DISTRIBUTION (shown only for Multi-Role by Job plans) -->
-          <div id="distribution-section" style="display:none;max-width:600px;margin-top:32px;padding-top:24px;border-top:1px solid #e5e7eb;">
-            <div style="display:flex;align-items:center;gap:10px;margin-bottom:6px;">
-              <h4 style="font-size:16px;margin:0;font-family:'p22-mackinac-pro',serif;">Distribution</h4>
-              <span class="badge-new">NEW</span>
-            </div>
-            <p style="font-size:13px;color:#6b7280;margin:0 0 16px;">For multi-role plans, decide whether each person gets the full award amount or whether the award is split among the crew who worked the job.</p>
-
-            <!-- Full vs Split -->
-            <div style="display:flex;flex-direction:column;gap:10px;margin-bottom:18px;">
-              <div class="split-card" id="dist-full" onclick="selectDist('full')">
-                <div style="display:flex;align-items:center;gap:12px;">
-                  <div style="width:18px;height:18px;border-radius:50%;border:2px solid #d1d5db;flex-shrink:0;" id="dist-full-radio"></div>
-                  <div><div style="font-size:14px;font-weight:600;color:#1a1a1a;">Each person gets the full amount</div><div style="font-size:12px;color:#6b7280;">The job award above is paid in full to every enrolled person on that job. No splitting.</div></div>
-                </div>
-              </div>
-              <div class="split-card selected" id="dist-split" onclick="selectDist('split')">
-                <div style="display:flex;align-items:center;gap:12px;">
-                  <div style="margin-top:2px;width:18px;height:18px;border-radius:50%;border:2px solid #1a1a1a;background:#1a1a1a;display:flex;align-items:center;justify-content:center;flex-shrink:0;"><div style="width:8px;height:8px;border-radius:50%;background:white;"></div></div>
-                  <div><div style="font-size:14px;font-weight:600;color:#1a1a1a;">Split the award among the crew</div><div style="font-size:12px;color:#6b7280;">Pool the job award and divide it among everyone on the job based on the rule below.</div></div>
-                </div>
-              </div>
-            </div>
-
-            <!-- Split-by selector (visible when 'split' is selected) -->
-            <div id="split-by-box" style="display:block;background:#fafafa;border:1px solid #e5e7eb;border-radius:12px;padding:18px;">
-              <div style="font-size:11px;font-weight:700;color:#6b7280;text-transform:uppercase;letter-spacing:.5px;margin-bottom:14px;">Split by</div>
-              <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;">
-                <label class="split-by-opt" data-by="role" onclick="selectSplitBy(this,'role')" style="display:flex;align-items:center;gap:10px;border:1.5px solid #e5e7eb;background:white;border-radius:10px;padding:12px;cursor:pointer;transition:all .15s;">
-                  <div class="rdot" style="width:16px;height:16px;border-radius:50%;border:2px solid #d1d5db;flex-shrink:0;"></div>
-                  <div><div style="font-size:13px;font-weight:600;color:#1a1a1a;">Role</div><div style="font-size:11px;color:#6b7280;">Fixed % by job role</div></div>
-                </label>
-                <label class="split-by-opt active" data-by="hours" onclick="selectSplitBy(this,'hours')" style="display:flex;align-items:center;gap:10px;border:1.5px solid #1a1a1a;background:white;border-radius:10px;padding:12px;cursor:pointer;transition:all .15s;">
-                  <div class="rdot" style="width:16px;height:16px;border-radius:50%;border:2px solid #1a1a1a;background:#1a1a1a;display:flex;align-items:center;justify-content:center;flex-shrink:0;"><div style="width:6px;height:6px;border-radius:50%;background:white;"></div></div>
-                  <div><div style="font-size:13px;font-weight:600;color:#1a1a1a;">Hours</div><div style="font-size:11px;color:#6b7280;">% of time worked on job</div></div>
-                </label>
-                <label class="split-by-opt" data-by="comp" onclick="selectSplitBy(this,'comp')" style="display:flex;align-items:center;gap:10px;border:1.5px solid #e5e7eb;background:white;border-radius:10px;padding:12px;cursor:pointer;transition:all .15s;">
-                  <div class="rdot" style="width:16px;height:16px;border-radius:50%;border:2px solid #d1d5db;flex-shrink:0;"></div>
-                  <div><div style="font-size:13px;font-weight:600;color:#1a1a1a;">Compensation</div><div style="font-size:11px;color:#6b7280;">Weighted by base pay rate</div></div>
-                </label>
-                <label class="split-by-opt" data-by="multi" onclick="selectSplitBy(this,'multi')" style="display:flex;align-items:center;gap:10px;border:1.5px solid #e5e7eb;background:white;border-radius:10px;padding:12px;cursor:pointer;transition:all .15s;">
-                  <div class="rdot" style="width:16px;height:16px;border-radius:50%;border:2px solid #d1d5db;flex-shrink:0;"></div>
-                  <div><div style="font-size:13px;font-weight:600;color:#1a1a1a;">Multi (combination)</div><div style="font-size:11px;color:#6b7280;">e.g., role share + hours</div></div>
-                </label>
-              </div>
-              <div class="info-box" style="font-size:12px;margin-top:14px;" id="split-by-preview">
-                Example: $200 job pool · Carlos 4.5h of 9h crew total = 50% → <strong>$100</strong> · Derek 4.5h = 50% → <strong>$100</strong>
-              </div>
-            </div>
-
-          </div>
         </div>
 
         <!-- ══════════════════════════════════════
@@ -1286,9 +1205,10 @@ function selectAwardMode(mode) {
   if (cmI) cmI.style.display = mode === 'individual' ? 'block' : 'none';
   if (cmP) cmP.style.display = mode === 'pool'       ? 'block' : 'none';
 
-  // Toggle the Distribution sub-section inside Job Awards (only for Multi-Role)
-  const distSection = document.getElementById('distribution-section');
-  if (distSection) distSection.style.display = mode === 'pool' ? 'block' : 'none';
+  // Inject (idempotent) and toggle per-rule Distribution blocks inside each award card.
+  // Only Multi-Role plans need to choose "everyone gets it" vs "split among crew" per rule.
+  injectRuleDistributions();
+  showRuleDistributions(mode === 'pool');
 
   // Unified flow now — selecting Multi-Role reveals Distribution sub-section
   // inside Job Awards step (no separate Crew Split step). Scenario tracking
@@ -1306,65 +1226,155 @@ function selectLeadRole(role) {
   leadRole = role; // kept for setScenario compatibility
 }
 
-// ─── Distribution (Full vs Split) for Multi-Role plans ────────────────────────
-function selectDist(d) {
-  ['full','split'].forEach(opt => {
-    const card = document.getElementById('dist-' + opt);
-    const radio = document.getElementById('dist-' + opt + '-radio');
-    if (!card) return;
-    card.classList.toggle('selected', opt === d);
-    if (radio) {
-      radio.style.background  = (opt === d) ? '#1a1a1a' : '';
-      radio.style.borderColor = (opt === d) ? '#1a1a1a' : '#d1d5db';
-      radio.innerHTML = (opt === d) ? '<div style="width:8px;height:8px;border-radius:50%;background:white;"></div>' : '';
-    }
-  });
-  const splitByBox = document.getElementById('split-by-box');
-  if (splitByBox) splitByBox.style.display = (d === 'split') ? 'block' : 'none';
+// ─── Per-rule Distribution (Full vs Split) ────────────────────────────────────
+// Each award rule card gets its own Distribution sub-section. Lets you say
+// "split the pool from rule A, but everyone gets the piece rate from rule B."
+
+// Rule defaults — piece rate usually goes to each person; pool/flat usually splits
+const ruleDistDefaults = { piece: 'full', pool: 'split', flat: 'split' };
+
+function distSnippet(ruleId) {
+  const defMode = ruleDistDefaults[ruleId] || 'full';
+  const fullActive = defMode === 'full' ? 'active' : '';
+  const splitActive = defMode === 'split' ? 'active' : '';
+  const splitByVisible = defMode === 'split' ? '' : 'display:none;';
+  return `
+    <div class="rule-dist" id="rule-dist-${ruleId}" data-rule="${ruleId}" onclick="event.stopPropagation()">
+      <div style="font-size:11px;font-weight:700;color:#9ca3af;text-transform:uppercase;letter-spacing:.4px;margin-bottom:10px;">Distribution per job</div>
+      <div style="display:flex;gap:8px;margin-bottom:10px;">
+        <div class="dist-pill ${fullActive}" data-mode="full" onclick="selectRuleDist('${ruleId}','full')">
+          <span class="ddot"></span>
+          <span><strong>Each person gets the full amount</strong><div style="font-size:11px;color:#9ca3af;font-weight:400;margin-top:1px;">No splitting; every crew member earns this rule.</div></span>
+        </div>
+        <div class="dist-pill ${splitActive}" data-mode="split" onclick="selectRuleDist('${ruleId}','split')">
+          <span class="ddot"></span>
+          <span><strong>Split among crew</strong><div style="font-size:11px;color:#9ca3af;font-weight:400;margin-top:1px;">Pool this rule and divide among everyone on the job.</div></span>
+        </div>
+      </div>
+      <div class="split-by-row" id="split-by-row-${ruleId}" style="${splitByVisible}">
+        <div style="font-size:11px;color:#9ca3af;margin-bottom:6px;">Split by:</div>
+        <div style="display:flex;gap:6px;flex-wrap:wrap;">
+          <button class="splitby-mini" onclick="selectMiniSplitBy('${ruleId}','role',this)">Role</button>
+          <button class="splitby-mini active" onclick="selectMiniSplitBy('${ruleId}','hours',this)">Hours</button>
+          <button class="splitby-mini" onclick="selectMiniSplitBy('${ruleId}','comp',this)">Compensation</button>
+          <button class="splitby-mini" onclick="selectMiniSplitBy('${ruleId}','multi',this)">Multi</button>
+        </div>
+        <div class="info-box" style="margin-top:10px;font-size:11px;" id="dist-preview-${ruleId}">
+          Example: pool from this rule splits proportional to hours each crew member worked on the job.
+        </div>
+      </div>
+    </div>
+  `;
 }
 
-function selectSplitBy(el, by) {
-  document.querySelectorAll('.split-by-opt').forEach(o => {
-    const active = o === el;
-    o.classList.toggle('active', active);
-    o.style.borderColor = active ? '#1a1a1a' : '#e5e7eb';
-    const rdot = o.querySelector('.rdot');
-    if (rdot) {
-      rdot.style.background  = active ? '#1a1a1a' : '';
-      rdot.style.borderColor = active ? '#1a1a1a' : '#d1d5db';
-      rdot.innerHTML = active ? '<div style="width:6px;height:6px;border-radius:50%;background:white;"></div>' : '';
-    }
+function injectRuleDistributions() {
+  ['piece','pool','flat'].forEach(ruleId => {
+    const configEl = document.getElementById('award-' + ruleId + '-config');
+    if (!configEl) return;
+    // Already injected?
+    if (configEl.parentElement.querySelector('.rule-dist[data-rule="' + ruleId + '"]')) return;
+    configEl.insertAdjacentHTML('afterend', distSnippet(ruleId));
   });
-  // Update example text
+}
+
+function selectRuleDist(ruleId, mode) {
+  const root = document.getElementById('rule-dist-' + ruleId);
+  if (!root) return;
+  root.querySelectorAll('.dist-pill').forEach(p => p.classList.toggle('active', p.dataset.mode === mode));
+  const sb = document.getElementById('split-by-row-' + ruleId);
+  if (sb) sb.style.display = (mode === 'split') ? '' : 'none';
+}
+
+function selectMiniSplitBy(ruleId, by, el) {
+  const row = document.getElementById('split-by-row-' + ruleId);
+  if (row) row.querySelectorAll('.splitby-mini').forEach(b => b.classList.toggle('active', b === el));
   const previews = {
-    role: 'Example: $200 pool · Crew Lead 60% → <strong>$120</strong> · Helper 1 20% → <strong>$40</strong> · Helper 2 20% → <strong>$40</strong>',
-    hours: 'Example: $200 pool · Carlos 4.5h of 9h crew total = 50% → <strong>$100</strong> · Derek 4.5h = 50% → <strong>$100</strong>',
-    comp: 'Example: $200 pool · Senior Tech ($45/hr) 60% → <strong>$120</strong> · Apprentice ($30/hr) 40% → <strong>$80</strong>',
-    multi: 'Example: 70% by hours + 30% by role weight. Configurable in dataset config.',
+    role: 'Example: pool split by fixed % per role. Crew Lead 60%, Helpers 40% (rescaled if a role is absent).',
+    hours: 'Example: pool splits proportional to hours each crew member worked on the job.',
+    comp: 'Example: pool weighted by base hourly rate. Senior tech gets a larger share than apprentices.',
+    multi: 'Example: combination — e.g. 70% by hours + 30% by role weight. Configurable in dataset config.',
   };
-  const preview = document.getElementById('split-by-preview');
-  if (preview) preview.innerHTML = previews[by] || '';
+  const preview = document.getElementById('dist-preview-' + ruleId);
+  if (preview) preview.textContent = previews[by] || '';
 }
 
-// ─── Eligibility Mode Selector ────────────────────────────────────────────────
-function setEligMode(mode) {
-  ['preset','custom','all'].forEach(m => {
-    const card = document.getElementById('emode-' + m);
-    const body = document.getElementById('emode-' + m + '-body');
-    if (card) {
-      card.classList.toggle('active', m === mode);
-      card.style.borderColor = (m === mode) ? '#1a1a1a' : '#e5e7eb';
-      card.style.background  = (m === mode) ? '#fafafa' : '';
-      // Recolor the icon box
-      const iconBox = card.querySelector('div[style*="border-radius:9px"]');
-      if (iconBox) {
-        iconBox.style.background = (m === mode) ? '#1a1a1a' : '#f3f4f6';
-        const svg = iconBox.querySelector('svg');
-        if (svg) svg.setAttribute('stroke', (m === mode) ? 'white' : '#374151');
-      }
-    }
-    if (body) body.style.display = (m === mode) ? 'block' : 'none';
+function showRuleDistributions(multiRole) {
+  ['piece','pool','flat'].forEach(ruleId => {
+    const card = document.getElementById('award-' + ruleId);
+    const dist = document.getElementById('rule-dist-' + ruleId);
+    if (!card || !dist) return;
+    const isSelected = card.classList.contains('selected');
+    dist.classList.toggle('show', !!multiRole && isSelected);
   });
+}
+
+// ─── Custom Criterion (dynamic add) ───────────────────────────────────────────
+let customCritCount = 0;
+function addCustomCriterion(prefill) {
+  customCritCount++;
+  const id = 'cust-crit-' + customCritCount;
+  const card = document.createElement('div');
+  card.className = 'criteria-card active';
+  card.id = id;
+  card.style.cssText = 'padding:16px;';
+  const p = prefill || {};
+  card.innerHTML = `
+    <div style="display:flex;align-items:flex-start;gap:14px;">
+      <label class="toggle-switch" style="margin-top:4px;"><input type="checkbox" checked onchange="this.closest('.criteria-card').classList.toggle('active', this.checked)"><span class="toggle-slider"></span></label>
+      <div style="flex:1;display:flex;flex-direction:column;gap:10px;">
+        <div>
+          <div style="font-size:11px;font-weight:700;color:#6b7280;text-transform:uppercase;letter-spacing:.4px;margin-bottom:4px;">Custom rule title</div>
+          <input type="text" placeholder="e.g. High-margin install jobs" value="${p.title || ''}" style="font-size:14px;font-weight:600;width:100%;">
+        </div>
+        <div style="display:grid;grid-template-columns:1.2fr .8fr 1fr;gap:8px;align-items:end;">
+          <div>
+            <div style="font-size:11px;font-weight:600;color:#9ca3af;margin-bottom:4px;">Metric / Column</div>
+            <select>
+              <option ${p.metric==='revenue'?'selected':''}>Revenue</option>
+              <option ${p.metric==='gp'?'selected':''}>Gross Profit ($)</option>
+              <option ${p.metric==='gp_pct'?'selected':''}>Gross Profit (%)</option>
+              <option ${p.metric==='hours'?'selected':''}>Labor Hours</option>
+              <option ${p.metric==='rev_per_hour'?'selected':''}>Revenue / Hour</option>
+              <option ${p.metric==='job_type'?'selected':''}>Job Type</option>
+              <option ${p.metric==='custom'?'selected':''}>Custom column…</option>
+            </select>
+          </div>
+          <div>
+            <div style="font-size:11px;font-weight:600;color:#9ca3af;margin-bottom:4px;">Operator</div>
+            <select>
+              <option ${p.op==='>=' ?'selected':''}>≥ (at least)</option>
+              <option ${p.op==='>'  ?'selected':''}>&gt; (greater than)</option>
+              <option ${p.op==='<=' ?'selected':''}>≤ (at most)</option>
+              <option ${p.op==='<'  ?'selected':''}>&lt; (less than)</option>
+              <option ${p.op==='='  ?'selected':''}>= (equals)</option>
+              <option ${p.op==='!=' ?'selected':''}>≠ (does not equal)</option>
+              <option ${p.op==='contains'?'selected':''}>contains</option>
+            </select>
+          </div>
+          <div>
+            <div style="font-size:11px;font-weight:600;color:#9ca3af;margin-bottom:4px;">Value</div>
+            <input type="text" placeholder="e.g. 35%" value="${p.value || ''}">
+          </div>
+        </div>
+        <div>
+          <div style="font-size:11px;font-weight:700;color:#6b7280;text-transform:uppercase;letter-spacing:.4px;margin-bottom:4px;">Display label <span style="font-weight:400;text-transform:none;color:#9ca3af;">— shown to employees</span></div>
+          <input type="text" placeholder="e.g. GP% ≥ 35%" value="${p.label || ''}" style="font-size:13px;width:100%;">
+        </div>
+      </div>
+      <button onclick="document.getElementById('${id}').remove()" style="background:none;border:none;color:#d1d5db;font-size:18px;cursor:pointer;line-height:1;padding:0;margin-top:2px;">✕</button>
+    </div>
+  `;
+  document.getElementById('custom-criteria-list').appendChild(card);
+}
+
+// ─── Eligibility: All Jobs Toggle ─────────────────────────────────────────────
+function toggleAllJobsEligible(on) {
+  const customBody = document.getElementById('emode-custom-body');
+  const banner = document.getElementById('all-jobs-banner');
+  const skipRow = document.getElementById('elig-skip-row');
+  if (customBody) customBody.style.display = on ? 'none' : 'block';
+  if (banner) banner.style.display = on ? 'block' : 'none';
+  if (skipRow) skipRow.style.display = on ? 'none' : 'block';
 }
 
 // ─── Plan Category ────────────────────────────────────────────────────────────
@@ -1458,6 +1468,8 @@ function selectAward(type, group) {
       if (cfg) cfg.style.display = 'none';
     }
   });
+  // Refresh per-rule distribution visibility (only the selected card shows it)
+  showRuleDistributions(awardMode === 'pool');
 }
 
 // ─── Second Award (Stacking) ──────────────────────────────────────────────────
