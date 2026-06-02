@@ -82,7 +82,7 @@
     /* Manual entries table */
     .me-table { width: 100%; border-collapse: collapse; font-size: 13px; }
     .me-table th { font-size: 11px; font-weight: 600; color: #6b7280; text-transform: uppercase; letter-spacing: .4px; padding: 10px 12px; text-align: left; border-bottom: 1px solid #eee9da; }
-    .me-table th .src-tag { display: inline-flex; align-items: center; gap: 4px; padding: 2px 7px; border-radius: 999px; background: #f3f4f6; color: #6b7280; font-size: 10px; font-weight: 600; margin-left: 6px; text-transform: none; letter-spacing: 0; }
+    .me-table th .src-tag { display: inline-flex; align-items: center; gap: 4px; padding: 2px 7px; border-radius: 999px; background: #dbeafe; color: #1e40af; font-size: 10px; font-weight: 600; margin-left: 6px; text-transform: none; letter-spacing: 0; }
     .me-table th .src-tag.manual { background: #fef3c7; color: #92400e; }
     .me-table td { padding: 12px; border-bottom: 1px solid #f4f1e8; }
     .me-table tr:last-child td { border-bottom: none; }
@@ -256,12 +256,13 @@
       </table>
     </div>
 
-    <!-- Manual Entries card (only shows if any non-integrated metric exists) -->
+    <!-- Employee Metrics card — per-employee values for the period (not tied to a specific job).
+         Source can be integrated (read-only) or manual (editable). -->
     <div class="card" id="manual-card">
       <div class="card-header">
         <div>
-          <h3 class="card-title">Manual entries</h3>
-          <div class="card-sub">These metrics aren't connected to a data source. Enter values per participant.</div>
+          <h3 class="card-title">Employee metrics</h3>
+          <div class="card-sub">Metrics tracked per employee for the period (not tied to a specific job). Integrated values are read-only · manual values are editable here.</div>
         </div>
       </div>
 
@@ -383,9 +384,10 @@ const PLANS = {
       { initials: 'AU', name: 'Austin Hughes' },
       { initials: 'BJ', name: 'Brooke Jamison' },
     ],
-    manualKpis: [
-      { key: 'reviews', label: '5-Star Reviews', src: 'manual', unit: 'ct', help: 'Count of 5-star Google reviews this period' },
-      { key: 'safety',  label: 'Safety Audit', src: 'manual', kind: 'toggle', help: 'Did the participant pass the monthly safety audit?' },
+    employeeMetrics: [
+      { key: 'memberships', label: 'Memberships Sold', src: 'integrated', srcName: 'ServiceTitan', unit: 'ct' },
+      { key: 'reviews',     label: '5-Star Reviews',  src: 'manual',                                  unit: 'ct' },
+      { key: 'safety',      label: 'Safety Audit',    src: 'manual', kind: 'toggle' },
     ],
   },
   b: {
@@ -397,8 +399,9 @@ const PLANS = {
       { initials: 'DM', name: 'Derek McAlister' },
       { initials: 'AB', name: 'Angelina Brown' },
     ],
-    manualKpis: [
-      { key: 'reviews', label: '5-Star Reviews', src: 'manual', unit: 'ct', help: 'Count of 5-star Google reviews this period' },
+    employeeMetrics: [
+      { key: 'memberships', label: 'Memberships Sold', src: 'integrated', srcName: 'ServiceTitan', unit: 'ct' },
+      { key: 'reviews',     label: '5-Star Reviews',  src: 'manual',                                  unit: 'ct' },
     ],
   },
 };
@@ -417,11 +420,22 @@ const JOBS = [
   { id: '#1049', date: 'May 12', customer: 'Carter Residence',   revenue: 15100, gpAmt: 6200, gpPct: 41, onTime: true,  callbacks: 0, laborSavings: 1400, hours: { DM: 3.5, AB: 3.5 }, lead: 'AH' },
 ];
 
-// Sample manual values pre-filled
-const MANUAL_VALUES = {
-  a: { AH: { reviews: 3, safety: true  }, AU: { reviews: 1, safety: true }, BJ: { reviews: 2, safety: true } },
-  b: { CR: { reviews: 2 }, DM: { reviews: 4 }, AB: { reviews: 1 } },
+// Sample values for employee-level metrics. Integrated values are read-only;
+// manual values are editable by the admin.
+const EMPLOYEE_VALUES = {
+  a: {
+    AH: { memberships: 5, reviews: 3, safety: true  },
+    AU: { memberships: 2, reviews: 1, safety: true  },
+    BJ: { memberships: 3, reviews: 2, safety: true  },
+  },
+  b: {
+    CR: { memberships: 4, reviews: 2 },
+    DM: { memberships: 1, reviews: 4 },
+    AB: { memberships: 2, reviews: 1 },
+  },
 };
+// Back-compat alias used elsewhere
+const MANUAL_VALUES = EMPLOYEE_VALUES;
 
 // ──────── Eligibility ────────
 function eligibility(j) {
@@ -494,12 +508,18 @@ function participantTotal(empInit) {
       jobLines.push({ job, result: r });
     }
   }
-  // Scorecard items (manual)
+  // Employee-level metrics (Step 9 Additional KPIs) — integrated or manual,
+  // both roll into the period payout the same way.
   const sc = [];
-  const mv = (MANUAL_VALUES[scenario] || {})[empInit] || {};
+  const mv = (EMPLOYEE_VALUES[scenario] || {})[empInit] || {};
+  if (mv.memberships) {
+    const amt = mv.memberships * 30;
+    sc.push({ label: 'Memberships Sold', math: `${mv.memberships} × $30`, amount: amt, src: 'integrated' });
+    total += amt;
+  }
   if (mv.reviews) {
     const amt = mv.reviews * 25;
-    sc.push({ label: '5-Star Reviews', math: `${mv.reviews} × $25`, amount: amt });
+    sc.push({ label: '5-Star Reviews', math: `${mv.reviews} × $25`, amount: amt, src: 'manual' });
     total += amt;
   }
   // Qualifier (scenario A only): safety audit pass — failing zeroes out this period
@@ -587,24 +607,37 @@ function render() {
     `;
   }).join('');
 
-  // Manual entries
+  // Employee metrics table
   const head = document.getElementById('me-head');
   const body = document.getElementById('me-body');
-  if (p.manualKpis.length === 0) {
+  const metrics = p.employeeMetrics || p.manualKpis || [];
+  if (metrics.length === 0) {
     document.getElementById('manual-card').style.display = 'none';
   } else {
     document.getElementById('manual-card').style.display = '';
-    head.innerHTML = '<th>Employee</th>' + p.manualKpis.map(k =>
-      `<th>${k.label}<span class="src-tag manual">manual</span></th>`
-    ).join('');
+    head.innerHTML = '<th>Employee</th>' + metrics.map(k => {
+      const tag = k.src === 'integrated'
+        ? `<span class="src-tag" title="From ${k.srcName || 'integration'}">● ${k.srcName || 'integrated'}</span>`
+        : `<span class="src-tag manual">manual</span>`;
+      return `<th>${k.label}${tag}</th>`;
+    }).join('');
     body.innerHTML = p.participants.map(emp => {
-      const mv = (MANUAL_VALUES[scenario] || {})[emp.initials] || {};
-      const cells = p.manualKpis.map(k => {
+      const mv = (EMPLOYEE_VALUES[scenario] || {})[emp.initials] || {};
+      const cells = metrics.map(k => {
+        const v = mv[k.key];
+        // Integrated → read-only display
+        if (k.src === 'integrated') {
+          if (k.kind === 'toggle') {
+            return `<td><span style="font-size:13px;color:#1a1a1a;font-weight:500;">${v ? '✓ Yes' : '— No'}</span> <span class="ro" style="margin-left:6px;">read-only</span></td>`;
+          }
+          return `<td><span style="font-size:14px;font-weight:600;color:#1a1a1a;">${v ?? 0}</span> <span class="ro" style="margin-left:6px;">read-only</span></td>`;
+        }
+        // Manual → editable input
         if (k.kind === 'toggle') {
-          const checked = mv[k.key] ? 'checked' : '';
+          const checked = v ? 'checked' : '';
           return `<td><label class="switch" style="width:36px;height:20px;"><input type="checkbox" ${checked} onchange="updateManual('${emp.initials}','${k.key}',this.checked); render(); renderStep2(); renderStep3();"><span class="slider"></span></label></td>`;
         }
-        return `<td><input type="number" class="me-input" min="0" value="${mv[k.key] || 0}" onchange="updateManual('${emp.initials}','${k.key}',Number(this.value)); render(); renderStep2(); renderStep3();"></td>`;
+        return `<td><input type="number" class="me-input" min="0" value="${v ?? 0}" onchange="updateManual('${emp.initials}','${k.key}',Number(this.value)); render(); renderStep2(); renderStep3();"></td>`;
       }).join('');
       return `<tr><td><span class="avatar" style="margin-right:8px;">${emp.initials}</span><strong>${emp.name}</strong></td>${cells}</tr>`;
     }).join('');
