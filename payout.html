@@ -1,0 +1,756 @@
+<!DOCTYPE html>
+<html lang="en"><head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Calculate Payout · ShareWillow Job-Based Plan Prototype</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link href="https://use.typekit.net/mgx2gxv.css" rel="stylesheet">
+  <style>
+    body { font-family: 'Matter', -apple-system, BlinkMacSystemFont, sans-serif; background: #f6f5ef; color: #1a1a1a; margin: 0; min-height: 100vh; }
+    h1, h2, h3, h4 { font-family: 'p22-mackinac-pro', serif; font-weight: 600; }
+
+    /* Prototype scenario bar */
+    #proto-bar { padding: 9px 24px; display: flex; align-items: center; gap: 10px; border-bottom: 1px solid #e5e7eb; background: #fafafa; }
+    .sc-tab { padding: 6px 14px; border-radius: 6px; font-size: 12px; font-weight: 500; cursor: pointer; transition: all .15s; border: 1.5px solid #e5e7eb; background: white; color: #374151; font-family: inherit; white-space: nowrap; }
+    .sc-tab.active { background: #1a1a1a; color: white; border-color: #1a1a1a; }
+
+    /* Top bar */
+    .topbar { padding: 18px 36px; display: flex; align-items: center; justify-content: space-between; background: white; border-bottom: 1px solid #eee9da; }
+    .crumb { display: flex; align-items: center; gap: 8px; font-size: 13px; color: #6b7280; }
+    .crumb svg { width: 16px; height: 16px; }
+    .crumb a { color: inherit; text-decoration: none; }
+    .crumb .accent { color: #2563eb; font-weight: 500; }
+    .save-exit { font-size: 13px; color: #1a1a1a; font-weight: 500; cursor: pointer; text-decoration: none; }
+
+    /* Main */
+    #app { max-width: 1180px; margin: 0 auto; padding: 32px 36px 60px; }
+
+    /* Step indicator */
+    .steps { display: flex; align-items: center; justify-content: center; gap: 0; margin-bottom: 36px; }
+    .step-dot { display: inline-flex; align-items: center; gap: 10px; padding: 4px 10px; }
+    .step-circle { width: 30px; height: 30px; border-radius: 50%; display: inline-flex; align-items: center; justify-content: center; font-size: 13px; font-weight: 600; flex-shrink: 0; }
+    .step-circle.pending { background: white; border: 1.5px solid #d1d5db; color: #9ca3af; }
+    .step-circle.active { background: #1a1a1a; border: 1.5px solid #1a1a1a; color: white; }
+    .step-circle.done { background: #1a1a1a; border: 1.5px solid #1a1a1a; color: white; }
+    .step-label { font-size: 14px; font-weight: 500; color: #6b7280; cursor: pointer; }
+    .step-label.active { color: #1a1a1a; font-weight: 600; }
+    .step-bar { width: 80px; height: 1.5px; background: #d1d5db; margin: 0 12px; }
+    .step-bar.done { background: #1a1a1a; }
+
+    /* Title */
+    .page-title { font-size: 36px; line-height: 1.15; margin-bottom: 8px; letter-spacing: -.5px; }
+    .page-subtitle { font-size: 14px; color: #6b7280; margin-bottom: 28px; }
+
+    /* Info cards row */
+    .info-row { display: grid; grid-template-columns: 1fr 1fr 1.4fr; gap: 16px; margin-bottom: 24px; }
+    .info-card { background: white; border: 1px solid #eee9da; border-radius: 14px; padding: 16px 20px; }
+    .info-label { font-size: 12px; color: #6b7280; margin-bottom: 6px; }
+    .info-value { font-size: 18px; font-weight: 600; }
+    .info-value .src-dot { display: inline-block; width: 6px; height: 6px; border-radius: 50%; background: #2563eb; margin-right: 6px; vertical-align: middle; }
+
+    /* Card */
+    .card { background: white; border: 1px solid #eee9da; border-radius: 14px; padding: 22px 24px; margin-bottom: 20px; }
+    .card-header { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-bottom: 16px; }
+    .card-title { font-size: 18px; margin: 0; font-family: 'p22-mackinac-pro', serif; font-weight: 600; }
+    .card-sub { font-size: 12px; color: #9ca3af; margin-top: 2px; }
+
+    /* Filter chips */
+    .chips { display: inline-flex; align-items: center; gap: 6px; }
+    .chip { font-size: 12px; padding: 5px 12px; border-radius: 999px; border: 1.5px solid #e5e7eb; background: white; cursor: pointer; font-weight: 500; color: #374151; font-family: inherit; transition: all .15s; display: inline-flex; align-items: center; gap: 5px; }
+    .chip:hover { border-color: #9ca3af; }
+    .chip.active { background: #1a1a1a; border-color: #1a1a1a; color: white; }
+    .chip-count { background: rgba(0,0,0,.07); font-size: 10px; font-weight: 700; padding: 1px 6px; border-radius: 999px; }
+    .chip.active .chip-count { background: rgba(255,255,255,.18); }
+
+    /* Jobs table */
+    .jt { width: 100%; border-collapse: collapse; font-size: 13px; }
+    .jt th { font-size: 11px; font-weight: 600; color: #6b7280; text-transform: uppercase; letter-spacing: .4px; padding: 10px 12px; text-align: left; border-bottom: 1px solid #eee9da; background: #fdfdfb; }
+    .jt td { padding: 12px; border-bottom: 1px solid #f4f1e8; vertical-align: middle; }
+    .jt tr:last-child td { border-bottom: none; }
+    .jt tr.inelig td { background: #fdfcf6; color: #6b7280; }
+    .jt a.jl { color: #2563eb; text-decoration: none; font-weight: 500; }
+    .pill { display: inline-flex; align-items: center; gap: 5px; padding: 3px 9px; border-radius: 999px; font-size: 11px; font-weight: 600; }
+    .pill.ok { background: #ecfdf5; color: #047857; }
+    .pill.no { background: #fef2f2; color: #b91c1c; }
+    .mfail { color: #dc2626; font-weight: 500; }
+    .mpass { color: #059669; font-weight: 500; }
+    .ro { color: #9ca3af; font-size: 11px; display: inline-flex; align-items: center; gap: 3px; }
+
+    /* Read-only banner */
+    .ro-banner { background: #fdfcf6; border: 1px solid #f0e9d2; border-radius: 10px; padding: 10px 14px; font-size: 12px; color: #92400e; display: flex; align-items: center; gap: 8px; margin-bottom: 14px; }
+
+    /* Manual entries table */
+    .me-table { width: 100%; border-collapse: collapse; font-size: 13px; }
+    .me-table th { font-size: 11px; font-weight: 600; color: #6b7280; text-transform: uppercase; letter-spacing: .4px; padding: 10px 12px; text-align: left; border-bottom: 1px solid #eee9da; }
+    .me-table th .src-tag { display: inline-flex; align-items: center; gap: 4px; padding: 2px 7px; border-radius: 999px; background: #f3f4f6; color: #6b7280; font-size: 10px; font-weight: 600; margin-left: 6px; text-transform: none; letter-spacing: 0; }
+    .me-table th .src-tag.manual { background: #fef3c7; color: #92400e; }
+    .me-table td { padding: 12px; border-bottom: 1px solid #f4f1e8; }
+    .me-table tr:last-child td { border-bottom: none; }
+    .me-input { border: 1.5px solid #e5e7eb; border-radius: 8px; padding: 7px 10px; font-size: 13px; font-family: inherit; outline: none; background: white; width: 100%; max-width: 110px; }
+    .me-input:focus { border-color: #1a1a1a; }
+    .me-input.disabled { background: #f3f4f6; color: #9ca3af; cursor: not-allowed; }
+
+    /* KPI tiles (Step 2) */
+    .kpi-row { display: grid; grid-template-columns: repeat(4, 1fr); gap: 14px; margin-bottom: 24px; }
+    .kpi { background: white; border: 1px solid #eee9da; border-radius: 14px; padding: 18px 20px; }
+    .kpi.green { background: #f0fdf4; border-color: #bbf7d0; }
+    .kpi-label { font-size: 12px; color: #6b7280; margin-bottom: 6px; }
+    .kpi-value { font-size: 26px; font-weight: 600; font-family: 'p22-mackinac-pro', serif; }
+    .kpi-value.green { color: #047857; }
+
+    /* Award breakdown */
+    .emp-card { background: white; border: 1px solid #eee9da; border-radius: 14px; margin-bottom: 12px; overflow: hidden; }
+    .emp-row { display: flex; align-items: center; justify-content: space-between; padding: 16px 22px; cursor: pointer; transition: background .15s; }
+    .emp-row:hover { background: #fdfcf6; }
+    .emp-left { display: flex; align-items: center; gap: 14px; }
+    .avatar { width: 36px; height: 36px; border-radius: 50%; background: #dbeafe; color: #1e40af; font-size: 12px; font-weight: 700; display: inline-flex; align-items: center; justify-content: center; }
+    .emp-name { font-size: 16px; font-weight: 600; color: #1a1a1a; }
+    .emp-right { display: flex; align-items: center; gap: 14px; }
+    .emp-amt { font-size: 18px; font-weight: 600; color: #047857; font-family: 'p22-mackinac-pro', serif; }
+    .chev { transition: transform .2s; color: #9ca3af; }
+    .emp-card.open .chev { transform: rotate(180deg); }
+    .emp-body { display: none; padding: 4px 22px 22px; border-top: 1px solid #f4f1e8; }
+    .emp-card.open .emp-body { display: block; }
+
+    .breakdown-section { margin-top: 18px; }
+    .bd-title { font-size: 11px; font-weight: 700; color: #6b7280; text-transform: uppercase; letter-spacing: .5px; margin-bottom: 10px; }
+    .bd-table { width: 100%; border-collapse: collapse; font-size: 13px; }
+    .bd-table th { font-size: 10px; font-weight: 700; color: #9ca3af; text-transform: uppercase; letter-spacing: .4px; padding: 8px 10px; text-align: left; border-bottom: 1px solid #eee9da; }
+    .bd-table td { padding: 10px; border-bottom: 1px solid #f4f1e8; }
+    .bd-table tr:last-child td { border-bottom: none; }
+    .bd-table .math { font-family: 'JetBrains Mono', ui-monospace, Menlo, monospace; font-size: 12px; color: #374151; background: #fafafa; padding: 3px 8px; border-radius: 5px; display: inline-block; }
+    .bd-subtotal { padding: 12px 10px; background: #fdfcf6; border-top: 1px solid #eee9da; font-weight: 600; font-size: 13px; display: flex; justify-content: space-between; }
+
+    /* Finalize step 3 */
+    .final-card { background: white; border: 1px solid #eee9da; border-radius: 14px; padding: 20px 24px; margin-bottom: 20px; }
+    .final-header { display: flex; align-items: center; justify-content: space-between; padding-bottom: 14px; border-bottom: 1px solid #f4f1e8; margin-bottom: 14px; font-size: 14px; }
+    .final-header .lbl { color: #6b7280; margin-right: 8px; }
+    .final-header strong { font-weight: 600; }
+    .participants-head { font-size: 11px; font-weight: 700; color: #6b7280; text-transform: uppercase; letter-spacing: .5px; background: #fdfcf6; padding: 8px 12px; border-radius: 8px; display: flex; justify-content: space-between; margin-bottom: 8px; }
+    .ptcp { display: flex; align-items: center; justify-content: space-between; padding: 12px; border-bottom: 1px solid #f4f1e8; font-size: 14px; }
+    .ptcp:last-child { border-bottom: none; }
+    .total-row { background: #fdfcf6; border-radius: 10px; padding: 14px 18px; font-size: 18px; font-weight: 600; display: flex; justify-content: space-between; align-items: center; margin-top: 12px; }
+    .total-row .amt { color: #047857; font-family: 'p22-mackinac-pro', serif; font-size: 22px; }
+
+    /* Toggle */
+    .toggle-row { background: white; border: 1px solid #eee9da; border-radius: 14px; padding: 18px 22px; display: flex; align-items: center; justify-content: space-between; margin-bottom: 16px; }
+    .toggle-row .tlabel { font-size: 14px; font-weight: 600; }
+    .toggle-row .tsub { font-size: 12px; color: #6b7280; margin-top: 2px; }
+    .switch { position: relative; width: 44px; height: 24px; flex-shrink: 0; }
+    .switch input { opacity: 0; width: 0; height: 0; }
+    .slider { position: absolute; inset: 0; background: #d1d5db; border-radius: 999px; cursor: pointer; transition: .15s; }
+    .slider:before { position: absolute; content: ""; height: 18px; width: 18px; left: 3px; top: 3px; background: white; border-radius: 50%; transition: .15s; }
+    .switch input:checked + .slider { background: #1a1a1a; }
+    .switch input:checked + .slider:before { transform: translateX(20px); }
+
+    /* Buttons */
+    .btn-row { display: flex; justify-content: space-between; align-items: center; padding: 16px 0; margin-top: 24px; border-top: 1px solid #eee9da; }
+    .btn { background: white; border: 1.5px solid #d1d5db; border-radius: 8px; padding: 9px 20px; font-size: 13px; font-weight: 500; cursor: pointer; font-family: inherit; color: #374151; display: inline-flex; align-items: center; gap: 6px; }
+    .btn:hover { border-color: #9ca3af; }
+    .btn.primary { background: #1a1a1a; color: white; border-color: #1a1a1a; font-weight: 600; padding: 9px 22px; }
+    .btn.primary:hover { background: #000; border-color: #000; }
+    .btn.success { background: #047857; color: white; border-color: #047857; }
+
+    /* Step pane visibility */
+    .step-pane { display: none; }
+    .step-pane.active { display: block; }
+
+    textarea { width: 100%; border: 1.5px solid #e5e7eb; border-radius: 10px; padding: 12px; font-size: 13px; font-family: inherit; outline: none; resize: vertical; min-height: 100px; }
+    textarea:focus { border-color: #1a1a1a; }
+  </style>
+</head>
+<body>
+
+<!-- PROTOTYPE CONTROLS -->
+<div id="proto-bar">
+  <span style="font-size:11px;font-weight:700;color:#9ca3af;text-transform:uppercase;letter-spacing:.4px;">Prototype:</span>
+  <button class="sc-tab active" id="tab-a" onclick="setScenario('a')">A — Crew Chief Bonus (Individual)</button>
+  <button class="sc-tab" id="tab-b" onclick="setScenario('b')">B — Field Tech Pool (Multi-role)</button>
+  <a href="./admin.html" style="margin-left:auto;font-size:12px;color:#2563eb;text-decoration:none;">← Back to Admin Plan</a>
+</div>
+
+<!-- TOP BAR -->
+<div class="topbar">
+  <div class="crumb">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 12l9-9 9 9M5 10v10a1 1 0 001 1h3M19 10v10a1 1 0 01-1 1h-3M9 21h6"/></svg>
+    <a href="./admin.html" id="crumb-plan">HVAC Install Crew Chief Bonus</a>
+    <span>›</span>
+    <span class="accent">Calculate Payout · May</span>
+  </div>
+  <a class="save-exit">Save &amp; Exit</a>
+</div>
+
+<div id="app">
+
+  <!-- Step indicator -->
+  <div class="steps">
+    <div class="step-dot" onclick="setStep(1)">
+      <span class="step-circle active" id="sc-1">1</span>
+      <span class="step-label active" id="sl-1">Review</span>
+    </div>
+    <div class="step-bar" id="sb-1"></div>
+    <div class="step-dot" onclick="setStep(2)">
+      <span class="step-circle pending" id="sc-2">2</span>
+      <span class="step-label" id="sl-2">Awards &amp; Insights</span>
+    </div>
+    <div class="step-bar" id="sb-2"></div>
+    <div class="step-dot" onclick="setStep(3)">
+      <span class="step-circle pending" id="sc-3">3</span>
+      <span class="step-label" id="sl-3">Finalize &amp; Notify</span>
+    </div>
+  </div>
+
+  <!-- ─────────────────────────────────────── STEP 1: REVIEW ─────────────────────────────────────── -->
+  <div class="step-pane active" id="step-1">
+
+    <h1 class="page-title">Review job data</h1>
+    <p class="page-subtitle">Jobs imported for this period. Job data and integrated metrics are read-only — make corrections in the source system.</p>
+
+    <div class="info-row">
+      <div class="info-card">
+        <div class="info-label">Pay period</div>
+        <div class="info-value">May 1 – 31</div>
+      </div>
+      <div class="info-card">
+        <div class="info-label">Participants</div>
+        <div class="info-value" id="info-parts">3</div>
+      </div>
+      <div class="info-card">
+        <div class="info-label">Sources</div>
+        <div class="info-value" id="info-sources"><span class="src-dot"></span>ServiceTitan,&nbsp; Google Reviews,&nbsp; Manual</div>
+      </div>
+    </div>
+
+    <!-- Jobs Table card -->
+    <div class="card">
+      <div class="card-header">
+        <div>
+          <h3 class="card-title">Jobs in this period</h3>
+          <div class="card-sub" id="jobs-count">Showing 15 of 15 jobs</div>
+        </div>
+        <div class="chips">
+          <button class="chip active" onclick="filterJobs('all')" id="chip-all">All <span class="chip-count" id="cc-all">0</span></button>
+          <button class="chip" onclick="filterJobs('elig')" id="chip-elig">✓ Eligible <span class="chip-count" id="cc-elig">0</span></button>
+          <button class="chip" onclick="filterJobs('inelig')" id="chip-inelig">✗ Ineligible <span class="chip-count" id="cc-inelig">0</span></button>
+        </div>
+      </div>
+
+      <div class="ro-banner">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0110 0v4"/></svg>
+        <span><strong>Job data is read-only.</strong> Sourced from ServiceTitan · last synced 12 minutes ago. To correct a value, edit the source job and resync.</span>
+      </div>
+
+      <table class="jt">
+        <thead>
+          <tr>
+            <th>Job #</th>
+            <th>Date</th>
+            <th>Customer</th>
+            <th>Revenue</th>
+            <th>GP %</th>
+            <th>Eligibility</th>
+            <th id="th-award" style="text-align:right;">Award</th>
+          </tr>
+        </thead>
+        <tbody id="jobs-body"></tbody>
+      </table>
+    </div>
+
+    <!-- Manual Entries card (only shows if any non-integrated metric exists) -->
+    <div class="card" id="manual-card">
+      <div class="card-header">
+        <div>
+          <h3 class="card-title">Manual entries</h3>
+          <div class="card-sub">These metrics aren't connected to a data source. Enter values per participant.</div>
+        </div>
+      </div>
+
+      <table class="me-table">
+        <thead>
+          <tr id="me-head"></tr>
+        </thead>
+        <tbody id="me-body"></tbody>
+      </table>
+    </div>
+
+    <div class="btn-row">
+      <button class="btn" disabled style="opacity:.4;">← Back</button>
+      <button class="btn primary" onclick="setStep(2)">Continue to Awards →</button>
+    </div>
+  </div>
+
+  <!-- ─────────────────────────────────────── STEP 2: AWARDS & INSIGHTS ─────────────────────────────────────── -->
+  <div class="step-pane" id="step-2">
+
+    <h1 class="page-title">Review award breakdown</h1>
+    <p class="page-subtitle">Here's what each team member earned this period. Click any row to see job-by-job detail.</p>
+
+    <div class="kpi-row">
+      <div class="kpi">
+        <div class="kpi-label">Pay period</div>
+        <div class="kpi-value">May 1 – 31</div>
+      </div>
+      <div class="kpi">
+        <div class="kpi-label">Participants</div>
+        <div class="kpi-value" id="k-parts">3</div>
+      </div>
+      <div class="kpi green">
+        <div class="kpi-label">Total payout</div>
+        <div class="kpi-value green" id="k-total">$0</div>
+      </div>
+      <div class="kpi">
+        <div class="kpi-label">Avg award</div>
+        <div class="kpi-value" id="k-avg">$0</div>
+      </div>
+    </div>
+
+    <div style="text-align:right;margin-bottom:10px;">
+      <button class="btn" style="font-size:12px;padding:6px 12px;" onclick="toggleExpandAll()" id="expand-all-btn">Expand all</button>
+    </div>
+
+    <div id="emp-list"></div>
+
+    <div class="total-row" style="margin-top:18px;">
+      <div><div style="font-size:12px;color:#6b7280;font-weight:500;" id="tot-summary">3 participants · HVAC Install Crew Chief Bonus · May 1-31</div><div style="font-size:15px;color:#1a1a1a;">Total payout this period</div></div>
+      <div class="amt" id="tot-amt">$0</div>
+    </div>
+
+    <div class="btn-row">
+      <button class="btn" onclick="setStep(1)">← Back to Review</button>
+      <button class="btn primary" onclick="setStep(3)">Continue to Finalize →</button>
+    </div>
+  </div>
+
+  <!-- ─────────────────────────────────────── STEP 3: FINALIZE & NOTIFY ─────────────────────────────────────── -->
+  <div class="step-pane" id="step-3">
+
+    <h1 class="page-title">Finalize &amp; notify</h1>
+    <p class="page-subtitle">Review awards, choose if participants are notified, then finalize.</p>
+
+    <div class="final-card">
+      <div class="final-header">
+        <div><span class="lbl">Plan</span><strong id="f-plan">HVAC Install Crew Chief Bonus</strong></div>
+        <div><span class="lbl">Period</span><strong>May 1 – 31</strong></div>
+      </div>
+
+      <div class="participants-head">
+        <span>Participants</span>
+        <span id="f-emp-count">3 employees</span>
+      </div>
+
+      <div id="f-list"></div>
+
+      <div class="total-row">
+        <div>Total payout</div>
+        <div class="amt" id="f-total">$0</div>
+      </div>
+    </div>
+
+    <div class="toggle-row">
+      <div>
+        <div class="tlabel">Email participants</div>
+        <div class="tsub" id="email-sub">All 3 employees will receive a breakdown of their individual award via email</div>
+      </div>
+      <label class="switch"><input type="checkbox" checked><span class="slider"></span></label>
+    </div>
+
+    <div style="margin-bottom:24px;">
+      <div style="font-size:14px;font-weight:600;margin-bottom:8px;">Message to participants <span style="font-weight:400;color:#9ca3af;">(optional)</span></div>
+      <textarea placeholder="Add a message that will be included in participant emails..."></textarea>
+    </div>
+
+    <div class="btn-row">
+      <button class="btn" onclick="setStep(2)">← Back to Awards</button>
+      <button class="btn success">Finalize payout ✓</button>
+    </div>
+  </div>
+
+</div>
+
+<script>
+// ──────── Data ────────
+let scenario = 'a';
+let step = 1;
+let jobFilter = 'all';
+
+const PLANS = {
+  a: {
+    plan: 'HVAC Install Crew Chief Bonus',
+    isPool: false,
+    sources: ['ServiceTitan', 'Google Reviews', 'Manual'],
+    participants: [
+      { initials: 'AH', name: 'Anthony Headen' },
+      { initials: 'AU', name: 'Austin Hughes' },
+      { initials: 'BJ', name: 'Brooke Jamison' },
+    ],
+    manualKpis: [
+      { key: 'reviews', label: '5-Star Reviews', src: 'manual', unit: 'ct', help: 'Count of 5-star Google reviews this period' },
+      { key: 'safety',  label: 'Safety Audit', src: 'manual', kind: 'toggle', help: 'Did the participant pass the monthly safety audit?' },
+    ],
+  },
+  b: {
+    plan: 'HVAC Install Field Tech Pool',
+    isPool: true,
+    sources: ['ServiceTitan', 'Gusto Timesheets', 'Manual'],
+    participants: [
+      { initials: 'CR', name: 'Carlos Reyes' },
+      { initials: 'DM', name: 'Derek McAlister' },
+      { initials: 'AB', name: 'Angelina Brown' },
+    ],
+    manualKpis: [
+      { key: 'reviews', label: '5-Star Reviews', src: 'manual', unit: 'ct', help: 'Count of 5-star Google reviews this period' },
+    ],
+  },
+};
+
+// Shared job list (Pool scenario adds laborSavings + crew)
+const JOBS = [
+  { id: '#1058', date: 'May 16', customer: 'Smith Residence',    revenue: 12400, gpAmt: 9300, gpPct: 75, onTime: true,  callbacks: 0, laborSavings: 2000, hours: { CR: 4.5, DM: 4.5 }, lead: 'AH' },
+  { id: '#1057', date: 'May 16', customer: 'Park Place Bldg.',   revenue: 8200,  gpAmt: 3450, gpPct: 42, onTime: true,  callbacks: 0, laborSavings: 1600, hours: { CR: 3.0, DM: 3.0 }, lead: 'AU' },
+  { id: '#1056', date: 'May 15', customer: 'Riverdale Apts.',    revenue: 6800,  gpAmt: 1900, gpPct: 28, onTime: true,  callbacks: 0, laborSavings: 800,  hours: { CR: 2.5, AB: 2.5 }, lead: 'AH' },
+  { id: '#1055', date: 'May 15', customer: 'Westwood Family',    revenue: 15300, gpAmt: 7800, gpPct: 51, onTime: true,  callbacks: 1, laborSavings: 1900, hours: { AB: 6.0, DM: 4.0 }, lead: 'AU' },
+  { id: '#1054', date: 'May 14', customer: 'Hartman Office',     revenue: 20500, gpAmt: 8200, gpPct: 40, onTime: true,  callbacks: 0, laborSavings: 2300, hours: { CR: 5.0, DM: 5.0, AB: 4.0 }, lead: 'AH' },
+  { id: '#1053', date: 'May 14', customer: 'Bell Townhomes',     revenue: 11000, gpAmt: 4200, gpPct: 38, onTime: false, callbacks: 0, laborSavings: 1100, hours: { CR: 4.0, DM: 4.0 }, lead: 'BJ' },
+  { id: '#1052', date: 'May 14', customer: 'Oakland Residence',  revenue: 15000, gpAmt: 6900, gpPct: 46, onTime: true,  callbacks: 0, laborSavings: 1500, hours: { AB: 4.5, CR: 4.5 }, lead: 'AU' },
+  { id: '#1051', date: 'May 13', customer: 'Marina Heights',     revenue: 14200, gpAmt: 5100, gpPct: 36, onTime: true,  callbacks: 0, laborSavings: 1200, hours: { CR: 3.5, DM: 3.5 }, lead: 'AH' },
+  { id: '#1050', date: 'May 13', customer: 'Pine Ridge Estates', revenue: 15300, gpAmt: 7500, gpPct: 49, onTime: true,  callbacks: 0, laborSavings: 1800, hours: { CR: 4.0, AB: 4.0 }, lead: 'AU' },
+  { id: '#1049', date: 'May 12', customer: 'Carter Residence',   revenue: 15100, gpAmt: 6200, gpPct: 41, onTime: true,  callbacks: 0, laborSavings: 1400, hours: { DM: 3.5, AB: 3.5 }, lead: 'AH' },
+];
+
+// Sample manual values pre-filled
+const MANUAL_VALUES = {
+  a: { AH: { reviews: 3, safety: true  }, AU: { reviews: 1, safety: true }, BJ: { reviews: 2, safety: true } },
+  b: { CR: { reviews: 2 }, DM: { reviews: 4 }, AB: { reviews: 1 } },
+};
+
+// ──────── Eligibility ────────
+function eligibility(j) {
+  const reasons = [];
+  if (j.gpPct < 35) reasons.push('GP% < 35%');
+  if (!j.onTime)    reasons.push('Not on-time');
+  if (j.callbacks)  reasons.push('Callback flagged');
+  return { eligible: reasons.length === 0, reasons };
+}
+
+// ──────── Awards ────────
+// Scenario A: per-person, $75 piece + 5% × (GP - $5k) when GP > $5k. Lead is the named person.
+function computeAwardA(job, empInit) {
+  const e = eligibility(job);
+  if (!e.eligible) return { eligible: false, reasons: e.reasons, total: 0, lines: [] };
+  if (job.lead !== empInit) return null; // employee wasn't the lead on this job
+  const r1 = 75;
+  const r2 = job.gpAmt > 5000 ? Math.round((job.gpAmt - 5000) * 0.05) : 0;
+  const lines = [{ rule: 'Piece rate', math: '$75 per eligible install', amount: r1 }];
+  if (r2 > 0) lines.push({ rule: 'GP over $5k bonus', math: `5% × ($${job.gpAmt.toLocaleString()} − $5,000)`, amount: r2 });
+  return { eligible: true, total: r1 + r2, lines };
+}
+
+// Scenario B: 12% labor savings → pool → -$60 lead deduction → split by hours among the crew on this job
+function computeAwardB(job, empInit) {
+  const e = eligibility(job);
+  if (!e.eligible) return { eligible: false, reasons: e.reasons, total: 0, lines: [] };
+  if (!(empInit in job.hours)) return null;
+  const pool = Math.round(job.laborSavings * 0.12);
+  const deduct = 60;
+  const crewPool = Math.max(0, pool - deduct);
+  const totalHrs = Object.values(job.hours).reduce((s, h) => s + h, 0);
+  const myHrs = job.hours[empInit];
+  const myPct = totalHrs ? myHrs / totalHrs : 0;
+  const myAmt = Math.round(crewPool * myPct);
+  return {
+    eligible: true,
+    total: myAmt,
+    lines: [{
+      rule: '12% labor savings pool',
+      math: `Pool $${pool} − $${deduct} lead = $${crewPool} crew · ${myHrs}h/${totalHrs}h = ${(myPct*100).toFixed(0)}%`,
+      amount: myAmt,
+    }],
+  };
+}
+
+function awardFor(job, empInit) {
+  return scenario === 'a' ? computeAwardA(job, empInit) : computeAwardB(job, empInit);
+}
+
+// Total award per job (across all participants)
+function jobTotal(job) {
+  const p = PLANS[scenario].participants;
+  let total = 0;
+  for (const emp of p) {
+    const r = awardFor(job, emp.initials);
+    if (r && r.eligible) total += r.total;
+  }
+  return total;
+}
+
+// Per-participant rollup for the period (includes manual KPIs)
+function participantTotal(empInit) {
+  let total = 0;
+  const jobLines = [];
+  for (const job of JOBS) {
+    const r = awardFor(job, empInit);
+    if (r && r.eligible) {
+      total += r.total;
+      jobLines.push({ job, result: r });
+    }
+  }
+  // Scorecard items (manual)
+  const sc = [];
+  const mv = (MANUAL_VALUES[scenario] || {})[empInit] || {};
+  if (mv.reviews) {
+    const amt = mv.reviews * 25;
+    sc.push({ label: '5-Star Reviews', math: `${mv.reviews} × $25`, amount: amt });
+    total += amt;
+  }
+  // Qualifier (scenario A only): safety audit pass — failing zeroes out this period
+  let qualifierImpact = null;
+  if (scenario === 'a' && mv.safety === false) {
+    qualifierImpact = { label: 'Safety Audit', detail: 'Failed — period payout suppressed' };
+    total = 0;
+  }
+  return { total, jobLines, scorecard: sc, qualifierImpact };
+}
+
+// ──────── Render ────────
+function setScenario(s) {
+  scenario = s;
+  document.getElementById('tab-a').className = 'sc-tab' + (s === 'a' ? ' active' : '');
+  document.getElementById('tab-b').className = 'sc-tab' + (s === 'b' ? ' active' : '');
+  document.getElementById('crumb-plan').textContent = PLANS[s].plan;
+  document.title = PLANS[s].plan + ' · Calculate Payout';
+  render();
+}
+
+function setStep(n) {
+  step = n;
+  for (let i = 1; i <= 3; i++) {
+    const c = document.getElementById('sc-' + i);
+    const l = document.getElementById('sl-' + i);
+    const p = document.getElementById('step-' + i);
+    if (!c || !l || !p) continue;
+    c.classList.remove('active', 'pending', 'done');
+    l.classList.remove('active');
+    if (i < n)      { c.classList.add('done'); c.innerHTML = '✓'; }
+    else if (i === n) { c.classList.add('active'); l.classList.add('active'); c.innerHTML = i; }
+    else            { c.classList.add('pending'); c.innerHTML = i; }
+    p.classList.toggle('active', i === n);
+  }
+  for (let i = 1; i <= 2; i++) {
+    const bar = document.getElementById('sb-' + i);
+    if (bar) bar.classList.toggle('done', i < n);
+  }
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+function render() {
+  const p = PLANS[scenario];
+  // Info cards (step 1)
+  document.getElementById('info-parts').textContent = p.participants.length;
+  document.getElementById('info-sources').innerHTML =
+    '<span class="src-dot"></span>' + p.sources.join(',&nbsp; ');
+
+  // Title scenario-specific
+  document.getElementById('th-award').textContent = p.isPool ? 'Pool · Split' : 'Award';
+
+  // Filter chip counts
+  let elig = 0, inelig = 0;
+  for (const job of JOBS) (eligibility(job).eligible ? elig++ : inelig++);
+  document.getElementById('cc-all').textContent = JOBS.length;
+  document.getElementById('cc-elig').textContent = elig;
+  document.getElementById('cc-inelig').textContent = inelig;
+
+  // Jobs table
+  let shown = JOBS;
+  if (jobFilter === 'elig')   shown = JOBS.filter(j => eligibility(j).eligible);
+  if (jobFilter === 'inelig') shown = JOBS.filter(j => !eligibility(j).eligible);
+  document.getElementById('jobs-count').textContent = `Showing ${shown.length} of ${JOBS.length} jobs`;
+
+  document.getElementById('jobs-body').innerHTML = shown.map(j => {
+    const e = eligibility(j);
+    const gpClass = j.gpPct < 35 ? 'mfail' : 'mpass';
+    const statusCell = e.eligible
+      ? '<span class="pill ok">✓ Eligible</span>'
+      : `<span class="pill no" title="${e.reasons.join('; ')}">✗ ${e.reasons[0]}</span>`;
+    const awardCell = e.eligible
+      ? `<strong>$${jobTotal(j).toLocaleString()}</strong>`
+      : '<span style="color:#d1d5db;">—</span>';
+    return `
+      <tr class="${e.eligible ? '' : 'inelig'}">
+        <td><a class="jl">${j.id}</a></td>
+        <td style="color:#6b7280;">${j.date}</td>
+        <td>${j.customer}</td>
+        <td><span class="ro">$${j.revenue.toLocaleString()}</span></td>
+        <td><span class="${gpClass}">${j.gpPct}%</span></td>
+        <td>${statusCell}</td>
+        <td style="text-align:right;">${awardCell}</td>
+      </tr>
+    `;
+  }).join('');
+
+  // Manual entries
+  const head = document.getElementById('me-head');
+  const body = document.getElementById('me-body');
+  if (p.manualKpis.length === 0) {
+    document.getElementById('manual-card').style.display = 'none';
+  } else {
+    document.getElementById('manual-card').style.display = '';
+    head.innerHTML = '<th>Employee</th>' + p.manualKpis.map(k =>
+      `<th>${k.label}<span class="src-tag manual">manual</span></th>`
+    ).join('');
+    body.innerHTML = p.participants.map(emp => {
+      const mv = (MANUAL_VALUES[scenario] || {})[emp.initials] || {};
+      const cells = p.manualKpis.map(k => {
+        if (k.kind === 'toggle') {
+          const checked = mv[k.key] ? 'checked' : '';
+          return `<td><label class="switch" style="width:36px;height:20px;"><input type="checkbox" ${checked} onchange="updateManual('${emp.initials}','${k.key}',this.checked); render(); renderStep2(); renderStep3();"><span class="slider"></span></label></td>`;
+        }
+        return `<td><input type="number" class="me-input" min="0" value="${mv[k.key] || 0}" onchange="updateManual('${emp.initials}','${k.key}',Number(this.value)); render(); renderStep2(); renderStep3();"></td>`;
+      }).join('');
+      return `<tr><td><span class="avatar" style="margin-right:8px;">${emp.initials}</span><strong>${emp.name}</strong></td>${cells}</tr>`;
+    }).join('');
+  }
+
+  renderStep2();
+  renderStep3();
+}
+
+function filterJobs(f) {
+  jobFilter = f;
+  ['all', 'elig', 'inelig'].forEach(k => {
+    document.getElementById('chip-' + k).classList.toggle('active', k === f);
+  });
+  render();
+}
+
+function updateManual(empInit, key, val) {
+  MANUAL_VALUES[scenario] = MANUAL_VALUES[scenario] || {};
+  MANUAL_VALUES[scenario][empInit] = MANUAL_VALUES[scenario][empInit] || {};
+  MANUAL_VALUES[scenario][empInit][key] = val;
+}
+
+function renderStep2() {
+  const p = PLANS[scenario];
+  let totalPayout = 0;
+  const empResults = p.participants.map(emp => {
+    const r = participantTotal(emp.initials);
+    totalPayout += r.total;
+    return { emp, r };
+  });
+  document.getElementById('k-parts').textContent = p.participants.length;
+  document.getElementById('k-total').textContent = `$${totalPayout.toLocaleString()}`;
+  document.getElementById('k-avg').textContent = `$${Math.round(totalPayout / p.participants.length).toLocaleString()}`;
+  document.getElementById('tot-amt').textContent = `$${totalPayout.toLocaleString()}`;
+  document.getElementById('tot-summary').textContent = `${p.participants.length} participants · ${p.plan} · May 1-31`;
+
+  document.getElementById('emp-list').innerHTML = empResults.map(({ emp, r }) => {
+    const jobRows = r.jobLines.length
+      ? r.jobLines.map(({ job, result }) => `
+        <tr>
+          <td><a class="jl" style="color:#2563eb;text-decoration:none;font-weight:500;">${job.id}</a></td>
+          <td style="color:#6b7280;">${job.date}</td>
+          <td>${job.customer}</td>
+          <td><span class="math">${result.lines.map(l => l.math).join(' + ')}</span></td>
+          <td style="text-align:right;font-weight:600;">$${result.total.toLocaleString()}</td>
+        </tr>
+      `).join('')
+      : '<tr><td colspan="5" style="text-align:center;color:#9ca3af;padding:14px;">No eligible jobs this period</td></tr>';
+
+    const scoreRows = r.scorecard.length
+      ? r.scorecard.map(s => `
+        <tr>
+          <td>${s.label}</td>
+          <td><span class="math">${s.math}</span></td>
+          <td style="text-align:right;font-weight:600;">$${s.amount.toLocaleString()}</td>
+        </tr>
+      `).join('')
+      : '';
+
+    const qualImpact = r.qualifierImpact
+      ? `<div class="ro-banner" style="background:#fef2f2;border-color:#fecaca;color:#b91c1c;margin-top:14px;">
+           <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12" y2="16"/></svg>
+           <span><strong>${r.qualifierImpact.label}:</strong> ${r.qualifierImpact.detail}</span>
+         </div>`
+      : '';
+
+    return `
+      <div class="emp-card">
+        <div class="emp-row" onclick="this.parentElement.classList.toggle('open')">
+          <div class="emp-left">
+            <span class="avatar">${emp.initials}</span>
+            <span class="emp-name">${emp.name}</span>
+            <span style="font-size:12px;color:#9ca3af;">${r.jobLines.length} eligible jobs${r.scorecard.length ? ' · ' + r.scorecard.length + ' scorecard items' : ''}</span>
+          </div>
+          <div class="emp-right">
+            <span class="emp-amt">$${r.total.toLocaleString()}</span>
+            <svg class="chev" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg>
+          </div>
+        </div>
+        <div class="emp-body">
+          <div class="breakdown-section">
+            <div class="bd-title">Job-by-job awards</div>
+            <table class="bd-table">
+              <thead><tr><th>Job #</th><th>Date</th><th>Customer</th><th>Math</th><th style="text-align:right;">Amount</th></tr></thead>
+              <tbody>${jobRows}</tbody>
+            </table>
+          </div>
+          ${scoreRows ? `
+          <div class="breakdown-section">
+            <div class="bd-title">Scorecard items</div>
+            <table class="bd-table">
+              <thead><tr><th>Item</th><th>Math</th><th style="text-align:right;">Amount</th></tr></thead>
+              <tbody>${scoreRows}</tbody>
+            </table>
+          </div>` : ''}
+          ${qualImpact}
+          <div class="bd-subtotal">
+            <span>Total for ${emp.name}</span>
+            <span>$${r.total.toLocaleString()}</span>
+          </div>
+        </div>
+      </div>
+    `;
+  }).join('');
+}
+
+function toggleExpandAll() {
+  const cards = document.querySelectorAll('.emp-card');
+  const anyClosed = Array.from(cards).some(c => !c.classList.contains('open'));
+  cards.forEach(c => c.classList.toggle('open', anyClosed));
+  document.getElementById('expand-all-btn').textContent = anyClosed ? 'Collapse all' : 'Expand all';
+}
+
+function renderStep3() {
+  const p = PLANS[scenario];
+  document.getElementById('f-plan').textContent = p.plan;
+  document.getElementById('f-emp-count').textContent = p.participants.length + ' employees';
+  document.getElementById('email-sub').textContent = `All ${p.participants.length} employees will receive a breakdown of their individual award via email`;
+
+  let total = 0;
+  document.getElementById('f-list').innerHTML = p.participants.map(emp => {
+    const r = participantTotal(emp.initials);
+    total += r.total;
+    return `
+      <div class="ptcp">
+        <div style="display:flex;align-items:center;gap:12px;">
+          <span class="avatar">${emp.initials}</span>
+          <span>${emp.name}</span>
+        </div>
+        <div style="font-weight:600;font-family:'p22-mackinac-pro',serif;font-size:16px;">$${r.total.toLocaleString()}</div>
+      </div>
+    `;
+  }).join('');
+  document.getElementById('f-total').textContent = `$${total.toLocaleString()}`;
+}
+
+// init — respect ?from=a|b
+const fromParam = new URLSearchParams(window.location.search).get('from');
+if (fromParam === 'b') {
+  scenario = 'b';
+  document.getElementById('tab-a').className = 'sc-tab';
+  document.getElementById('tab-b').className = 'sc-tab active';
+}
+render();
+setStep(1);
+</script>
+</body>
+</html>

@@ -255,7 +255,7 @@
   <span class="label">Prototype</span>
   <button class="sc-tab active" id="tab-a" onclick="setScenario('a')">A · Crew Chief Bonus (Individual / Lead)</button>
   <button class="sc-tab" id="tab-b" onclick="setScenario('b')">B · Field Tech Pool (Crew)</button>
-  <a class="back-link" href="./builder.html">← Back to Plan Builder</a>
+  <a class="back-link" href="/prototype-job-based-plan">← Back to Plan Builder</a>
 </div>
 
 <div id="app">
@@ -301,7 +301,7 @@
       </div>
     </div>
     <button class="btn-outline">Upload manually</button>
-    <button class="btn-primary">Review &amp; finalize →</button>
+    <button class="btn-primary" onclick="window.location.href='./payout.html?from=' + scenario">Review &amp; finalize →</button>
     <button class="btn-icon" title="Dismiss">×</button>
   </div>
 
