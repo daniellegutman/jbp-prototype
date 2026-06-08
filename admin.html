@@ -2,637 +2,637 @@
 <html lang="en"><head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Job Plan Admin · ShareWillow Prototype</title>
+  <title>HVAC Install Plan · ShareWillow</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <link href="https://use.typekit.net/mgx2gxv.css" rel="stylesheet">
   <style>
     :root {
-      --bg: #f5f4f0;
-      --card-border: #e8e6df;
-      --text: #1a1a1a;
+      --bg: #f5f4ef;
+      --card: #ffffff;
+      --hairline: #ece9dc;
+      --hairline-2: #f4f1e5;
+      --ink: #1a1a1a;
+      --ink-2: #374151;
       --muted: #6b7280;
       --faint: #9ca3af;
+      --accent: #2563eb;
       --green: #047857;
       --green-bg: #ecfdf5;
+      --green-border: #bbf7d0;
       --amber: #b45309;
       --amber-bg: #fef3c7;
       --red: #b91c1c;
       --red-bg: #fef2f2;
-      --blue: #2563eb;
-      --hairline: #f0eee7;
+      --purple: #7c3aed;
+      --side-w: 220px;
     }
     * { box-sizing: border-box; }
-    body { font-family: 'Matter', -apple-system, BlinkMacSystemFont, sans-serif; background: var(--bg); color: var(--text); margin: 0; font-size: 14px; -webkit-font-smoothing: antialiased; }
+    body { font-family: 'Matter', -apple-system, BlinkMacSystemFont, sans-serif; background: var(--bg); color: var(--ink); margin: 0; min-height: 100vh; font-size: 14px; }
     h1, h2, h3, h4 { font-family: 'p22-mackinac-pro', serif; font-weight: 600; margin: 0; }
-    a { color: inherit; text-decoration: none; }
-    button { font-family: inherit; cursor: pointer; }
 
-    /* ── Prototype scenario tabs ── */
-    #proto-bar { padding: 8px 24px; display: flex; align-items: center; gap: 10px; background: #1a1a1a; color: white; }
-    #proto-bar .label { font-size: 10px; font-weight: 700; color: #9ca3af; text-transform: uppercase; letter-spacing: .5px; }
-    #proto-bar .sc-tab { padding: 5px 12px; border-radius: 6px; font-size: 12px; font-weight: 500; border: 1px solid rgba(255,255,255,.15); background: transparent; color: rgba(255,255,255,.7); white-space: nowrap; transition: all .15s; }
-    #proto-bar .sc-tab:hover { color: white; border-color: rgba(255,255,255,.35); }
-    #proto-bar .sc-tab.active { background: white; color: #1a1a1a; border-color: white; font-weight: 600; }
-    #proto-bar .back-link { margin-left: auto; font-size: 12px; color: #93c5fd; }
-    #proto-bar .back-link:hover { color: #dbeafe; }
+    /* Prototype controls bar */
+    #proto-bar { padding: 9px 24px; display: flex; align-items: center; gap: 10px; border-bottom: 1px solid var(--hairline); background: #fafaf6; position: sticky; top: 0; z-index: 50; }
+    .sc-tab { padding: 6px 14px; border-radius: 6px; font-size: 12px; font-weight: 500; cursor: pointer; transition: all .15s; border: 1.5px solid var(--hairline); background: white; color: var(--ink-2); font-family: inherit; white-space: nowrap; }
+    .sc-tab.active { background: var(--ink); color: white; border-color: var(--ink); }
 
-    /* ── App container ── */
-    #app { max-width: 1240px; margin: 0 auto; padding: 24px 32px 80px; }
+    /* App shell */
+    .shell { display: flex; min-height: calc(100vh - 43px); }
+    .sidebar { width: var(--side-w); flex-shrink: 0; background: var(--bg); padding: 22px 16px; border-right: 1px solid var(--hairline); display: flex; flex-direction: column; gap: 6px; }
+    .brand { display: flex; align-items: center; gap: 8px; padding: 4px 8px 22px; font-family: 'p22-mackinac-pro', serif; font-size: 18px; font-weight: 700; }
+    .brand svg { width: 22px; height: 22px; }
+    .side-toggle { background: none; border: none; cursor: pointer; color: var(--faint); padding: 0; margin-left: auto; }
+    .nav-item { display: flex; align-items: center; gap: 11px; padding: 9px 12px; border-radius: 9px; cursor: pointer; color: var(--ink-2); font-size: 13.5px; font-weight: 500; transition: background .12s; text-decoration: none; }
+    .nav-item:hover { background: rgba(0,0,0,.04); color: var(--ink); }
+    .nav-item.active { background: white; color: var(--ink); border: 1px solid var(--hairline); }
+    .nav-item svg { width: 17px; height: 17px; flex-shrink: 0; opacity: .85; }
+    .nav-spacer { flex: 1; }
 
-    /* ── Breadcrumb ── */
-    .crumb { display: flex; align-items: center; gap: 8px; font-size: 13px; color: var(--muted); margin-bottom: 14px; }
-    .crumb svg { width: 14px; height: 14px; }
-    .crumb a.blue { color: var(--blue); }
+    .main { flex: 1; padding: 28px 44px 60px; min-width: 0; background: var(--card); }
 
-    /* ── Title row ── */
-    .title-row { display: flex; align-items: flex-start; justify-content: space-between; gap: 24px; }
-    .title-block h1 { font-size: 40px; display: flex; align-items: center; gap: 12px; flex-wrap: wrap; line-height: 1.15; }
-    .title-meta { font-size: 13px; color: var(--muted); margin-top: 10px; }
-    .pill { display: inline-flex; align-items: center; gap: 5px; padding: 3px 10px; border-radius: 999px; font-size: 12px; font-weight: 500; }
-    .pill-status { background: var(--green-bg); color: var(--green); }
-    .pill-status::before { content: ""; width: 6px; height: 6px; border-radius: 50%; background: #10b981; }
-    .pill-version { background: #f3f4f6; color: var(--muted); border-radius: 6px; font-weight: 500; }
-    .pill-role { background: #ede9fe; color: #6d28d9; border-radius: 6px; }
+    /* Breadcrumb */
+    .crumb { display: flex; align-items: center; gap: 8px; font-size: 13.5px; color: var(--muted); margin-bottom: 18px; }
+    .crumb a { color: inherit; text-decoration: none; }
+    .crumb .last { color: var(--accent); font-weight: 500; }
+    .crumb svg { width: 16px; height: 16px; }
+
+    /* Title row */
+    .title-row { display: flex; align-items: flex-start; justify-content: space-between; gap: 24px; margin-bottom: 24px; }
+    h1.plan-title { font-size: 40px; letter-spacing: -.5px; display: inline-flex; align-items: center; gap: 14px; line-height: 1.1; }
+    .pill { display: inline-flex; align-items: center; gap: 5px; font-size: 12px; font-weight: 500; padding: 4px 10px; border-radius: 999px; vertical-align: middle; }
+    .pill-live { background: var(--green-bg); color: var(--green); border: 1px solid var(--green-border); }
+    .pill-live .dot { width: 6px; height: 6px; border-radius: 50%; background: #10b981; }
+    .pill-version { background: #f3f4f6; color: var(--muted); font-weight: 500; }
+    .pill-role { background: #ede9fe; color: var(--purple); font-weight: 500; font-size: 11px; padding: 3px 9px; }
     .pill-role.crew { background: #dbeafe; color: #1e40af; }
-    .pill-role.solo { background: #dcfce7; color: #166534; }
+    .plan-meta { font-size: 13px; color: var(--muted); margin-top: 8px; }
 
     .ytd-block { text-align: right; flex-shrink: 0; }
-    .ytd-figure { font-size: 38px; font-weight: 600; color: var(--green); font-family: 'p22-mackinac-pro', serif; line-height: 1; letter-spacing: -.5px; }
-    .ytd-sub { font-size: 12px; color: var(--muted); margin-top: 6px; }
-    .btn-actions { background: var(--text); color: white; border: none; border-radius: 8px; padding: 8px 16px; font-size: 13px; font-weight: 600; display: inline-flex; align-items: center; gap: 8px; margin-top: 12px; }
-    .btn-actions:hover { background: #333; }
+    .ytd-figure { font-size: 36px; font-weight: 700; color: var(--green); font-family: 'p22-mackinac-pro', serif; line-height: 1; letter-spacing: -.5px; }
+    .ytd-sub { font-size: 12px; color: var(--muted); margin-top: 4px; }
+    .btn-actions { margin-top: 10px; background: white; color: var(--ink); border: 1.5px solid var(--hairline); border-radius: 8px; padding: 8px 16px; font-size: 13px; font-weight: 600; cursor: pointer; font-family: inherit; display: inline-flex; align-items: center; gap: 6px; }
+    .btn-actions:hover { border-color: var(--ink); }
 
-    /* ── Action banner ── */
-    .banner { background: white; border: 1px solid var(--card-border); border-radius: 12px; padding: 13px 16px; display: flex; align-items: center; gap: 14px; margin: 20px 0 22px; }
-    .banner .check { width: 30px; height: 30px; border-radius: 8px; background: var(--green-bg); color: var(--green); display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
-    .banner-body { flex: 1; }
-    .banner-title { font-size: 14px; font-weight: 600; }
-    .banner-meta { font-size: 12px; color: var(--muted); margin-top: 3px; display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
-    .banner-meta .warn { color: var(--amber); display: inline-flex; align-items: center; gap: 4px; }
-    .banner-meta .warn::before { content: ""; width: 5px; height: 5px; border-radius: 50%; background: #f59e0b; }
-    .btn-outline { background: white; border: 1px solid #d1d5db; border-radius: 7px; padding: 7px 12px; font-size: 13px; font-weight: 500; color: #374151; }
-    .btn-outline:hover { border-color: #9ca3af; background: #fafafa; }
-    .btn-primary { background: var(--text); color: white; border: none; border-radius: 7px; padding: 7px 14px; font-size: 13px; font-weight: 600; display: inline-flex; align-items: center; gap: 6px; }
-    .btn-primary:hover { background: #333; }
-    .btn-icon { background: none; border: none; color: var(--faint); font-size: 18px; padding: 4px; line-height: 1; }
-    .btn-icon:hover { color: var(--text); }
+    /* Tabs */
+    .tabs { display: flex; align-items: center; gap: 0; border-bottom: 1px solid var(--hairline); margin-bottom: 26px; }
+    .tab { padding: 11px 18px; font-size: 14px; font-weight: 500; color: var(--muted); cursor: pointer; border: none; background: none; font-family: inherit; border-bottom: 2px solid transparent; margin-bottom: -1px; }
+    .tab:hover { color: var(--ink); }
+    .tab.active { color: var(--ink); font-weight: 600; border-bottom-color: var(--ink); }
 
-    /* ── Tabs ── */
-    .tabs { display: flex; align-items: center; gap: 2px; border-bottom: 1px solid var(--card-border); margin-bottom: 22px; }
-    .tab { padding: 12px 16px; font-size: 14px; font-weight: 500; color: var(--muted); border: none; background: none; border-bottom: 2px solid transparent; margin-bottom: -1px; transition: color .15s; }
-    .tab:hover { color: var(--text); }
-    .tab.active { color: var(--text); font-weight: 600; border-bottom-color: var(--text); }
-    .tab .star { color: #7c3aed; margin-right: 4px; font-size: 11px; }
+    /* Layout */
+    .layout { display: grid; grid-template-columns: minmax(0, 1fr) 320px; gap: 24px; }
 
-    /* ── Tab panes ── */
-    .tab-pane { display: none; }
-    .tab-pane.active { display: block; }
-
-    /* ── Two-col layout (summary tab) ── */
-    .grid { display: grid; grid-template-columns: minmax(0, 1fr) 308px; gap: 22px; }
-
-    /* ── Cards ── */
-    .card { background: white; border: 1px solid var(--card-border); border-radius: 14px; margin-bottom: 16px; }
-    .card-pad { padding: 20px 22px; }
-    .card-head { display: flex; align-items: flex-start; justify-content: space-between; gap: 12px; padding: 18px 22px 14px; border-bottom: 1px solid var(--hairline); }
-    .card-head.borderless { border-bottom: none; padding-bottom: 18px; }
-    .card-title { font-size: 16px; font-weight: 600; color: var(--text); }
-    .card-sub { font-size: 12px; color: var(--muted); margin-top: 3px; line-height: 1.4; }
-    .card-action { font-size: 13px; color: var(--text); font-weight: 500; }
+    /* Cards */
+    .card { background: var(--card); border: 1px solid var(--hairline); border-radius: 14px; padding: 22px 24px; margin-bottom: 18px; }
+    .card-head { display: flex; align-items: flex-start; justify-content: space-between; gap: 12px; margin-bottom: 6px; }
+    .card-title { font-size: 16px; font-family: 'p22-mackinac-pro', serif; font-weight: 600; }
+    .card-sub { font-size: 12.5px; color: var(--muted); margin-top: 3px; }
+    .card-action { font-size: 13px; color: var(--ink); font-weight: 500; cursor: pointer; text-decoration: none; }
     .card-action:hover { text-decoration: underline; }
-    .card-body { padding: 16px 22px 20px; }
 
-    /* ── Rail ── */
-    .rail-card { background: white; border: 1px solid var(--card-border); border-radius: 12px; padding: 16px 18px; margin-bottom: 14px; }
-    .rail-head { display: flex; align-items: center; justify-content: space-between; margin-bottom: 10px; }
-    .rail-title { font-size: 10px; font-weight: 700; color: var(--muted); text-transform: uppercase; letter-spacing: .6px; }
-    .rail-row { display: flex; align-items: center; justify-content: space-between; padding: 6px 0; font-size: 13px; gap: 12px; }
-    .rail-row + .rail-row { border-top: 1px solid var(--hairline); }
-    .rail-row .label { color: var(--muted); }
-    .rail-row .value { color: var(--text); font-weight: 500; text-align: right; }
-    .rail-row .muted-info { color: var(--faint); font-size: 11px; font-weight: 400; }
-    .rail-row .dot { display: inline-block; width: 6px; height: 6px; border-radius: 50%; margin-right: 4px; vertical-align: 1px; }
-    .dot.green { background: #10b981; }
-    .dot.amber { background: #f59e0b; }
-
-    /* ── Structure tables (Job Award, Scorecard) ── */
-    .struct-table { width: 100%; border-collapse: collapse; font-size: 13px; }
-    .struct-table th { font-size: 10px; font-weight: 700; color: var(--faint); text-transform: uppercase; letter-spacing: .5px; padding: 0 16px 10px; text-align: left; border-bottom: 1px solid var(--hairline); }
-    .struct-table th:last-child { text-align: right; }
-    .struct-table td { padding: 14px 16px; border-bottom: 1px solid var(--hairline); vertical-align: top; }
-    .struct-table tr:last-child td { border-bottom: none; }
-    .struct-table tr.attention td { background: #fefce8; }
-    .struct-table tr.clickable:hover td { background: #fafafa; cursor: pointer; }
-    .struct-table tr.clickable.attention:hover td { background: #fef9c3; }
-    .row-name { display: flex; align-items: flex-start; gap: 12px; }
-    .row-icon { width: 32px; height: 32px; border-radius: 8px; background: var(--green-bg); color: var(--green); display: flex; align-items: center; justify-content: center; flex-shrink: 0; font-size: 14px; }
-    .row-icon.blue { background: #eff6ff; color: var(--blue); }
-    .row-icon.purple { background: #f5f3ff; color: #7c3aed; }
+    /* Rules table (matches existing KPIs design) */
+    .rules-table { width: 100%; border-collapse: collapse; margin-top: 14px; }
+    .rules-table th { font-size: 10.5px; font-weight: 600; color: var(--muted); text-transform: uppercase; letter-spacing: .55px; padding: 10px 12px; text-align: left; border-bottom: 1px solid var(--hairline-2); }
+    .rules-table td { padding: 14px 12px; border-bottom: 1px solid var(--hairline-2); font-size: 13.5px; }
+    .rules-table tr:last-child td { border-bottom: none; }
+    .rules-table tr.clickable { cursor: pointer; }
+    .rules-table tr.clickable:hover td { background: #fdfcf5; }
+    .rules-table tr.attention td { background: #fffbeb; }
+    .row-name { display: flex; align-items: center; gap: 12px; }
+    .row-icon { width: 30px; height: 30px; border-radius: 8px; display: flex; align-items: center; justify-content: center; font-size: 14px; flex-shrink: 0; background: var(--green-bg); color: var(--green); }
+    .row-icon.blue { background: #dbeafe; color: #1d4ed8; }
+    .row-icon.purple { background: #ede9fe; color: var(--purple); }
     .row-icon.amber { background: var(--amber-bg); color: var(--amber); }
-    .row-name-text { font-weight: 600; color: var(--text); font-size: 13.5px; }
-    .row-sub { font-size: 12px; color: var(--muted); margin-top: 2px; }
-    .formula { font-family: 'JetBrains Mono', ui-monospace, Menlo, monospace; font-size: 12.5px; background: #fafaf7; padding: 4px 9px; border-radius: 6px; display: inline-block; color: var(--text); border: 1px solid var(--hairline); }
-    .pill-attention { background: var(--amber-bg); color: var(--amber); font-size: 10px; font-weight: 600; padding: 2px 7px; border-radius: 999px; margin-left: 6px; display: inline-flex; align-items: center; gap: 3px; }
-    .pill-inherited { background: #f3f4f6; color: var(--muted); font-size: 10px; font-weight: 600; padding: 2px 7px; border-radius: 999px; }
-    .last-sync { font-size: 12px; color: var(--faint); white-space: nowrap; }
-    .last-sync .resync { color: var(--amber); font-weight: 500; margin-left: 4px; }
+    .row-name-text { font-weight: 600; color: var(--ink); font-size: 14px; }
+    .row-sub { font-size: 11.5px; color: var(--muted); margin-top: 1px; }
+    .formula { font-family: 'JetBrains Mono', ui-monospace, Menlo, monospace; font-size: 12.5px; color: var(--ink); background: #fafaf3; padding: 4px 9px; border-radius: 6px; display: inline-block; }
+    .pill-attention { background: var(--amber-bg); color: var(--amber); font-size: 10px; font-weight: 600; padding: 2px 7px; border-radius: 999px; margin-left: 8px; }
+    .last-sync { font-size: 11.5px; color: var(--faint); }
+    .resync { color: var(--amber); margin-left: 4px; cursor: pointer; font-weight: 500; }
 
-    /* ── Eligibility list ── */
-    .elig-grid { display: grid; gap: 8px; }
-    .elig-item { display: flex; align-items: center; gap: 10px; padding: 10px 14px; background: #fafaf7; border: 1px solid var(--hairline); border-radius: 9px; font-size: 13px; }
-    .elig-item .check { color: var(--green); font-weight: 700; flex-shrink: 0; }
-    .elig-item .tail { margin-left: auto; }
+    /* Eligibility compact list */
+    .elig-list { display: flex; flex-direction: column; gap: 6px; margin-top: 12px; }
+    .elig-item { display: flex; align-items: center; gap: 10px; padding: 9px 12px; background: #fafaf3; border-radius: 8px; font-size: 13px; }
+    .elig-item .check { color: var(--green); font-weight: 700; }
+    .elig-item .tail { margin-left: auto; font-size: 11px; }
+    .pill-inherited { background: #ede9fe; color: var(--purple); padding: 2px 8px; border-radius: 999px; font-weight: 500; }
 
-    /* ── Crew split detail ── */
-    .split-row { display: grid; grid-template-columns: 150px 1fr; gap: 12px; padding: 12px 14px; background: #fafaf7; border: 1px solid var(--hairline); border-radius: 9px; font-size: 13px; margin-bottom: 8px; }
-    .split-row:last-child { margin-bottom: 0; }
-    .split-row .lbl { color: var(--muted); font-size: 12px; }
-    .split-row .val { color: var(--text); font-weight: 500; }
-    .badge-tag { background: #f3f4f6; color: var(--muted); font-size: 10px; font-weight: 600; padding: 2px 7px; border-radius: 6px; margin-left: 6px; }
+    /* Crew split detail */
+    .split-detail { display: flex; flex-direction: column; gap: 8px; margin-top: 14px; }
+    .split-row { display: flex; align-items: center; gap: 12px; padding: 10px 14px; background: #fafaf3; border-radius: 8px; font-size: 13px; }
+    .split-row .k { color: var(--muted); min-width: 140px; font-size: 12px; }
+    .split-row .v { color: var(--ink); font-weight: 500; }
+    .badge-deduct { background: var(--amber-bg); color: var(--amber); font-size: 10px; font-weight: 600; padding: 2px 7px; border-radius: 999px; margin-left: 6px; }
 
-    /* ── Participants ── */
-    .part-controls { display: flex; align-items: center; gap: 8px; }
-    .part-search { border: 1px solid var(--card-border); border-radius: 7px; padding: 6px 10px; font-size: 12px; width: 150px; outline: none; font-family: inherit; }
-    .part-table { width: 100%; border-collapse: collapse; }
-    .part-table th { font-size: 10px; font-weight: 700; color: var(--faint); text-transform: uppercase; letter-spacing: .5px; padding: 0 16px 10px; text-align: left; border-bottom: 1px solid var(--hairline); }
-    .part-table td { padding: 12px 16px; border-bottom: 1px solid var(--hairline); font-size: 13px; }
+    /* Participants */
+    .p-search { display: flex; align-items: center; gap: 8px; }
+    .p-search input { border: 1.5px solid var(--hairline); border-radius: 8px; padding: 7px 11px 7px 32px; font-size: 12.5px; outline: none; font-family: inherit; width: 220px; background: #fafaf3 url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='14' height='14' viewBox='0 0 24 24' fill='none' stroke='%23999' stroke-width='2'><circle cx='11' cy='11' r='8'/><path d='m21 21-4.35-4.35'/></svg>") no-repeat 10px center; }
+    .btn-sm { font-size: 12.5px; padding: 7px 13px; border-radius: 8px; border: 1.5px solid var(--hairline); background: white; cursor: pointer; font-family: inherit; color: var(--ink-2); }
+    .btn-sm:hover { border-color: var(--ink); }
+    .part-table { width: 100%; border-collapse: collapse; margin-top: 14px; }
+    .part-table th { font-size: 10.5px; font-weight: 600; color: var(--muted); text-transform: uppercase; letter-spacing: .55px; padding: 10px 12px; text-align: left; border-bottom: 1px solid var(--hairline-2); }
+    .part-table td { padding: 12px; border-bottom: 1px solid var(--hairline-2); font-size: 13px; vertical-align: middle; }
+    .part-table tr:hover td { background: #fdfcf5; cursor: pointer; }
     .part-table tr:last-child td { border-bottom: none; }
-    .part-table tr:hover td { background: #fafafa; cursor: pointer; }
-    .avatar { display: inline-flex; align-items: center; justify-content: center; width: 28px; height: 28px; border-radius: 50%; background: var(--text); color: white; font-size: 10px; font-weight: 700; vertical-align: middle; margin-right: 8px; }
-    .ytd-cell { display: flex; align-items: center; gap: 10px; }
-    .ytd-cell .amt { font-weight: 600; min-width: 60px; }
-    .bar-track { flex: 1; height: 4px; background: #e5e7eb; border-radius: 2px; max-width: 140px; }
-    .bar-fill { height: 4px; background: var(--text); border-radius: 2px; }
+    .avatar { width: 28px; height: 28px; border-radius: 50%; background: #dbeafe; color: #1e40af; font-size: 11px; font-weight: 700; display: inline-flex; align-items: center; justify-content: center; margin-right: 10px; vertical-align: middle; }
+    .ytd-cell { display: flex; align-items: center; gap: 12px; }
+    .ytd-cell .amt { font-weight: 600; font-size: 13.5px; min-width: 72px; text-align: right; }
+    .bar-track { width: 110px; height: 4px; background: #e5e7eb; border-radius: 2px; overflow: hidden; }
+    .bar-fill { height: 4px; background: var(--ink); }
     .chev { color: var(--faint); }
-    .part-footer { display: flex; align-items: center; justify-content: space-between; padding: 12px 22px 18px; font-size: 12px; color: var(--faint); }
 
-    /* ── Activity ── */
-    .act-item { display: flex; gap: 10px; padding: 9px 0; font-size: 12px; }
-    .act-item + .act-item { border-top: 1px solid var(--hairline); }
-    .act-dot { width: 6px; height: 6px; border-radius: 50%; background: var(--text); margin-top: 6px; flex-shrink: 0; }
-    .act-text { color: var(--text); line-height: 1.45; }
+    /* Right rail cards */
+    .rail-card { background: var(--card); border: 1px solid var(--hairline); border-radius: 14px; padding: 18px 20px; margin-bottom: 14px; }
+    .rail-head { display: flex; align-items: center; justify-content: space-between; margin-bottom: 14px; }
+    .rail-title { font-size: 11px; font-weight: 700; color: var(--muted); text-transform: uppercase; letter-spacing: .55px; }
+    .rail-row { display: flex; align-items: center; justify-content: space-between; padding: 8px 0; font-size: 13px; border-bottom: 1px solid var(--hairline-2); }
+    .rail-row:last-child { border-bottom: none; }
+    .rail-row .k { color: var(--muted); }
+    .rail-row .v { color: var(--ink); font-weight: 500; text-align: right; }
+    .muted-info { color: var(--faint); font-size: 11px; font-weight: 400; }
+
+    /* Activity */
+    .act-item { display: flex; gap: 10px; padding: 9px 0; font-size: 12.5px; border-bottom: 1px solid var(--hairline-2); }
+    .act-item:last-child { border-bottom: none; }
+    .act-dot { width: 6px; height: 6px; border-radius: 50%; background: var(--ink); margin-top: 7px; flex-shrink: 0; }
+    .act-text { color: var(--ink); line-height: 1.4; }
     .act-meta { color: var(--faint); font-size: 11px; margin-top: 2px; }
 
-    /* ── Data sources ── */
-    .ds-row { display: flex; align-items: center; gap: 10px; padding: 9px 0; font-size: 13px; }
-    .ds-row + .ds-row { border-top: 1px solid var(--hairline); }
-    .ds-icon { width: 26px; height: 26px; border-radius: 7px; background: #f3f4f6; display: flex; align-items: center; justify-content: center; flex-shrink: 0; font-size: 13px; }
-    .ds-info { flex: 1; min-width: 0; }
-    .ds-name { font-weight: 500; font-size: 13px; }
-    .ds-sub { font-size: 11px; color: var(--muted); margin-top: 1px; }
-    .ds-count { font-size: 11px; color: var(--faint); }
+    /* SUB-TABS (Performance) */
+    .subtabs { display: inline-flex; align-items: center; gap: 6px; padding: 4px; background: #f3f4f1; border-radius: 10px; margin-bottom: 20px; }
+    .subtab { font-size: 13px; font-weight: 500; padding: 8px 16px; border-radius: 7px; border: none; background: transparent; cursor: pointer; font-family: inherit; color: var(--ink-2); }
+    .subtab:hover { color: var(--ink); }
+    .subtab.active { background: white; color: var(--ink); font-weight: 600; box-shadow: 0 1px 3px rgba(0,0,0,.06); }
 
-    /* ── Performance tab ── */
-    .perf-controls { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-bottom: 18px; flex-wrap: wrap; }
-    .perf-period { display: flex; align-items: center; gap: 10px; }
-    .perf-period select { border: 1px solid var(--card-border); border-radius: 7px; padding: 7px 10px; font-size: 13px; background: white; outline: none; font-family: inherit; min-width: 170px; cursor: pointer; }
+    /* Performance period bar */
+    .period-bar { display: flex; align-items: center; justify-content: space-between; margin-bottom: 16px; flex-wrap: wrap; gap: 12px; }
+    .period-bar select { border: 1.5px solid var(--hairline); border-radius: 8px; padding: 8px 13px; font-size: 13px; background: white; font-family: inherit; cursor: pointer; outline: none; min-width: 160px; }
 
+    /* KPI tiles */
     .kpi-row { display: grid; grid-template-columns: repeat(5, 1fr); gap: 12px; margin-bottom: 20px; }
-    .kpi { background: white; border: 1px solid var(--card-border); border-radius: 12px; padding: 14px 16px; }
-    .kpi-label { font-size: 10px; font-weight: 700; color: var(--muted); text-transform: uppercase; letter-spacing: .5px; margin-bottom: 8px; }
-    .kpi-value { font-size: 22px; font-weight: 600; font-family: 'p22-mackinac-pro', serif; line-height: 1; letter-spacing: -.3px; }
-    .kpi-sub { font-size: 11px; color: var(--muted); margin-top: 5px; }
+    .kpi { background: var(--card); border: 1px solid var(--hairline); border-radius: 12px; padding: 14px 16px; }
+    .kpi-label { font-size: 10.5px; font-weight: 700; color: var(--muted); text-transform: uppercase; letter-spacing: .45px; margin-bottom: 6px; }
+    .kpi-value { font-size: 22px; font-family: 'p22-mackinac-pro', serif; font-weight: 600; line-height: 1.1; }
+    .kpi-sub { font-size: 11px; color: var(--muted); margin-top: 4px; }
     .kpi-sub.up { color: var(--green); }
     .kpi-sub.down { color: var(--amber); }
 
-    .chip-row { display: flex; align-items: center; gap: 8px; margin-bottom: 14px; flex-wrap: wrap; }
-    .chip-row .label { font-size: 12px; color: var(--muted); margin-right: 4px; }
-    .chip { background: white; border: 1px solid var(--card-border); border-radius: 999px; padding: 5px 14px; font-size: 12px; font-weight: 500; color: #374151; display: inline-flex; align-items: center; gap: 6px; transition: all .15s; }
+    /* Chips */
+    .chips { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+    .chip { font-size: 12px; padding: 6px 13px; border-radius: 999px; border: 1.5px solid var(--hairline); background: white; cursor: pointer; font-weight: 500; color: var(--ink-2); font-family: inherit; display: inline-flex; align-items: center; gap: 5px; }
     .chip:hover { border-color: var(--faint); }
-    .chip.active { background: var(--text); color: white; border-color: var(--text); }
-    .chip-count { background: rgba(0,0,0,.08); padding: 1px 7px; border-radius: 999px; font-size: 10px; font-weight: 700; }
-    .chip.active .chip-count { background: rgba(255,255,255,.22); }
-    .chip-row .result-count { margin-left: auto; font-size: 11px; color: var(--faint); }
+    .chip.active { background: var(--ink); border-color: var(--ink); color: white; }
+    .chip-n { background: rgba(0,0,0,.07); font-size: 10px; font-weight: 700; padding: 1px 6px; border-radius: 999px; }
+    .chip.active .chip-n { background: rgba(255,255,255,.18); }
 
-    .jobs-card { background: white; border: 1px solid var(--card-border); border-radius: 12px; overflow: hidden; }
+    /* Jobs / Performance tables */
     .jobs-table { width: 100%; border-collapse: collapse; font-size: 13px; }
-    .jobs-table th { background: #fafaf7; padding: 10px 14px; text-align: left; font-weight: 600; color: var(--muted); font-size: 10px; text-transform: uppercase; letter-spacing: .5px; border-bottom: 1px solid var(--hairline); }
-    .jobs-table th.right { text-align: right; }
-    .jobs-table td { padding: 13px 14px; border-bottom: 1px solid var(--hairline); }
-    .jobs-table tr:last-child td { border-bottom: none; }
-    .jobs-table tr.inelig td { background: #fdfcf5; }
-    .jobs-table tr:hover td { background: #fafafa; cursor: pointer; }
-    .jobs-table tr.inelig:hover td { background: #fef9c3; }
-    .job-link { color: var(--blue); font-weight: 500; }
-    .m-pass { color: var(--green); font-weight: 600; }
-    .m-fail { color: var(--red); font-weight: 600; }
-    .status-pill { display: inline-flex; align-items: center; gap: 5px; padding: 3px 9px; border-radius: 999px; font-size: 11px; font-weight: 600; white-space: nowrap; }
+    .jobs-table th { font-size: 10.5px; font-weight: 600; color: var(--muted); text-transform: uppercase; letter-spacing: .55px; padding: 11px 14px; text-align: left; border-bottom: 1px solid var(--hairline); background: #fafaf3; }
+    .jobs-table td { padding: 12px 14px; border-bottom: 1px solid var(--hairline-2); vertical-align: middle; }
+    .jobs-table tr.parent { cursor: pointer; }
+    .jobs-table tr.parent:hover td { background: #fdfcf5; }
+    .jobs-table tr.parent.inelig td { background: #fdfcf4; color: var(--muted); }
+    .jobs-table tr.parent.open td { background: #fafaf3; }
+    .jobs-table tr.expand td { padding: 0; border-bottom: 1px solid var(--hairline); background: #fafaf3; }
+    .expand-inner { padding: 14px 22px 18px; }
+    .expand-title { font-size: 11px; font-weight: 700; color: var(--muted); text-transform: uppercase; letter-spacing: .45px; margin-bottom: 10px; }
+    .expand-table { width: 100%; border-collapse: collapse; font-size: 12.5px; background: white; border: 1px solid var(--hairline); border-radius: 10px; overflow: hidden; }
+    .expand-table th { background: white; padding: 8px 12px; text-align: left; font-size: 10px; font-weight: 600; color: var(--muted); text-transform: uppercase; letter-spacing: .4px; border-bottom: 1px solid var(--hairline-2); }
+    .expand-table td { padding: 10px 12px; border-bottom: 1px solid var(--hairline-2); }
+    .expand-table tr:last-child td { border-bottom: none; }
+    .job-link { color: var(--accent); text-decoration: none; font-weight: 500; }
+    .status-pill { display: inline-flex; align-items: center; gap: 4px; padding: 3px 9px; border-radius: 999px; font-size: 11px; font-weight: 600; }
     .status-pill.elig { background: var(--green-bg); color: var(--green); }
     .status-pill.inelig { background: var(--red-bg); color: var(--red); }
-    .award { font-weight: 600; color: var(--text); }
-    .award-sub { font-size: 11px; color: var(--muted); margin-top: 2px; font-family: 'JetBrains Mono', ui-monospace, monospace; }
-    .award-empty { color: #d1d5db; }
-    .perf-footer-note { font-size: 11px; color: var(--faint); text-align: center; margin-top: 14px; }
+    .m-pass { color: var(--green); font-weight: 500; }
+    .m-fail { color: var(--red); font-weight: 500; }
+    .award { font-weight: 600; }
+    .award-sub { font-size: 10.5px; color: var(--muted); margin-top: 1px; }
+    .award-empty { color: var(--faint); }
+    .chev-mini { color: var(--faint); transition: transform .15s; display: inline-block; }
+    tr.parent.open .chev-mini { transform: rotate(90deg); color: var(--ink); }
 
-    /* ── Drawer ── */
-    #drawer-bg { position: fixed; inset: 0; background: rgba(15,15,15,.45); z-index: 90; opacity: 0; pointer-events: none; transition: opacity .2s; }
-    #drawer-bg.open { opacity: 1; pointer-events: auto; }
-    #drawer { position: fixed; top: 0; right: 0; bottom: 0; width: 560px; max-width: 92vw; background: white; box-shadow: -10px 0 40px rgba(0,0,0,.18); z-index: 91; transform: translateX(100%); transition: transform .25s ease; overflow-y: auto; }
-    #drawer.open { transform: translateX(0); }
-    .dr-head { padding: 22px 28px 18px; border-bottom: 1px solid var(--hairline); display: flex; align-items: flex-start; justify-content: space-between; gap: 12px; position: sticky; top: 0; background: white; }
-    .dr-eyebrow { font-size: 10px; font-weight: 700; color: var(--faint); text-transform: uppercase; letter-spacing: .5px; margin-bottom: 4px; }
-    .dr-title { font-size: 22px; font-weight: 600; font-family: 'p22-mackinac-pro', serif; }
-    .dr-body { padding: 22px 28px 40px; }
-    .dr-section { margin-bottom: 26px; }
-    .dr-section-title { font-size: 10px; font-weight: 700; color: var(--muted); text-transform: uppercase; letter-spacing: .6px; margin-bottom: 10px; }
-    .dr-kv { display: flex; align-items: center; justify-content: space-between; padding: 8px 0; font-size: 13px; }
-    .dr-kv + .dr-kv { border-top: 1px solid var(--hairline); }
+    /* Drawer */
+    #drawer-bg { position: fixed; inset: 0; background: rgba(0,0,0,.4); z-index: 99; display: none; }
+    #drawer-bg.open { display: block; }
+    #drawer { position: fixed; right: 0; top: 0; bottom: 0; width: 560px; max-width: 92vw; background: white; box-shadow: -8px 0 30px rgba(0,0,0,.15); z-index: 100; padding: 26px 30px; overflow-y: auto; display: none; }
+    #drawer.open { display: block; }
+    .dr-head { display: flex; align-items: flex-start; justify-content: space-between; gap: 12px; margin-bottom: 20px; }
+    .dr-eyebrow { font-size: 11px; font-weight: 700; color: var(--muted); text-transform: uppercase; letter-spacing: .55px; margin-bottom: 4px; }
+    .dr-title { font-size: 22px; font-family: 'p22-mackinac-pro', serif; font-weight: 600; }
+    .btn-close { background: none; border: none; color: var(--faint); font-size: 22px; cursor: pointer; padding: 0; line-height: 1; }
+    .dr-section { margin-bottom: 22px; }
+    .dr-section-title { font-size: 11px; font-weight: 700; color: var(--muted); text-transform: uppercase; letter-spacing: .45px; margin-bottom: 10px; }
+    .dr-kv { display: flex; align-items: center; justify-content: space-between; padding: 8px 0; font-size: 13px; border-bottom: 1px solid var(--hairline-2); }
     .dr-kv .k { color: var(--muted); }
-    .dr-kv .v { color: var(--text); font-weight: 500; text-align: right; }
+    .dr-kv .v { color: var(--ink); font-weight: 500; }
     .dr-table { width: 100%; border-collapse: collapse; font-size: 12px; }
-    .dr-table th { background: #fafaf7; padding: 8px 10px; text-align: left; font-size: 10px; font-weight: 700; color: var(--muted); text-transform: uppercase; letter-spacing: .4px; border-bottom: 1px solid var(--hairline); }
-    .dr-table td { padding: 9px 10px; border-bottom: 1px solid var(--hairline); }
-    .dr-table tr:last-child td { border-bottom: none; }
-    .callout-warn { background: var(--amber-bg); border: 1px solid #fde68a; border-radius: 10px; padding: 12px 14px; font-size: 13px; color: var(--amber); line-height: 1.5; }
+    .dr-table th { background: #fafaf3; padding: 8px 10px; text-align: left; font-weight: 600; color: var(--muted); font-size: 10.5px; text-transform: uppercase; letter-spacing: .35px; border-bottom: 1px solid var(--hairline); }
+    .dr-table td { padding: 10px; border-bottom: 1px solid var(--hairline-2); color: var(--ink); }
+    .callout-warn { background: var(--amber-bg); border: 1px solid #fde68a; color: var(--amber); border-radius: 8px; padding: 11px 13px; font-size: 12.5px; line-height: 1.4; }
+    .btn-primary { background: var(--ink); color: white; border: none; border-radius: 8px; padding: 8px 16px; font-size: 13px; font-weight: 600; cursor: pointer; font-family: inherit; }
+    code { background: #f3f4f6; padding: 1px 6px; border-radius: 4px; font-size: 12px; }
 
-    code { background: #f3f4f6; padding: 1px 6px; border-radius: 4px; font-size: 12px; font-family: 'JetBrains Mono', ui-monospace, monospace; }
+    /* Tab panes */
+    .tab-pane { display: none; }
+    .tab-pane.active { display: block; }
+    .sub-pane { display: none; }
+    .sub-pane.active { display: block; }
+
+    /* Bottom helper text under Jobs table */
+    .helper-text { font-size: 11px; color: var(--faint); text-align: center; margin-top: 12px; }
   </style>
 </head>
 <body>
 
 <!-- Prototype controls -->
 <div id="proto-bar">
-  <span class="label">Prototype</span>
-  <button class="sc-tab active" id="tab-a" onclick="setScenario('a')">A · Crew Chief Bonus (Individual / Lead)</button>
-  <button class="sc-tab" id="tab-b" onclick="setScenario('b')">B · Field Tech Pool (Crew)</button>
-  <a class="back-link" href="/prototype-job-based-plan">← Back to Plan Builder</a>
+  <span style="font-size:11px;font-weight:700;color:var(--faint);text-transform:uppercase;letter-spacing:.5px;">Prototype:</span>
+  <button class="sc-tab active" id="tab-a" onclick="setScenario('a')">A — Crew Chief Bonus (Single-Role)</button>
+  <button class="sc-tab" id="tab-b" onclick="setScenario('b')">B — Field Tech Pool (Multi-Role)</button>
+  <a href="./builder.html" style="margin-left:auto;font-size:12px;color:var(--accent);text-decoration:none;">← Back to Plan Builder</a>
 </div>
 
-<div id="app">
-
-  <!-- Breadcrumb -->
-  <nav class="crumb">
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 12l9-9 9 9M5 10v10a1 1 0 001 1h3M19 10v10a1 1 0 01-1 1h-3M9 21h6"/></svg>
-    <a class="blue" href="#">Plans</a>
-    <span>›</span>
-    <span id="crumb-plan" style="color:var(--text);">HVAC Install Crew Chief Bonus</span>
-  </nav>
-
-  <!-- Title -->
-  <header class="title-row">
-    <div class="title-block">
-      <h1>
-        <span id="plan-title">HVAC Install Crew Chief Bonus</span>
-        <span class="pill pill-status">Active</span>
-        <span class="pill pill-version">v2</span>
-        <span class="pill pill-role" id="plan-role">Lead</span>
-      </h1>
-      <div class="title-meta" id="plan-meta">2026 Job-Based Plan · Individual · Monthly Payout · Created Mar 14 · Last edited May 12 by Danielle G.</div>
+<!-- App shell -->
+<div class="shell">
+  <!-- LEFT SIDEBAR NAV -->
+  <aside class="sidebar">
+    <div class="brand">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 10c4-2 8-2 12 0s8 2 12 0v12c-4 2-8 2-12 0s-8-2-12 0V10z" transform="translate(-1.5 -1)"/></svg>
+      <span>ShareWillow</span>
+      <button class="side-toggle" title="Toggle sidebar"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><line x1="9" y1="3" x2="9" y2="21"/></svg></button>
     </div>
-    <div class="ytd-block">
-      <div class="ytd-figure" id="ytd-figure">$12,400</div>
-      <div class="ytd-sub" id="ytd-sub">Awarded YTD · 5 payout runs</div>
-      <button class="btn-actions">Actions <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="6 9 12 15 18 9"/></svg></button>
-    </div>
-  </header>
+    <a class="nav-item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12l9-9 9 9M5 10v10a1 1 0 001 1h3M19 10v10a1 1 0 01-1 1h-3M9 21h6"/></svg> Home</a>
+    <a class="nav-item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="14" rx="2"/><path d="M8 21h8M12 17v4"/></svg> Dashboard</a>
+    <a class="nav-item active"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 7V5a2 2 0 00-2-2h-4a2 2 0 00-2 2v2M9 13h6"/></svg> Metrics</a>
+    <a class="nav-item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M9 12h6M12 9v6"/></svg> Payouts</a>
+    <a class="nav-item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="7" r="4"/><path d="M17 11l2 2 4-4M3 21v-2a4 4 0 014-4h4a4 4 0 014 4v2"/></svg> People</a>
+    <div class="nav-spacer"></div>
+    <a class="nav-item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 01-2.83 2.83l-.06-.06a1.65 1.65 0 00-1.82-.33 1.65 1.65 0 00-1 1.51V21a2 2 0 01-4 0v-.09a1.65 1.65 0 00-1-1.51 1.65 1.65 0 00-1.82.33l-.06.06a2 2 0 11-2.83-2.83l.06-.06a1.65 1.65 0 00.33-1.82 1.65 1.65 0 00-1.51-1H3a2 2 0 010-4h.09a1.65 1.65 0 001.51-1 1.65 1.65 0 00-.33-1.82l-.06-.06a2 2 0 112.83-2.83l.06.06a1.65 1.65 0 001.82.33h0a1.65 1.65 0 001-1.51V3a2 2 0 014 0v.09a1.65 1.65 0 001 1.51h0a1.65 1.65 0 001.82-.33l.06-.06a2 2 0 112.83 2.83l-.06.06a1.65 1.65 0 00-.33 1.82v0a1.65 1.65 0 001.51 1H21a2 2 0 010 4h-.09a1.65 1.65 0 00-1.51 1z"/></svg> Settings</a>
+  </aside>
 
-  <!-- Action banner -->
-  <div class="banner">
-    <div class="check">
-      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
+  <!-- MAIN -->
+  <main class="main">
+    <div class="crumb">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 12l9-9 9 9M5 10v10a1 1 0 001 1h3M19 10v10a1 1 0 01-1 1h-3M9 21h6"/></svg>
+      <span>›</span>
+      <a class="last" id="crumb-plan">HVAC Install Crew Chief Bonus</a>
     </div>
-    <div class="banner-body">
-      <div class="banner-title" id="banner-title">Review May 12 – 18 payouts</div>
-      <div class="banner-meta" id="banner-meta">
-        <span>ServiceTitan synced 8 min ago</span><span>·</span>
-        <span><strong id="banner-elig">12</strong> eligible jobs</span><span>·</span>
-        <span>est. total <strong id="banner-total">$1,250</strong></span><span>·</span>
-        <span class="warn" id="banner-warn">1 rule needs attention</span>
-      </div>
-    </div>
-    <button class="btn-outline">Upload manually</button>
-    <button class="btn-primary" onclick="window.location.href='./payout.html?from=' + scenario">Review &amp; finalize →</button>
-    <button class="btn-icon" title="Dismiss">×</button>
-  </div>
 
-  <!-- Tabs -->
-  <nav class="tabs">
-    <button class="tab active" id="t-summary" onclick="setTab('summary')">Plan Summary</button>
-    <button class="tab" id="t-performance" onclick="setTab('performance')">Performance</button>
-    <button class="tab" onclick="alert('Payouts tab coming soon')">Payouts</button>
-    <button class="tab"><span class="star">✦</span> Plan Intelligence</button>
-    <button class="tab"><span class="star">✦</span> Behavioral Proof</button>
-    <button class="tab"><span class="star">✦</span> Pay Simulator</button>
-  </nav>
-
-  <!-- ============== PLAN SUMMARY TAB ============== -->
-  <div class="tab-pane active" id="pane-summary">
-    <div class="grid">
-      <!-- LEFT COLUMN -->
+    <div class="title-row">
       <div>
-        <!-- Eligibility -->
-        <section class="card">
-          <header class="card-head">
-            <div>
-              <h3 class="card-title">Eligibility</h3>
-              <div class="card-sub" id="elig-mode">Filter mode · 3 criteria</div>
-            </div>
-            <a class="card-action" onclick="openDrawer('elig')">Edit eligibility ›</a>
-          </header>
-          <div class="card-body">
-            <div class="elig-grid" id="elig-list"></div>
-          </div>
-        </section>
+        <h1 class="plan-title">
+          <span id="plan-title">HVAC Install Crew Chief Bonus</span>
+          <span class="pill pill-live"><span class="dot"></span> Live</span>
+          <span class="pill pill-role" id="plan-role">Lead</span>
+        </h1>
+        <div class="plan-meta" id="plan-meta">2026 Job-Based Plan · Individual · Monthly Payout · Created Mar 14 · Last edited May 12 by Danielle G.</div>
+      </div>
+      <div class="ytd-block">
+        <div class="ytd-figure" id="ytd-figure">$12,400</div>
+        <div class="ytd-sub" id="ytd-sub">Awarded YTD · 5 payout runs</div>
+        <button class="btn-actions">Actions <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="6 9 12 15 18 9"/></svg></button>
+      </div>
+    </div>
 
-        <!-- Job Award Rules -->
-        <section class="card">
-          <header class="card-head">
-            <div>
-              <h3 class="card-title">Job Award Rules</h3>
-              <div class="card-sub" id="award-sub">2 rules · Per-job, stacked</div>
+    <div class="tabs">
+      <button class="tab active" id="t-summary" onclick="setTab('summary')">Plan Summary</button>
+      <button class="tab" id="t-performance" onclick="setTab('performance')">Performance</button>
+      <button class="tab" id="t-payouts" onclick="setTab('payouts')">Payouts</button>
+    </div>
+
+    <!-- ============== PLAN SUMMARY ============== -->
+    <div class="tab-pane active" id="pane-summary">
+      <div class="layout">
+        <div>
+          <!-- Eligibility (compact) -->
+          <div class="card">
+            <div class="card-head">
+              <div>
+                <h3 class="card-title">Eligibility</h3>
+                <div class="card-sub" id="elig-mode">Filter mode · 3 criteria</div>
+              </div>
+              <a class="card-action" onclick="openDrawer('elig')">Edit ›</a>
             </div>
-            <a class="card-action" onclick="openDrawer('award')">Edit rules ›</a>
-          </header>
-          <table class="struct-table">
+            <div class="elig-list" id="elig-list"></div>
+          </div>
+
+          <!-- Rules (unified KPIs table) -->
+          <div class="card">
+            <div class="card-head">
+              <div>
+                <h3 class="card-title">Rules</h3>
+                <div class="card-sub">Performance rules that determine per-job payouts</div>
+              </div>
+              <a class="card-action" onclick="openDrawer('award')">Edit ›</a>
+            </div>
+            <table class="rules-table">
+              <thead>
+                <tr><th>Rule</th><th>Type</th><th>Formula</th><th style="text-align:right;">Last sync</th></tr>
+              </thead>
+              <tbody id="rules-rows"></tbody>
+            </table>
+          </div>
+
+          <!-- Crew Split (only Multi-Role) -->
+          <div class="card" id="split-card" style="display:none;">
+            <div class="card-head">
+              <div>
+                <h3 class="card-title">Crew Split</h3>
+                <div class="card-sub">How each job's pool is divided between crew members</div>
+              </div>
+              <a class="card-action" onclick="openDrawer('split')">Edit ›</a>
+            </div>
+            <div class="split-detail">
+              <div class="split-row">
+                <span class="k">Pool Deduction</span>
+                <span class="v">$60 lead share / job <span class="badge-deduct">column ref · lead_share_amount</span></span>
+              </div>
+              <div class="split-row">
+                <span class="k">Distribution</span>
+                <span class="v">By % of time on job <span class="muted-info">· requires timesheet dataset</span></span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Participants -->
+          <div class="card">
+            <div class="card-head">
+              <div>
+                <h3 class="card-title">Participants <span style="color:var(--faint);font-weight:500;font-size:13.5px;margin-left:6px;" id="part-count">(3)</span></h3>
+                <div class="card-sub">YTD earnings on this plan</div>
+              </div>
+              <div class="p-search">
+                <input type="text" placeholder="Search participants">
+                <button class="btn-sm">↕ Sort: YTD Earnings</button>
+                <button class="btn-sm">Manage</button>
+              </div>
+            </div>
+            <table class="part-table">
+              <thead>
+                <tr><th>Employee</th><th>Role</th><th>YTD Earned</th><th>Last Cycle</th><th style="width:24px;"></th></tr>
+              </thead>
+              <tbody id="part-rows"></tbody>
+            </table>
+            <div style="display:flex;align-items:center;justify-content:space-between;padding-top:14px;font-size:12px;color:var(--faint);">
+              <span id="part-footer-text">Showing 3 of 3 · All synced from ServiceTitan</span>
+              <a class="card-action" style="font-size:12px;">View full roster →</a>
+            </div>
+          </div>
+        </div>
+
+        <!-- RIGHT RAIL -->
+        <div>
+          <div class="rail-card">
+            <div class="rail-head">
+              <div class="rail-title">Plan Details</div>
+              <div style="font-size:11px;color:var(--faint);">v2 · May 12</div>
+            </div>
+            <div class="rail-row"><span class="k">Status</span><span class="v"><span style="display:inline-block;width:6px;height:6px;border-radius:50%;background:#10b981;margin-right:5px;"></span>Live</span></div>
+            <div class="rail-row"><span class="k">Cadence</span><span class="v">Monthly</span></div>
+            <div class="rail-row"><span class="k">Award Mode</span><span class="v" id="rail-mode">Individual</span></div>
+            <div class="rail-row"><span class="k">Compensation</span><span class="v" id="rail-comp">Performance Pay</span></div>
+            <div class="rail-row"><span class="k">Period</span><span class="v">Jan 1 – Dec 31, 2026</span></div>
+            <div class="rail-row"><span class="k">Participants</span><span class="v" id="rail-parts">3 enrolled</span></div>
+            <div class="rail-row"><span class="k">Next payout</span><span class="v"><span style="display:inline-block;width:6px;height:6px;border-radius:50%;background:#f59e0b;margin-right:5px;"></span>May 19 – 25</span></div>
+            <div class="rail-row"><span class="k">Rules tracked</span><span class="v" id="rail-rules">2</span></div>
+            <div class="rail-row"><span class="k">Role group</span><span class="v" id="rail-role">Lead</span></div>
+          </div>
+
+          <div class="rail-card">
+            <div class="rail-head">
+              <div class="rail-title">YTD Performance</div>
+              <div style="font-size:11px;color:var(--faint);">2026</div>
+            </div>
+            <div class="rail-row"><span class="k">Total paid</span><span class="v" id="ytd-total">$12,400</span></div>
+            <div class="rail-row"><span class="k">Payout runs</span><span class="v">5</span></div>
+            <div class="rail-row"><span class="k">Eligible jobs</span><span class="v" id="ytd-jobs">165 / 178 <span class="muted-info">· 93%</span></span></div>
+            <div class="rail-row"><span class="k">Avg per run</span><span class="v" id="ytd-avg">$2,480</span></div>
+            <div class="rail-row"><span class="k">Top earner</span><span class="v" id="ytd-top">Anthony H. · $5,200</span></div>
+          </div>
+
+          <div class="rail-card">
+            <div class="rail-head">
+              <div class="rail-title">Recent Activity</div>
+            </div>
+            <div id="activity-list"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ============== PERFORMANCE ============== -->
+    <div class="tab-pane" id="pane-performance">
+      <!-- Sub-tabs -->
+      <div class="subtabs">
+        <button class="subtab active" id="st-jobs" onclick="setSubtab('jobs')">Jobs</button>
+        <button class="subtab" id="st-individual" onclick="setSubtab('individual')">Individual Performance</button>
+      </div>
+
+      <!-- Period bar (shared) -->
+      <div class="period-bar">
+        <div style="display:flex;align-items:center;gap:10px;">
+          <span style="font-size:13px;color:var(--muted);">Period:</span>
+          <select id="perf-period" onchange="renderPerformance()">
+            <option value="may-2026" selected>May 2026 (current)</option>
+            <option value="apr-2026">April 2026</option>
+            <option value="mar-2026">March 2026</option>
+            <option value="ytd-2026">YTD 2026</option>
+          </select>
+        </div>
+        <div style="display:flex;align-items:center;gap:8px;">
+          <button class="btn-sm">↻ Refresh sync</button>
+          <button class="btn-sm">Export CSV</button>
+        </div>
+      </div>
+
+      <!-- JOBS sub-pane -->
+      <div class="sub-pane active" id="sub-jobs">
+        <div class="kpi-row" id="kpi-row"></div>
+
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;flex-wrap:wrap;gap:10px;">
+          <div class="chips">
+            <span style="font-size:12px;color:var(--muted);margin-right:4px;">Filter:</span>
+            <button class="chip active" id="chip-all" onclick="setFilter('all')">All <span class="chip-n" id="chip-all-n">0</span></button>
+            <button class="chip" id="chip-elig" onclick="setFilter('eligible')">✓ Eligible <span class="chip-n" id="chip-elig-n">0</span></button>
+            <button class="chip" id="chip-inelig" onclick="setFilter('ineligible')">✗ Ineligible <span class="chip-n" id="chip-inelig-n">0</span></button>
+          </div>
+          <span id="result-count" style="font-size:12px;color:var(--faint);">Showing 0 jobs</span>
+        </div>
+
+        <div class="card" style="padding:0;overflow:hidden;">
+          <table class="jobs-table">
             <thead>
-              <tr><th>Rule</th><th>Type</th><th>Formula</th><th style="text-align:right;">Last sync</th></tr>
+              <tr>
+                <th style="width:28px;"></th>
+                <th>Job #</th>
+                <th>Date</th>
+                <th>Customer</th>
+                <th>GP %</th>
+                <th>On-Time</th>
+                <th>Callbacks 30d</th>
+                <th>Status</th>
+                <th style="text-align:right;" id="th-award">Award</th>
+              </tr>
             </thead>
-            <tbody id="award-rows"></tbody>
+            <tbody id="jobs-rows"></tbody>
           </table>
-        </section>
-
-        <!-- Crew Split (Pool only) -->
-        <section class="card" id="split-card" style="display:none;">
-          <header class="card-head">
-            <div>
-              <h3 class="card-title">Crew Split</h3>
-              <div class="card-sub">Pool deduction runs first, then distribution splits the remainder</div>
-            </div>
-            <a class="card-action" onclick="openDrawer('split')">Edit split ›</a>
-          </header>
-          <div class="card-body">
-            <div class="split-row">
-              <span class="lbl">Pool Deduction</span>
-              <span class="val">−$60 / job (avg) <span class="badge-tag">column ref · <code>lead_share_amount</code></span></span>
-            </div>
-            <div class="split-row">
-              <span class="lbl">Distribution</span>
-              <span class="val">By % of time on job <span class="badge-tag">timesheet · Gusto</span></span>
-            </div>
-            <div class="split-row">
-              <span class="lbl">Deduction destination</span>
-              <span class="val" style="color:var(--muted);font-weight:400;font-size:12px;">Separate Lead plan (not paid from this plan)</span>
-            </div>
-          </div>
-        </section>
-
-        <!-- Scorecard Items -->
-        <section class="card">
-          <header class="card-head">
-            <div>
-              <h3 class="card-title">Scorecard Items</h3>
-              <div class="card-sub" id="sc-sub">Per-event bonuses on top of job awards</div>
-            </div>
-            <a class="card-action" onclick="openDrawer('scorecard')">Edit items ›</a>
-          </header>
-          <table class="struct-table">
-            <thead><tr><th>Item</th><th>Type</th><th>Formula</th><th style="text-align:right;">Last sync</th></tr></thead>
-            <tbody id="sc-rows"></tbody>
-          </table>
-        </section>
-
-        <!-- Participants -->
-        <section class="card">
-          <header class="card-head">
-            <div>
-              <h3 class="card-title">Participants <span style="color:var(--faint);font-weight:500;font-size:13px;margin-left:4px;" id="part-count">(3)</span></h3>
-              <div class="card-sub">YTD earnings on this plan</div>
-            </div>
-            <div class="part-controls">
-              <input class="part-search" placeholder="Search…">
-              <button class="btn-outline" style="padding:6px 11px;font-size:12px;">Sort: YTD</button>
-              <button class="btn-outline" style="padding:6px 11px;font-size:12px;">Manage</button>
-            </div>
-          </header>
-          <table class="part-table">
-            <thead><tr><th>Employee</th><th>Role</th><th>YTD Earned</th><th>Last cycle</th><th style="width:24px;"></th></tr></thead>
-            <tbody id="part-rows"></tbody>
-          </table>
-          <div class="part-footer">
-            <span id="part-footer-text">Showing 3 of 3 · All synced from ServiceTitan</span>
-            <a class="card-action" style="font-size:12px;">View full roster →</a>
-          </div>
-        </section>
+        </div>
+        <div class="helper-text">Click any job to expand and see per-employee payout from that job.</div>
       </div>
 
-      <!-- RIGHT RAIL -->
-      <aside>
-        <div class="rail-card">
-          <div class="rail-head">
-            <span class="rail-title">Plan Details</span>
-            <span class="muted-info" id="plan-version-meta" style="font-size:11px;color:var(--faint);">v2 · May 12</span>
+      <!-- INDIVIDUAL PERFORMANCE sub-pane -->
+      <div class="sub-pane" id="sub-individual">
+        <div class="card" style="padding:0;overflow:hidden;">
+          <div style="padding:18px 22px 14px;border-bottom:1px solid var(--hairline-2);">
+            <h3 class="card-title">Employee performance</h3>
+            <div class="card-sub">Per-employee totals across job awards and additional KPIs for the selected period.</div>
           </div>
-          <div class="rail-row"><span class="label">Status</span><span class="value"><span class="dot green"></span>Active</span></div>
-          <div class="rail-row"><span class="label">Cadence</span><span class="value">Monthly</span></div>
-          <div class="rail-row"><span class="label">Award Mode</span><span class="value" id="rail-mode">Individual</span></div>
-          <div class="rail-row"><span class="label">Compensation</span><span class="value" id="rail-comp">Performance Pay</span></div>
-          <div class="rail-row"><span class="label">Role Group</span><span class="value" id="rail-role">Lead</span></div>
-          <div class="rail-row"><span class="label">Period</span><span class="value">Jan 1 – Dec 31, 2026</span></div>
-          <div class="rail-row"><span class="label">Participants</span><span class="value" id="rail-parts">3 enrolled</span></div>
-          <div class="rail-row"><span class="label">Next payout</span><span class="value"><span class="dot amber"></span>May 12 – 18</span></div>
-          <div class="rail-row"><span class="label">Rules tracked</span><span class="value" id="rail-rules">2 <span class="muted-info">· 1 attention</span></span></div>
+          <table class="jobs-table">
+            <thead>
+              <tr id="ip-head"></tr>
+            </thead>
+            <tbody id="ip-rows"></tbody>
+          </table>
         </div>
-
-        <div class="rail-card">
-          <div class="rail-head">
-            <span class="rail-title">YTD Performance</span>
-            <span class="muted-info" style="font-size:11px;color:var(--faint);">2026</span>
-          </div>
-          <div class="rail-row"><span class="label">Total paid</span><span class="value" id="ytd-total">$12,400</span></div>
-          <div class="rail-row"><span class="label">Payout runs</span><span class="value">5</span></div>
-          <div class="rail-row"><span class="label">Eligible jobs</span><span class="value" id="ytd-jobs">165 / 178 <span class="muted-info">· 93%</span></span></div>
-          <div class="rail-row"><span class="label">Avg per run</span><span class="value" id="ytd-avg">$2,480</span></div>
-          <div class="rail-row"><span class="label">Top earner</span><span class="value" id="ytd-top">Anthony H. · $5,200</span></div>
-        </div>
-
-        <div class="rail-card">
-          <div class="rail-head">
-            <span class="rail-title">Data Sources</span>
-            <a class="card-action" style="font-size:12px;">Manage</a>
-          </div>
-          <div id="ds-list"></div>
-        </div>
-
-        <div class="rail-card">
-          <div class="rail-head">
-            <span class="rail-title">Recent Activity</span>
-          </div>
-          <div id="activity-list"></div>
-        </div>
-      </aside>
-    </div>
-  </div>
-
-  <!-- ============== PERFORMANCE TAB ============== -->
-  <div class="tab-pane" id="pane-performance">
-
-    <div class="perf-controls">
-      <div class="perf-period">
-        <span style="font-size:12px;color:var(--muted);">Period</span>
-        <select id="perf-period" onchange="renderPerformance()">
-          <option value="may-2026" selected>May 2026 (current)</option>
-          <option value="apr-2026">April 2026</option>
-          <option value="mar-2026">March 2026</option>
-          <option value="ytd-2026">YTD 2026</option>
-        </select>
-      </div>
-      <div style="display:flex;gap:8px;">
-        <button class="btn-outline" style="font-size:12px;padding:6px 11px;">↻ Refresh sync</button>
-        <button class="btn-outline" style="font-size:12px;padding:6px 11px;">Export CSV</button>
       </div>
     </div>
 
-    <div class="kpi-row" id="kpi-row"></div>
-
-    <div class="chip-row">
-      <span class="label">Filter</span>
-      <button class="chip active" id="chip-all" onclick="setFilter('all')">All <span class="chip-count" id="chip-all-n">0</span></button>
-      <button class="chip" id="chip-elig" onclick="setFilter('eligible')">✓ Eligible <span class="chip-count" id="chip-elig-n">0</span></button>
-      <button class="chip" id="chip-inelig" onclick="setFilter('ineligible')">✗ Ineligible <span class="chip-count" id="chip-inelig-n">0</span></button>
-      <span class="result-count" id="result-count">Showing 0 jobs</span>
+    <!-- ============== PAYOUTS ============== -->
+    <div class="tab-pane" id="pane-payouts">
+      <div style="text-align:center;padding:80px 20px;color:var(--muted);font-size:14px;">Payouts tab — coming soon.</div>
     </div>
 
-    <div class="jobs-card">
-      <table class="jobs-table">
-        <thead>
-          <tr>
-            <th>Job #</th>
-            <th>Date</th>
-            <th>Customer</th>
-            <th>GP%</th>
-            <th>On-Time</th>
-            <th>Callbacks 30d</th>
-            <th>Status</th>
-            <th class="right" id="th-award">Award</th>
-            <th style="width:24px;"></th>
-          </tr>
-        </thead>
-        <tbody id="jobs-rows"></tbody>
-      </table>
-    </div>
-
-    <div class="perf-footer-note">Click any row to drill into the per-job math · Job # links to ServiceTitan</div>
-  </div>
-
+  </main>
 </div>
 
 <!-- Drawer -->
 <div id="drawer-bg" onclick="closeDrawer()"></div>
 <div id="drawer">
-  <header class="dr-head">
+  <div class="dr-head">
     <div>
       <div class="dr-eyebrow" id="dr-eyebrow">Detail</div>
-      <div class="dr-title" id="dr-title">—</div>
+      <div class="dr-title" id="dr-title">Detail</div>
     </div>
-    <button class="btn-icon" onclick="closeDrawer()" style="font-size:22px;">×</button>
-  </header>
-  <div class="dr-body" id="dr-body"></div>
+    <button class="btn-close" onclick="closeDrawer()">×</button>
+  </div>
+  <div id="dr-body"></div>
 </div>
 
 <script>
 // ═══════════════════ DATA ═══════════════════
 let scenario = 'a';
 let perfFilter = 'all';
+let perfSubtab = 'jobs';
+const openJobIds = new Set();
 
 const SCEN = {
   a: {
     title: 'HVAC Install Crew Chief Bonus',
-    meta: '2026 Job-Based Plan · Individual · Monthly Payout · Created Mar 14 · Last edited May 12 by Danielle G.',
+    meta: '2026 Job-Based Plan · Single-Role · Monthly Payout · Created Mar 14 · Last edited May 12 by Danielle G.',
     role: 'Lead', roleClass: '',
     ytd: '$12,400', ytdSub: 'Awarded YTD · 5 payout runs',
-    banner: { title: 'Review May 12 – 18 payouts', elig: '12', total: '$1,250', warn: '1 rule needs attention' },
     eligMode: 'Filter mode · 3 criteria',
     elig: [
       { label: 'GP% ≥ 35%' },
       { label: 'On-time completion' },
       { label: 'No callbacks within 30 days' },
     ],
-    awardSub: '2 rules · Per-job, stacked',
-    award: [
-      { idx: 1, name: 'Piece Rate per Eligible Install', sub: 'Source: ServiceTitan · jobs.completed', type: 'Piece Rate', formula: '$75 × eligible installs', sync: '8 min ago', iconCls: '' },
-      { idx: 2, name: 'Bonus on GP Over $5k', sub: 'Source: ServiceTitan · jobs.gross_profit', type: '% Over Goal', formula: '5% × (gp − $5,000)', sync: '8 min ago', iconCls: 'blue' },
+    // Rules table — combined job awards + scorecard items, like the KPIs table in the existing app
+    rules: [
+      { idx: 'a1',  kind: 'award',     name: 'Piece Rate per Eligible Install', sub: 'Source: ServiceTitan · jobs.completed', type: 'Piece Rate',     formula: '$75 × eligible installs', sync: '8 min ago',  icon: '①', iconCls: '' },
+      { idx: 'a2',  kind: 'award',     name: 'Bonus on GP Over $5k',            sub: 'Source: ServiceTitan · jobs.gross_profit', type: '% Over Goal',  formula: '5% × (gp − $5,000)',        sync: '8 min ago',  icon: '②', iconCls: 'blue' },
+      { idx: 's1',  kind: 'scorecard', name: '5-Star Review',                   sub: 'Source: Google Reviews API',                type: 'Per Event',     formula: '+$25 per 5-star review',   sync: '22 min ago', icon: '★', iconCls: 'purple' },
+      { idx: 's2',  kind: 'scorecard', name: 'Callback Penalty',                sub: 'No data since May 15 · 3 days stale',       type: 'Per Event',     formula: '−$50 per callback',         sync: '3 days ago', icon: '!', iconCls: 'amber', attention: true },
     ],
     showSplit: false,
-    scSub: '2 items · Apply to eligible jobs',
-    sc: [
-      { idx: 1, name: '5-Star Review', sub: 'Source: Google Reviews API', type: 'Per Event', formula: '+$25 per 5-star review', sync: '22 min ago', iconCls: 'purple' },
-      { idx: 2, name: 'Callback Penalty', sub: 'No data since May 15 · 3 days stale', type: 'Per Event', formula: '−$50 per callback', sync: '3 days ago', iconCls: 'amber', attention: true },
-    ],
-    rail: { mode: 'Individual', comp: 'Performance Pay', role: 'Lead', parts: '3 enrolled', rules: '2 <span class="muted-info">· 1 attention</span>' },
+    rail: { mode: 'Individual', comp: 'Performance Pay', role: 'Lead', parts: '3 enrolled', rules: '4 <span class="muted-info">· 1 attention</span>' },
     ytdRail: { total: '$12,400', jobs: '165 / 178 <span class="muted-info">· 93%</span>', avg: '$2,480', top: 'Anthony H. · $5,200' },
     parts: [
-      { initials: 'AH', name: 'Anthony Headen', role: 'Crew Chief', ytd: 5200, ytdL: '$5,200', last: '$925', pct: 100 },
-      { initials: 'AB', name: 'Austin Hughes', role: 'Crew Chief', ytd: 4100, ytdL: '$4,100', last: '$725', pct: 79 },
-      { initials: 'BJ', name: 'Brooke Jamison', role: 'Crew Chief', ytd: 3100, ytdL: '$3,100', last: '$600', pct: 60 },
+      { initials: 'AH', name: 'Anthony Headen', role: 'Crew Chief', ytdL: '$5,200', last: '$925', pct: 100 },
+      { initials: 'AU', name: 'Austin Hughes', role: 'Crew Chief', ytdL: '$4,100', last: '$725', pct: 79 },
+      { initials: 'BJ', name: 'Brooke Jamison', role: 'Crew Chief', ytdL: '$3,100', last: '$600', pct: 60 },
     ],
     partCount: 3,
-    ds: [
-      { icon: '⚙', name: 'ServiceTitan Jobs', sub: 'Synced 8m ago', dot: 'green', count: '3 rules' },
-      { icon: '🔁', name: 'Callbacks feed', sub: 'Stale · 3d ago', dot: 'amber', count: '1 rule' },
-      { icon: '⭐', name: 'Google Reviews', sub: 'Synced 22m ago', dot: 'green', count: '1 rule' },
-    ],
     activity: [
       { text: '<strong>Danielle G.</strong> raised piece rate to $75', meta: 'May 12 · v1 → v2' },
-      { text: '<strong>May 5 – 11</strong> payout finalized · $2,150', meta: 'May 11 · 3 leads notified' },
-      { text: 'Callbacks data feed marked stale', meta: 'May 15 · last sync 3d ago' },
-      { text: '<strong>Anthony H.</strong> added to plan', meta: 'Mar 14 · by Danielle G.' },
+      { text: '<strong>May 5 – 11</strong> payout finalized · $2,150',  meta: 'May 11 · 3 leads notified' },
+      { text: 'Callbacks data feed marked stale',                       meta: 'May 15 · last sync 3d ago' },
+      { text: '<strong>Anthony H.</strong> added to plan',              meta: 'Mar 14 · by Danielle G.' },
+    ],
+    // For Individual Performance sub-tab: per-employee KPI columns
+    ipColumns: [
+      { key: 'jobs',     label: 'Eligible Jobs' },
+      { key: 'piece',    label: 'Piece Rate $' },
+      { key: 'gpbonus',  label: 'GP Bonus $' },
+      { key: 'reviews',  label: '5★ Reviews' },
+      { key: 'callbacks',label: 'Callbacks' },
+      { key: 'total',    label: 'Total Earned' },
+    ],
+    ipRows: [
+      { name: 'Anthony Headen', initials: 'AH', jobs: 8, piece: 600, gpbonus: 215, reviews: 3, callbacks: 0, total: 890 },
+      { name: 'Austin Hughes',  initials: 'AU', jobs: 5, piece: 375, gpbonus: 105, reviews: 1, callbacks: 0, total: 505 },
+      { name: 'Brooke Jamison', initials: 'BJ', jobs: 4, piece: 300, gpbonus:  90, reviews: 2, callbacks: 1, total: 390 },
     ],
   },
   b: {
     title: 'HVAC Install Field Tech Pool',
-    meta: '2026 Job-Based Plan · Job Pool · Monthly Payout · Created Mar 14 · Last edited May 12 by Danielle G.',
+    meta: '2026 Job-Based Plan · Multi-Role · Monthly Payout · Created Mar 14 · Last edited May 12 by Danielle G.',
     role: 'Crew', roleClass: 'crew',
     ytd: '$28,650', ytdSub: 'Awarded YTD · 5 payout runs',
-    banner: { title: 'Review May 12 – 18 payouts', elig: '12', total: '$2,820', warn: 'Timesheet feed pending' },
     eligMode: 'Referenced from Crew Chief Bonus · Live-synced',
     elig: [
       { label: 'GP% ≥ 35%', tail: 'inherited' },
       { label: 'On-time completion', tail: 'inherited' },
       { label: 'No callbacks within 30 days', tail: 'inherited' },
     ],
-    awardSub: '1 pool rule · Split among crew via Crew Split',
-    award: [
-      { idx: 1, name: 'Job Pool · 12% Labor Savings', sub: 'Source: ServiceTitan + Gusto timesheets', type: 'Pool · % of Metric', formula: '12% × (labor_budget − actual_labor_$)', sync: '8 min ago', iconCls: 'blue', poolIcon: true },
+    rules: [
+      { idx: 'a1', kind: 'award',     name: 'Job Pool · 12% Labor Savings',  sub: 'Source: ServiceTitan + Gusto timesheets', type: 'Pool · % of Metric', formula: '12% × (labor_budget − actual_labor_$)', sync: '8 min ago',   icon: '◯', iconCls: 'blue' },
+      { idx: 's1', kind: 'scorecard', name: '5-Star Review (per job)',       sub: 'Splits among crew on the job',             type: 'Per-Event Pool',    formula: '+$25 split by hours on job',            sync: '22 min ago',  icon: '★', iconCls: 'purple' },
     ],
     showSplit: true,
-    scSub: '1 item · Splits among crew on eligible job',
-    sc: [
-      { idx: 1, name: '5-Star Review (per job)', sub: 'Splits among crew on the job', type: 'Per-Event Pool', formula: '+$25 split by hours on job', sync: '22 min ago', iconCls: 'purple' },
-    ],
     rail: { mode: 'Job Pool', comp: 'Performance Pay', role: 'Crew', parts: '8 enrolled', rules: '1 pool + 1 scorecard <span class="muted-info">· feed pending</span>' },
     ytdRail: { total: '$28,650', jobs: '165 / 178 <span class="muted-info">· 93%</span>', avg: '$5,730', top: 'Carlos R. · $4,300' },
     parts: [
-      { initials: 'CR', name: 'Carlos Reyes', role: 'Field Tech', ytd: 4300, ytdL: '$4,300', last: '$680', pct: 100 },
-      { initials: 'DM', name: 'Derek McAlister', role: 'Field Tech', ytd: 3950, ytdL: '$3,950', last: '$680', pct: 92 },
-      { initials: 'AB', name: 'Angelina Brown', role: 'Field Tech', ytd: 3720, ytdL: '$3,720', last: '$555', pct: 87 },
-      { initials: 'GT', name: 'Garrett Trimnal', role: 'Field Tech', ytd: 3680, ytdL: '$3,680', last: '$420', pct: 86 },
-      { initials: 'DC', name: 'Dory Cantillano', role: 'Field Tech', ytd: 3450, ytdL: '$3,450', last: '$400', pct: 80 },
-      { initials: 'EB', name: 'Emma Blakely', role: 'Field Tech', ytd: 3300, ytdL: '$3,300', last: '$385', pct: 77 },
-      { initials: 'DM', name: 'Daniel McAlister', role: 'Field Tech', ytd: 3120, ytdL: '$3,120', last: '$330', pct: 73 },
-      { initials: 'GS', name: 'Gregory Sellers', role: 'Field Tech', ytd: 3130, ytdL: '$3,130', last: '$345', pct: 73 },
+      { initials: 'CR', name: 'Carlos Reyes',     role: 'Field Tech', ytdL: '$4,300', last: '$680', pct: 100 },
+      { initials: 'DM', name: 'Derek McAlister',  role: 'Field Tech', ytdL: '$3,950', last: '$680', pct: 92 },
+      { initials: 'AB', name: 'Angelina Brown',   role: 'Field Tech', ytdL: '$3,720', last: '$555', pct: 87 },
+      { initials: 'GT', name: 'Garrett Trimnal',  role: 'Field Tech', ytdL: '$3,680', last: '$420', pct: 86 },
+      { initials: 'DC', name: 'Dory Cantillano',  role: 'Field Tech', ytdL: '$3,450', last: '$400', pct: 80 },
+      { initials: 'EB', name: 'Emma Blakely',     role: 'Field Tech', ytdL: '$3,300', last: '$385', pct: 77 },
+      { initials: 'D2', name: 'Daniel McAlister', role: 'Field Tech', ytdL: '$3,120', last: '$330', pct: 73 },
+      { initials: 'GS', name: 'Gregory Sellers',  role: 'Field Tech', ytdL: '$3,130', last: '$345', pct: 73 },
     ],
     partCount: 8,
-    ds: [
-      { icon: '⚙', name: 'ServiceTitan Jobs', sub: 'Synced 8m ago', dot: 'green', count: '1 rule' },
-      { icon: '⏱', name: 'Gusto Timesheets', sub: 'Pending sync · 12m ago', dot: 'amber', count: 'crew split' },
-      { icon: '🔁', name: 'Callbacks feed', sub: 'Synced 22m ago', dot: 'green', count: 'eligibility' },
-      { icon: '⭐', name: 'Google Reviews', sub: 'Synced 22m ago', dot: 'green', count: '1 scorecard' },
-    ],
     activity: [
       { text: '<strong>Danielle G.</strong> linked eligibility to Crew Chief Bonus', meta: 'May 12 · live-sync enabled' },
-      { text: '<strong>May 5 – 11</strong> payout finalized · $5,640', meta: 'May 11 · 8 techs notified' },
-      { text: 'Pool Deduction set to <code>lead_share_amount</code> column', meta: 'May 12 · by Danielle G.' },
-      { text: '<strong>Carlos R.</strong> added to plan', meta: 'Mar 14 · by Danielle G.' },
+      { text: '<strong>May 5 – 11</strong> payout finalized · $5,640',                meta: 'May 11 · 8 techs notified' },
+      { text: 'Pool Deduction set to <code>lead_share_amount</code> column',          meta: 'May 12 · by Danielle G.' },
+      { text: '<strong>Carlos R.</strong> added to plan',                              meta: 'Mar 14 · by Danielle G.' },
+    ],
+    ipColumns: [
+      { key: 'jobs',    label: 'Eligible Jobs' },
+      { key: 'hours',   label: 'Hours' },
+      { key: 'pool',    label: 'Pool Share $' },
+      { key: 'reviews', label: '5★ Reviews' },
+      { key: 'total',   label: 'Total Earned' },
+    ],
+    ipRows: [
+      { name: 'Carlos Reyes',     initials: 'CR', jobs: 9, hours: 36, pool: 540, reviews: 2, total: 590 },
+      { name: 'Derek McAlister',  initials: 'DM', jobs: 8, hours: 32, pool: 480, reviews: 4, total: 580 },
+      { name: 'Angelina Brown',   initials: 'AB', jobs: 7, hours: 28, pool: 420, reviews: 1, total: 445 },
+      { name: 'Garrett Trimnal',  initials: 'GT', jobs: 6, hours: 24, pool: 360, reviews: 0, total: 360 },
+      { name: 'Dory Cantillano',  initials: 'DC', jobs: 5, hours: 20, pool: 300, reviews: 1, total: 325 },
+      { name: 'Emma Blakely',     initials: 'EB', jobs: 4, hours: 16, pool: 240, reviews: 0, total: 240 },
     ],
   },
 };
 
-// Shared jobs dataset across both scenarios — B references A's eligibility
+// Shared jobs dataset
 const PERF_JOBS = {
   'may-2026': [
     { id: '#1058', date: 'May 18', customer: 'Smith Residence',     gpAmt: 9300, gpPct: 75, onTime: true,  callbacks: 0, savings: 2000 },
     { id: '#1057', date: 'May 17', customer: 'Park Place Bldg.',    gpAmt: 5400, gpPct: 42, onTime: true,  callbacks: 0, savings: 1600 },
-    { id: '#1056', date: 'May 17', customer: 'Riverdale Apartments', gpAmt: 1900, gpPct: 28, onTime: true,  callbacks: 0, savings: 800 },
+    { id: '#1056', date: 'May 17', customer: 'Riverdale Apartments', gpAmt: 1900, gpPct: 28, onTime: true,  callbacks: 0, savings: 800  },
     { id: '#1055', date: 'May 16', customer: 'Westwood Family',     gpAmt: 7800, gpPct: 51, onTime: true,  callbacks: 1, savings: 1900 },
     { id: '#1054', date: 'May 16', customer: 'Hartman Office',      gpAmt: 8200, gpPct: 40, onTime: true,  callbacks: 0, savings: 2300 },
     { id: '#1053', date: 'May 15', customer: 'Bell Townhomes #12',  gpAmt: 4200, gpPct: 38, onTime: false, callbacks: 0, savings: 1100 },
@@ -640,16 +640,16 @@ const PERF_JOBS = {
     { id: '#1051', date: 'May 14', customer: 'Marina Heights',      gpAmt: 5100, gpPct: 36, onTime: true,  callbacks: 0, savings: 1200 },
     { id: '#1050', date: 'May 14', customer: 'Pine Ridge Estates',  gpAmt: 7500, gpPct: 49, onTime: true,  callbacks: 0, savings: 1800 },
     { id: '#1049', date: 'May 13', customer: 'Carter Residence',    gpAmt: 6200, gpPct: 41, onTime: true,  callbacks: 0, savings: 1400 },
-    { id: '#1048', date: 'May 13', customer: 'Sunset Plaza',        gpAmt: 2800, gpPct: 31, onTime: true,  callbacks: 0, savings: 600 },
+    { id: '#1048', date: 'May 13', customer: 'Sunset Plaza',        gpAmt: 2800, gpPct: 31, onTime: true,  callbacks: 0, savings: 600  },
     { id: '#1047', date: 'May 12', customer: 'Greenway Condos',     gpAmt: 4800, gpPct: 39, onTime: true,  callbacks: 0, savings: 1300 },
     { id: '#1046', date: 'May 12', customer: 'Holly Park Family',   gpAmt: 8800, gpPct: 53, onTime: true,  callbacks: 0, savings: 2200 },
-    { id: '#1045', date: 'May 11', customer: 'Brooks Apartments',   gpAmt: 3400, gpPct: 33, onTime: true,  callbacks: 0, savings: 700 },
+    { id: '#1045', date: 'May 11', customer: 'Brooks Apartments',   gpAmt: 3400, gpPct: 33, onTime: true,  callbacks: 0, savings: 700  },
     { id: '#1044', date: 'May 11', customer: 'Donovan Residence',   gpAmt: 9600, gpPct: 58, onTime: true,  callbacks: 0, savings: 2400 },
   ],
 };
-PERF_JOBS['apr-2026'] = PERF_JOBS['may-2026'].slice(0, 11).map(j => ({...j, id: j.id.replace('10', '09'), date: j.date.replace('May', 'Apr')}));
-PERF_JOBS['mar-2026'] = PERF_JOBS['may-2026'].slice(0, 9).map(j => ({...j, id: j.id.replace('10', '08'), date: j.date.replace('May', 'Mar')}));
-PERF_JOBS['ytd-2026'] = [...PERF_JOBS['may-2026'], ...PERF_JOBS['apr-2026'], ...PERF_JOBS['mar-2026']];
+PERF_JOBS['apr-2026']  = PERF_JOBS['may-2026'].slice(0, 11).map(j => ({...j, id: j.id.replace('10', '09'), date: j.date.replace('May', 'Apr')}));
+PERF_JOBS['mar-2026']  = PERF_JOBS['may-2026'].slice(0, 9).map(j => ({...j, id: j.id.replace('10', '08'), date: j.date.replace('May', 'Mar')}));
+PERF_JOBS['ytd-2026']  = [...PERF_JOBS['may-2026'], ...PERF_JOBS['apr-2026'], ...PERF_JOBS['mar-2026']];
 
 // ═══════════════════ RENDER ═══════════════════
 function render() {
@@ -666,12 +666,6 @@ function render() {
   document.getElementById('ytd-figure').textContent = d.ytd;
   document.getElementById('ytd-sub').textContent = d.ytdSub;
 
-  document.getElementById('banner-title').textContent = d.banner.title;
-  document.getElementById('banner-elig').textContent = d.banner.elig;
-  document.getElementById('banner-total').textContent = d.banner.total;
-  document.getElementById('banner-warn').textContent = d.banner.warn;
-
-  // Eligibility
   document.getElementById('elig-mode').textContent = d.eligMode;
   document.getElementById('elig-list').innerHTML = d.elig.map(e => `
     <div class="elig-item">
@@ -681,13 +675,12 @@ function render() {
     </div>
   `).join('');
 
-  // Award rules
-  document.getElementById('award-sub').textContent = d.awardSub;
-  document.getElementById('award-rows').innerHTML = d.award.map(r => `
+  // Unified Rules table
+  document.getElementById('rules-rows').innerHTML = d.rules.map(r => `
     <tr class="clickable ${r.attention ? 'attention' : ''}" onclick="openDrawer('rule-${r.idx}')">
       <td>
         <div class="row-name">
-          <div class="row-icon ${r.iconCls}">${r.poolIcon ? '◯' : (r.idx === 1 ? '①' : '②')}</div>
+          <div class="row-icon ${r.iconCls}">${r.icon}</div>
           <div>
             <div class="row-name-text">${r.name}${r.attention ? '<span class="pill-attention">⚠ Attention</span>' : ''}</div>
             <div class="row-sub">${r.sub}</div>
@@ -696,31 +689,11 @@ function render() {
       </td>
       <td style="color:var(--muted);">${r.type}</td>
       <td><span class="formula">${r.formula}</span></td>
-      <td style="text-align:right;" class="last-sync">${r.sync}</td>
+      <td style="text-align:right;" class="last-sync">${r.sync}${r.attention ? '<span class="resync">· Resync</span>' : ''}</td>
     </tr>
   `).join('');
 
-  // Crew split visibility
   document.getElementById('split-card').style.display = d.showSplit ? '' : 'none';
-
-  // Scorecard
-  document.getElementById('sc-sub').textContent = d.scSub;
-  document.getElementById('sc-rows').innerHTML = d.sc.map(it => `
-    <tr class="clickable ${it.attention ? 'attention' : ''}" onclick="openDrawer('sc-${it.idx}')">
-      <td>
-        <div class="row-name">
-          <div class="row-icon ${it.iconCls}">${it.idx === 1 ? '★' : '•'}</div>
-          <div>
-            <div class="row-name-text">${it.name}${it.attention ? '<span class="pill-attention">⚠ Stale</span>' : ''}</div>
-            <div class="row-sub">${it.sub}</div>
-          </div>
-        </div>
-      </td>
-      <td style="color:var(--muted);">${it.type}</td>
-      <td><span class="formula">${it.formula}</span></td>
-      <td style="text-align:right;" class="last-sync">${it.sync}${it.attention ? '<span class="resync">· Resync</span>' : ''}</td>
-    </tr>
-  `).join('');
 
   // Right rail
   document.getElementById('rail-mode').textContent = d.rail.mode;
@@ -728,23 +701,10 @@ function render() {
   document.getElementById('rail-role').textContent = d.rail.role;
   document.getElementById('rail-parts').textContent = d.rail.parts;
   document.getElementById('rail-rules').innerHTML = d.rail.rules;
-
   document.getElementById('ytd-total').textContent = d.ytdRail.total;
   document.getElementById('ytd-jobs').innerHTML = d.ytdRail.jobs;
   document.getElementById('ytd-avg').textContent = d.ytdRail.avg;
   document.getElementById('ytd-top').textContent = d.ytdRail.top;
-
-  // Data sources
-  document.getElementById('ds-list').innerHTML = d.ds.map(s => `
-    <div class="ds-row">
-      <div class="ds-icon">${s.icon}</div>
-      <div class="ds-info">
-        <div class="ds-name">${s.name}</div>
-        <div class="ds-sub"><span class="dot ${s.dot}"></span>${s.sub}</div>
-      </div>
-      <div class="ds-count">${s.count}</div>
-    </div>
-  `).join('');
 
   // Activity
   document.getElementById('activity-list').innerHTML = d.activity.map(a => `
@@ -762,7 +722,7 @@ function render() {
   document.getElementById('part-footer-text').textContent = `Showing ${d.partCount} of ${d.partCount} · All synced from ServiceTitan`;
   document.getElementById('part-rows').innerHTML = d.parts.map(p => `
     <tr>
-      <td><span class="avatar">${p.initials}</span>${p.name}</td>
+      <td><span class="avatar">${p.initials}</span><strong>${p.name}</strong></td>
       <td style="color:var(--muted);">${p.role}</td>
       <td>
         <div class="ytd-cell">
@@ -780,6 +740,7 @@ function setScenario(s) {
   scenario = s;
   document.getElementById('tab-a').classList.toggle('active', s === 'a');
   document.getElementById('tab-b').classList.toggle('active', s === 'b');
+  openJobIds.clear();
   render();
   if (document.getElementById('pane-performance').classList.contains('active')) renderPerformance();
 }
@@ -790,7 +751,17 @@ function setTab(name) {
   document.getElementById('pane-' + name).classList.add('active');
   document.getElementById('t-summary').classList.toggle('active', name === 'summary');
   document.getElementById('t-performance').classList.toggle('active', name === 'performance');
+  document.getElementById('t-payouts').classList.toggle('active', name === 'payouts');
   if (name === 'performance') renderPerformance();
+}
+
+function setSubtab(name) {
+  perfSubtab = name;
+  document.querySelectorAll('.sub-pane').forEach(p => p.classList.remove('active'));
+  document.getElementById('sub-' + name).classList.add('active');
+  document.getElementById('st-jobs').classList.toggle('active', name === 'jobs');
+  document.getElementById('st-individual').classList.toggle('active', name === 'individual');
+  renderPerformance();
 }
 
 // ═══════════════════ PERFORMANCE ═══════════════════
@@ -798,7 +769,7 @@ function evalElig(j) {
   const reasons = [];
   if (j.gpPct < 35)    reasons.push('GP% below 35%');
   if (!j.onTime)       reasons.push('Not on-time');
-  if (j.callbacks > 0) reasons.push(`Callback within 30d`);
+  if (j.callbacks > 0) reasons.push('Callback within 30d');
   return { ok: reasons.length === 0, reasons };
 }
 
@@ -807,18 +778,46 @@ function computeAward(j, ok) {
   if (scenario === 'a') {
     const piece = 75;
     const bonus = j.gpAmt > 5000 ? Math.round((j.gpAmt - 5000) * 0.05) : 0;
-    return { total: piece + bonus, sub: bonus ? `$75 piece + $${bonus} GP bonus` : `$75 piece rate` };
+    return { total: piece + bonus, piece, bonus, sub: bonus ? `$75 piece + $${bonus} GP bonus` : `$75 piece rate` };
   } else {
     const pool = Math.round(j.savings * 0.12);
     const ded = 60;
     const crew = Math.max(0, pool - ded);
     const techs = 3;
     const per = Math.round(crew / techs);
-    return { total: pool, sub: `−$${ded} lead · $${crew} ÷ ${techs} = $${per}/tech` };
+    return { total: pool, pool, ded, crew, techs, per, sub: `−$${ded} lead · $${crew} ÷ ${techs} = $${per}/tech` };
+  }
+}
+
+// Per-job per-employee breakdown for the expand row
+function jobBreakdown(j, e) {
+  if (!e.ok) return null;
+  if (scenario === 'a') {
+    // Lead-only: pick a stable lead per job based on job id hash
+    const leads = ['Anthony Headen', 'Austin Hughes', 'Brooke Jamison'];
+    const inits = ['AH', 'AU', 'BJ'];
+    const ix = (parseInt(j.id.replace(/\D/g,''), 10) % 3);
+    const a = computeAward(j, true);
+    return [
+      { name: leads[ix], initials: inits[ix], role: 'Crew Chief', hours: '—', lines: a.bonus > 0 ? `Piece $75 + GP bonus $${a.bonus}` : `Piece $75`, amount: a.total },
+    ];
+  } else {
+    // Pool split among 3 fixed techs
+    const a = computeAward(j, true);
+    return [
+      { name: 'Carlos Reyes',     initials: 'CR', role: 'Field Tech', hours: '4.0h', lines: `33% of $${a.crew}`, amount: a.per },
+      { name: 'Derek McAlister',  initials: 'DM', role: 'Field Tech', hours: '4.0h', lines: `33% of $${a.crew}`, amount: a.per },
+      { name: 'Angelina Brown',   initials: 'AB', role: 'Field Tech', hours: '4.0h', lines: `33% of $${a.crew}`, amount: a.per },
+    ];
   }
 }
 
 function renderPerformance() {
+  if (perfSubtab === 'jobs') renderJobs();
+  else renderIndividual();
+}
+
+function renderJobs() {
   const period = document.getElementById('perf-period').value;
   const jobs = PERF_JOBS[period] || [];
   const evald = jobs.map(j => {
@@ -851,22 +850,26 @@ function renderPerformance() {
   document.getElementById('chip-inelig-n').textContent = inelig.length;
 
   let shown = evald;
-  if (perfFilter === 'eligible') shown = elig;
+  if (perfFilter === 'eligible')   shown = elig;
   if (perfFilter === 'ineligible') shown = inelig;
 
   document.getElementById('result-count').textContent = `Showing ${shown.length} of ${total} jobs`;
   document.getElementById('th-award').textContent = scenario === 'a' ? 'Award' : 'Pool · Split';
 
-  document.getElementById('jobs-rows').innerHTML = shown.map(j => {
+  const rowsHtml = shown.map(j => {
+    const isOpen = openJobIds.has(j.id);
     const status = j.ok
       ? `<span class="status-pill elig">✓ Eligible</span>`
       : `<span class="status-pill inelig" title="${j.reasons.join('; ')}">✗ ${j.reasons[0]}</span>`;
     const awardCell = j.award
       ? `<div class="award">$${j.award.total.toLocaleString()}</div><div class="award-sub">${j.award.sub}</div>`
       : `<span class="award-empty">—</span>`;
-    return `
-      <tr class="${j.ok ? '' : 'inelig'}" onclick="openDrawer('job-${j.id.slice(1)}')">
-        <td><a class="job-link" onclick="event.stopPropagation();">${j.id}</a></td>
+    const expandable = j.ok; // can only expand eligible jobs (others have no payout breakdown)
+    const cleanId = j.id.replace('#','');
+    const parentRow = `
+      <tr class="parent ${j.ok ? '' : 'inelig'} ${isOpen ? 'open' : ''}" data-jid="${j.id}" onclick="toggleJob('${j.id}')">
+        <td><span class="chev-mini">${expandable ? '›' : ''}</span></td>
+        <td><a class="job-link" onclick="event.stopPropagation();openDrawer('job-${cleanId}')">${j.id}</a></td>
         <td style="color:var(--muted);">${j.date}</td>
         <td>${j.customer}</td>
         <td><span class="${j.gpPct < 35 ? 'm-fail' : 'm-pass'}">${j.gpPct}%</span></td>
@@ -874,10 +877,42 @@ function renderPerformance() {
         <td><span class="${j.callbacks > 0 ? 'm-fail' : 'm-pass'}">${j.callbacks > 0 ? '✗ ' + j.callbacks : '✓ 0'}</span></td>
         <td>${status}</td>
         <td style="text-align:right;">${awardCell}</td>
-        <td style="text-align:right;color:var(--faint);">›</td>
-      </tr>
-    `;
+      </tr>`;
+    let expandRow = '';
+    if (isOpen && j.ok) {
+      const bd = jobBreakdown(j, { ok: true });
+      const detailRows = bd.map(p => `
+        <tr>
+          <td><span class="avatar" style="background:#dbeafe;color:#1e40af;">${p.initials}</span><strong>${p.name}</strong></td>
+          <td style="color:var(--muted);">${p.role}</td>
+          <td style="color:var(--muted);">${p.hours}</td>
+          <td><span class="formula" style="font-size:11.5px;">${p.lines}</span></td>
+          <td style="text-align:right;font-weight:600;">$${p.amount.toLocaleString()}</td>
+        </tr>
+      `).join('');
+      expandRow = `
+        <tr class="expand">
+          <td colspan="9">
+            <div class="expand-inner">
+              <div class="expand-title">Who got paid from this job</div>
+              <table class="expand-table">
+                <thead><tr><th>Employee</th><th>Role</th><th>Hours</th><th>Math</th><th style="text-align:right;">Amount</th></tr></thead>
+                <tbody>${detailRows}</tbody>
+              </table>
+            </div>
+          </td>
+        </tr>`;
+    }
+    return parentRow + expandRow;
   }).join('') || `<tr><td colspan="9" style="text-align:center;color:var(--faint);padding:30px;">No jobs match the current filter.</td></tr>`;
+
+  document.getElementById('jobs-rows').innerHTML = rowsHtml;
+}
+
+function toggleJob(jobId) {
+  if (openJobIds.has(jobId)) openJobIds.delete(jobId);
+  else openJobIds.add(jobId);
+  renderJobs();
 }
 
 function setFilter(f) {
@@ -886,11 +921,126 @@ function setFilter(f) {
     const id = k === 'elig' ? 'eligible' : k === 'inelig' ? 'ineligible' : 'all';
     document.getElementById('chip-' + k).classList.toggle('active', id === f);
   });
-  renderPerformance();
+  openJobIds.clear();
+  renderJobs();
+}
+
+function renderIndividual() {
+  const d = SCEN[scenario];
+  const cols = d.ipColumns;
+  // Header
+  document.getElementById('ip-head').innerHTML =
+    '<th>Name</th>' + cols.map(c => `<th>${c.label}</th>`).join('');
+
+  // Sort by total earned desc
+  const rows = [...d.ipRows].sort((a, b) => b.total - a.total);
+  document.getElementById('ip-rows').innerHTML = rows.map(p => `
+    <tr>
+      <td><span class="avatar">${p.initials}</span><strong>${p.name}</strong></td>
+      ${cols.map(c => {
+        const v = p[c.key];
+        const isCurrency = ['piece','gpbonus','pool','total'].includes(c.key);
+        const isTotal    = c.key === 'total';
+        return `<td style="${isTotal ? 'font-weight:700;color:var(--green);' : ''}">${
+          isCurrency ? '$' + (v ?? 0).toLocaleString() : (v ?? 0)
+        }</td>`;
+      }).join('')}
+    </tr>
+  `).join('');
 }
 
 // ═══════════════════ DRAWER ═══════════════════
-const drawerKinds = {
+function ruleDrawer(idx) {
+  const r = SCEN[scenario].rules.find(x => x.idx === idx);
+  if (!r) return null;
+  return {
+    eyebrow: r.kind === 'scorecard' ? 'Additional KPI' : 'Award Rule',
+    title: r.name,
+    body: `
+      <div class="dr-section">
+        <div class="dr-section-title">Type</div>
+        <div style="font-size:14px;font-weight:500;">${r.type}</div>
+        <div style="font-size:12px;color:var(--muted);margin-top:3px;">${r.sub}</div>
+      </div>
+      <div class="dr-section">
+        <div class="dr-section-title">Formula</div>
+        <span class="formula" style="font-size:14px;padding:8px 12px;">${r.formula}</span>
+      </div>
+      <div class="dr-section">
+        <div class="dr-section-title">Dataset Configuration</div>
+        <div class="dr-kv"><span class="k">Source</span><span class="v">ServiceTitan</span></div>
+        <div class="dr-kv"><span class="k">Table</span><span class="v"><code>jobs.completed</code></span></div>
+        <div class="dr-kv"><span class="k">Join key</span><span class="v"><code>job_id</code></span></div>
+        <div class="dr-kv"><span class="k">Aggregation</span><span class="v">Sum per ${r.kind === 'scorecard' ? 'event' : 'crew member'} per period</span></div>
+        <div class="dr-kv"><span class="k">Last sync</span><span class="v">${r.sync}</span></div>
+      </div>
+      ${r.attention ? `
+      <div class="dr-section">
+        <div class="dr-section-title">Issue</div>
+        <div class="callout-warn"><strong>Data feed is stale.</strong> Last sync was 3 days ago. Until resynced, payouts for this rule will be excluded from the May 19 – 25 run.</div>
+        <button class="btn-primary" style="margin-top:12px;">Resync now →</button>
+      </div>` : ''}
+      <div class="dr-section">
+        <div class="dr-section-title">Last 5 ${r.kind === 'scorecard' ? 'events' : 'eligible jobs'}</div>
+        <table class="dr-table">
+          <thead><tr><th>Job</th><th>Date</th><th>${scenario === 'b' && r.kind === 'award' ? 'Pool' : 'Amount'}</th><th>Notes</th></tr></thead>
+          <tbody>
+            <tr><td>#1058</td><td>May 18</td><td>${r.kind === 'award' ? (scenario === 'b' ? '$240' : '$290') : '+$25'}</td><td style="color:var(--muted);">${scenario === 'b' ? '$2k labor savings × 12%' : 'Anthony H. · GP $9.3k'}</td></tr>
+            <tr><td>#1057</td><td>May 17</td><td>${r.kind === 'award' ? (scenario === 'b' ? '$192' : '$95')  : '+$25'}</td><td style="color:var(--muted);">${scenario === 'b' ? '$1.6k labor savings × 12%' : 'Austin H. · GP $5.4k'}</td></tr>
+            <tr><td>#1054</td><td>May 16</td><td>${r.kind === 'award' ? (scenario === 'b' ? '$276' : '$235') : '+$25'}</td><td style="color:var(--muted);">${scenario === 'b' ? '$2.3k labor savings × 12%' : 'Anthony H. · GP $8.2k'}</td></tr>
+            <tr><td>#1052</td><td>May 15</td><td>${r.kind === 'award' ? (scenario === 'b' ? '$180' : '$170') : '+$25'}</td><td style="color:var(--muted);">${scenario === 'b' ? '$1.5k labor savings × 12%' : 'Brooke J. · GP $6.9k'}</td></tr>
+            <tr><td>#1050</td><td>May 14</td><td>${r.kind === 'award' ? (scenario === 'b' ? '$216' : '$200') : '+$25'}</td><td style="color:var(--muted);">${scenario === 'b' ? '$1.8k labor savings × 12%' : 'Austin H. · GP $7.5k'}</td></tr>
+          </tbody>
+        </table>
+      </div>
+    `,
+  };
+}
+
+function jobDrawer(jobId) {
+  const period = document.getElementById('perf-period').value;
+  const j = PERF_JOBS[period].find(x => x.id === '#' + jobId);
+  if (!j) return null;
+  const e = evalElig(j);
+  const award = computeAward(j, e.ok);
+  return {
+    eyebrow: `Job ${j.id}`,
+    title: j.customer,
+    body: `
+      <div class="dr-section">
+        <div class="dr-section-title">Job Details</div>
+        <div class="dr-kv"><span class="k">Date</span><span class="v">${j.date}, 2026</span></div>
+        <div class="dr-kv"><span class="k">Revenue</span><span class="v">$${(j.gpAmt / (j.gpPct/100)).toLocaleString(undefined,{maximumFractionDigits:0})}</span></div>
+        <div class="dr-kv"><span class="k">Gross Profit</span><span class="v">$${j.gpAmt.toLocaleString()} (${j.gpPct}%)</span></div>
+        <div class="dr-kv"><span class="k">Labor Savings</span><span class="v">$${j.savings.toLocaleString()}</span></div>
+        <div class="dr-kv"><span class="k">Callbacks (30d)</span><span class="v">${j.callbacks}</span></div>
+        <div class="dr-kv"><span class="k">On-time</span><span class="v">${j.onTime ? '✓ Yes' : '✗ No'}</span></div>
+      </div>
+      <div class="dr-section">
+        <div class="dr-section-title">Eligibility</div>
+        <div class="dr-kv"><span class="k">GP% ≥ 35%</span><span class="v" style="color:${j.gpPct >= 35 ? 'var(--green)' : 'var(--red)'};">${j.gpPct >= 35 ? '✓ Passed' : '✗ Failed (' + j.gpPct + '%)'}</span></div>
+        <div class="dr-kv"><span class="k">On-time completion</span><span class="v" style="color:${j.onTime ? 'var(--green)' : 'var(--red)'};">${j.onTime ? '✓ Passed' : '✗ Failed'}</span></div>
+        <div class="dr-kv"><span class="k">No callbacks 30d</span><span class="v" style="color:${j.callbacks === 0 ? 'var(--green)' : 'var(--red)'};">${j.callbacks === 0 ? '✓ Passed' : '✗ Failed (' + j.callbacks + ')'}</span></div>
+      </div>
+      <div class="dr-section">
+        <div class="dr-section-title">${e.ok ? 'Award Calculation' : 'Result'}</div>
+        ${e.ok && award ? (scenario === 'a' ? `
+          <div class="dr-kv"><span class="k">Piece Rate</span><span class="v">$${award.piece}</span></div>
+          <div class="dr-kv"><span class="k">GP Bonus (5% × (gp − $5k))</span><span class="v">$${award.bonus}</span></div>
+          <div class="dr-kv" style="font-weight:700;"><span class="k">Total to lead</span><span class="v" style="color:var(--green);">$${award.total}</span></div>
+        ` : `
+          <div class="dr-kv"><span class="k">Pool (12% × labor savings)</span><span class="v">$${award.pool}</span></div>
+          <div class="dr-kv"><span class="k">Pool Deduction (lead share)</span><span class="v" style="color:var(--amber);">−$${award.ded}</span></div>
+          <div class="dr-kv"><span class="k">Crew Pool</span><span class="v">$${award.crew}</span></div>
+          <div class="dr-kv"><span class="k">Crew Size</span><span class="v">${award.techs} techs</span></div>
+          <div class="dr-kv" style="font-weight:700;"><span class="k">Per tech (equal hours)</span><span class="v" style="color:var(--green);">$${award.per}</span></div>
+        `) : `<div class="callout-warn"><strong>Job ineligible.</strong> Failed: ${e.reasons.join(', ')}. No award paid from this plan.</div>`}
+      </div>
+    `,
+  };
+}
+
+const fixedDrawers = {
   elig: () => {
     const d = SCEN[scenario];
     return {
@@ -905,25 +1055,12 @@ const drawerKinds = {
           <div class="dr-section-title">Criteria</div>
           ${d.elig.map(e => `<div class="dr-kv"><span class="k">${e.label}</span><span class="v">${e.tail || 'Enabled'}</span></div>`).join('')}
         </div>
-        <div class="dr-section">
-          <div class="dr-section-title">Recent eligibility decisions (last 5 jobs)</div>
-          <table class="dr-table">
-            <thead><tr><th>Job #</th><th>GP%</th><th>Callbacks</th><th>Result</th></tr></thead>
-            <tbody>
-              <tr><td>#1058</td><td>75%</td><td>0</td><td style="color:var(--green);font-weight:600;">✓ Eligible</td></tr>
-              <tr><td>#1057</td><td>42%</td><td>0</td><td style="color:var(--green);font-weight:600;">✓ Eligible</td></tr>
-              <tr><td>#1056</td><td>28%</td><td>0</td><td style="color:var(--red);">✗ GP% threshold</td></tr>
-              <tr><td>#1055</td><td>51%</td><td>1</td><td style="color:var(--red);">✗ Callback flagged</td></tr>
-              <tr><td>#1054</td><td>40%</td><td>0</td><td style="color:var(--green);font-weight:600;">✓ Eligible</td></tr>
-            </tbody>
-          </table>
-        </div>
       `,
     };
   },
   award: () => ({
-    eyebrow: 'Job Award Rules',
-    title: 'Award Rules',
+    eyebrow: 'Rules',
+    title: 'Rules',
     body: `
       <div class="dr-section">
         <div class="dr-section-title">Award Mode</div>
@@ -931,11 +1068,11 @@ const drawerKinds = {
       </div>
       <div class="dr-section">
         <div class="dr-section-title">Rules</div>
-        ${SCEN[scenario].award.map(r => `
-          <div style="padding:14px 0;border-bottom:1px solid var(--hairline);">
+        ${SCEN[scenario].rules.map(r => `
+          <div style="padding:14px 0;border-bottom:1px solid var(--hairline-2);">
             <div style="font-weight:600;margin-bottom:4px;">${r.name}</div>
             <div style="font-size:12px;color:var(--muted);margin-bottom:8px;">${r.type} · ${r.sub}</div>
-            <div><span class="formula">${r.formula}</span></div>
+            <span class="formula">${r.formula}</span>
           </div>
         `).join('')}
       </div>
@@ -958,164 +1095,15 @@ const drawerKinds = {
         <div class="dr-kv"><span class="k">Timesheet source</span><span class="v">Gusto Export</span></div>
         <div class="dr-kv"><span class="k">Join key</span><span class="v"><code>Work Order #</code></span></div>
       </div>
-      <div class="dr-section">
-        <div class="dr-section-title">Recent splits (last 3 jobs)</div>
-        <table class="dr-table">
-          <thead><tr><th>Job</th><th>Pool</th><th>Deduct</th><th>Crew Pool</th><th>Per Tech</th></tr></thead>
-          <tbody>
-            <tr><td>#1058</td><td>$240</td><td>−$60</td><td>$180</td><td>$60 ✕ 3</td></tr>
-            <tr><td>#1057</td><td>$192</td><td>−$60</td><td>$132</td><td>$44 ✕ 3</td></tr>
-            <tr><td>#1054</td><td>$276</td><td>−$60</td><td>$216</td><td>$72 ✕ 3</td></tr>
-          </tbody>
-        </table>
-      </div>
     `,
-  }),
-  scorecard: () => ({
-    eyebrow: 'Scorecard Items',
-    title: 'Scorecard Items',
-    body: SCEN[scenario].sc.map(it => `
-      <div class="dr-section">
-        <div class="dr-section-title">${it.name}${it.attention ? '<span class="pill-attention">⚠ Stale</span>' : ''}</div>
-        <div style="font-size:13px;color:var(--muted);margin-bottom:8px;">${it.sub}</div>
-        <div><span class="formula">${it.formula}</span></div>
-        ${it.attention ? `<div class="callout-warn" style="margin-top:14px;"><strong>Data feed is stale.</strong> Last sync 3 days ago. Until resynced, payouts for this item will be excluded from the May 12–18 run.</div><button class="btn-primary" style="margin-top:12px;">Resync now →</button>` : ''}
-      </div>
-    `).join(''),
   }),
 };
 
-function ruleDrawer(idx) {
-  const r = SCEN[scenario].award[idx - 1];
-  if (!r) return null;
-  return {
-    eyebrow: 'Rule Detail',
-    title: r.name,
-    body: `
-      <div class="dr-section">
-        <div class="dr-section-title">Type</div>
-        <div style="font-size:14px;font-weight:500;">${r.type}</div>
-        <div style="font-size:12px;color:var(--muted);margin-top:3px;">${r.sub}</div>
-      </div>
-      <div class="dr-section">
-        <div class="dr-section-title">Calculation</div>
-        <span class="formula" style="font-size:14px;padding:8px 12px;">${r.formula}</span>
-      </div>
-      <div class="dr-section">
-        <div class="dr-section-title">Dataset Configuration</div>
-        <div class="dr-kv"><span class="k">Source</span><span class="v">ServiceTitan</span></div>
-        <div class="dr-kv"><span class="k">Table</span><span class="v"><code>jobs.completed</code></span></div>
-        <div class="dr-kv"><span class="k">Join key</span><span class="v"><code>job_id</code></span></div>
-        <div class="dr-kv"><span class="k">Aggregation</span><span class="v">Sum per crew member per period</span></div>
-        <div class="dr-kv"><span class="k">Last sync</span><span class="v">${r.sync}</span></div>
-      </div>
-      <div class="dr-section">
-        <div class="dr-section-title">Last 5 eligible jobs</div>
-        <table class="dr-table">
-          <thead><tr><th>Job</th><th>Date</th><th>${scenario === 'b' ? 'Pool' : 'Award'}</th><th>Notes</th></tr></thead>
-          <tbody>
-            <tr><td>#1058</td><td>May 18</td><td>$${scenario === 'b' ? '240' : '290'}</td><td style="color:var(--muted);">${scenario === 'b' ? '$2k labor savings × 12%' : 'Anthony H. · GP $9.3k'}</td></tr>
-            <tr><td>#1057</td><td>May 17</td><td>$${scenario === 'b' ? '192' : '95'}</td><td style="color:var(--muted);">${scenario === 'b' ? '$1.6k labor savings × 12%' : 'Austin H. · GP $5.4k'}</td></tr>
-            <tr><td>#1054</td><td>May 16</td><td>$${scenario === 'b' ? '276' : '235'}</td><td style="color:var(--muted);">${scenario === 'b' ? '$2.3k labor savings × 12%' : 'Anthony H. · GP $8.2k'}</td></tr>
-            <tr><td>#1052</td><td>May 15</td><td>$${scenario === 'b' ? '180' : '170'}</td><td style="color:var(--muted);">${scenario === 'b' ? '$1.5k labor savings × 12%' : 'Brooke J. · GP $6.9k'}</td></tr>
-            <tr><td>#1050</td><td>May 14</td><td>$${scenario === 'b' ? '216' : '200'}</td><td style="color:var(--muted);">${scenario === 'b' ? '$1.8k labor savings × 12%' : 'Austin H. · GP $7.5k'}</td></tr>
-          </tbody>
-        </table>
-      </div>
-    `,
-  };
-}
-
-function scDrawer(idx) {
-  const it = SCEN[scenario].sc[idx - 1];
-  if (!it) return null;
-  return {
-    eyebrow: 'Scorecard Item',
-    title: it.name,
-    body: `
-      <div class="dr-section">
-        <div class="dr-section-title">Description</div>
-        <div style="font-size:13px;color:var(--muted);">${it.sub}</div>
-      </div>
-      <div class="dr-section">
-        <div class="dr-section-title">Formula</div>
-        <span class="formula" style="font-size:14px;padding:8px 12px;">${it.formula}</span>
-      </div>
-      ${it.attention ? `
-      <div class="dr-section">
-        <div class="dr-section-title">Issue</div>
-        <div class="callout-warn"><strong>Data feed is stale.</strong> Last sync was 3 days ago. Until resynced, payouts for this item will be excluded from the May 12–18 run.</div>
-        <button class="btn-primary" style="margin-top:12px;">Resync now →</button>
-      </div>` : ''}
-      <div class="dr-section">
-        <div class="dr-section-title">Recent events (last 30d)</div>
-        <table class="dr-table">
-          <thead><tr><th>Date</th><th>Employee</th><th>Job</th><th>Amount</th></tr></thead>
-          <tbody>
-            <tr><td>May 18</td><td>Anthony H.</td><td>#1058</td><td>+$25</td></tr>
-            <tr><td>May 17</td><td>Austin H.</td><td>#1057</td><td>+$25</td></tr>
-            <tr><td>May 16</td><td>Anthony H.</td><td>#1054</td><td>+$25</td></tr>
-            <tr><td>May 15</td><td>Brooke J.</td><td>#1052</td><td>+$25</td></tr>
-          </tbody>
-        </table>
-      </div>
-    `,
-  };
-}
-
-function jobDrawer(jobId) {
-  // Find job in current period
-  const period = document.getElementById('perf-period').value;
-  const j = PERF_JOBS[period].find(x => x.id === '#' + jobId);
-  if (!j) return null;
-  const e = evalElig(j);
-  const award = computeAward(j, e.ok);
-
-  return {
-    eyebrow: `Job ${j.id}`,
-    title: j.customer,
-    body: `
-      <div class="dr-section">
-        <div class="dr-section-title">Job Details</div>
-        <div class="dr-kv"><span class="k">Date</span><span class="v">${j.date}, 2026</span></div>
-        <div class="dr-kv"><span class="k">Revenue</span><span class="v">$${(j.gpAmt / (j.gpPct/100)).toLocaleString(undefined,{maximumFractionDigits:0})}</span></div>
-        <div class="dr-kv"><span class="k">Gross Profit</span><span class="v">$${j.gpAmt.toLocaleString()} (${j.gpPct}%)</span></div>
-        <div class="dr-kv"><span class="k">Labor Savings</span><span class="v">$${j.savings.toLocaleString()}</span></div>
-        <div class="dr-kv"><span class="k">Callbacks (30d)</span><span class="v">${j.callbacks}</span></div>
-        <div class="dr-kv"><span class="k">On-time</span><span class="v">${j.onTime ? '✓ Yes' : '✗ No'}</span></div>
-      </div>
-      <div class="dr-section">
-        <div class="dr-section-title">Eligibility Evaluation</div>
-        <div class="dr-kv"><span class="k">GP% ≥ 35%</span><span class="v" style="color:${j.gpPct >= 35 ? 'var(--green)' : 'var(--red)'};">${j.gpPct >= 35 ? '✓ Passed' : '✗ Failed (' + j.gpPct + '%)'}</span></div>
-        <div class="dr-kv"><span class="k">On-time completion</span><span class="v" style="color:${j.onTime ? 'var(--green)' : 'var(--red)'};">${j.onTime ? '✓ Passed' : '✗ Failed'}</span></div>
-        <div class="dr-kv"><span class="k">No callbacks 30d</span><span class="v" style="color:${j.callbacks === 0 ? 'var(--green)' : 'var(--red)'};">${j.callbacks === 0 ? '✓ Passed' : '✗ Failed (' + j.callbacks + ')'}</span></div>
-      </div>
-      <div class="dr-section">
-        <div class="dr-section-title">${e.ok ? 'Award Calculation' : 'Result'}</div>
-        ${e.ok && award ? `
-          ${scenario === 'a' ? `
-            <div class="dr-kv"><span class="k">Piece Rate</span><span class="v">$75</span></div>
-            <div class="dr-kv"><span class="k">GP Bonus (5% × (gp − $5k))</span><span class="v">$${award.total - 75}</span></div>
-            <div class="dr-kv" style="font-weight:700;"><span class="k">Total to ${j.customer.split(' ')[0] === 'Smith' ? 'Anthony H.' : 'Lead'}</span><span class="v" style="color:var(--green);">$${award.total}</span></div>
-          ` : `
-            <div class="dr-kv"><span class="k">Pool (12% × labor_savings)</span><span class="v">$${award.total}</span></div>
-            <div class="dr-kv"><span class="k">Pool Deduction (lead share)</span><span class="v" style="color:var(--amber);">−$60</span></div>
-            <div class="dr-kv"><span class="k">Crew Pool</span><span class="v">$${award.total - 60}</span></div>
-            <div class="dr-kv"><span class="k">Crew Size</span><span class="v">3 techs</span></div>
-            <div class="dr-kv" style="font-weight:700;"><span class="k">Per tech (equal hours)</span><span class="v" style="color:var(--green);">$${Math.round((award.total - 60) / 3)}</span></div>
-          `}
-        ` : `<div class="callout-warn"><strong>Job ineligible.</strong> Failed criterion: ${e.reasons.join(', ')}. No award paid from this plan.</div>`}
-      </div>
-    `,
-  };
-}
-
 function openDrawer(kind) {
   let cfg = null;
-  if (drawerKinds[kind]) cfg = drawerKinds[kind]();
-  else if (kind.startsWith('rule-')) cfg = ruleDrawer(parseInt(kind.split('-')[1]));
-  else if (kind.startsWith('sc-')) cfg = scDrawer(parseInt(kind.split('-')[1]));
-  else if (kind.startsWith('job-')) cfg = jobDrawer(kind.split('-')[1]);
+  if (fixedDrawers[kind]) cfg = fixedDrawers[kind]();
+  else if (kind.startsWith('rule-')) cfg = ruleDrawer(kind.replace('rule-',''));
+  else if (kind.startsWith('job-'))  cfg = jobDrawer(kind.replace('job-',''));
   if (!cfg) return;
   document.getElementById('dr-eyebrow').textContent = cfg.eyebrow;
   document.getElementById('dr-title').innerHTML = cfg.title;
