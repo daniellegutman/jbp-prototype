@@ -158,14 +158,15 @@
     .act-meta { color: var(--faint); font-size: 11px; margin-top: 2px; }
 
     /* SUB-TABS (Performance) */
-    .subtabs { display: inline-flex; align-items: center; gap: 6px; padding: 4px; background: #f3f4f1; border-radius: 10px; margin-bottom: 20px; }
+    .subtabs { display: inline-flex; align-items: center; gap: 6px; padding: 4px; background: #f3f4f1; border-radius: 10px; }
     .subtab { font-size: 13px; font-weight: 500; padding: 8px 16px; border-radius: 7px; border: none; background: transparent; cursor: pointer; font-family: inherit; color: var(--ink-2); }
     .subtab:hover { color: var(--ink); }
     .subtab.active { background: white; color: var(--ink); font-weight: 600; box-shadow: 0 1px 3px rgba(0,0,0,.06); }
 
-    /* Performance period bar */
-    .period-bar { display: flex; align-items: center; justify-content: space-between; margin-bottom: 16px; flex-wrap: wrap; gap: 12px; }
-    .period-bar select { border: 1.5px solid var(--hairline); border-radius: 8px; padding: 8px 13px; font-size: 13px; background: white; font-family: inherit; cursor: pointer; outline: none; min-width: 160px; }
+    /* Performance header row — subtabs left, period + actions right */
+    .perf-bar { display: flex; align-items: center; justify-content: space-between; margin-bottom: 20px; flex-wrap: wrap; gap: 12px; }
+    .perf-bar-right { display: flex; align-items: center; gap: 8px; }
+    .perf-bar select { border: 1.5px solid var(--hairline); border-radius: 8px; padding: 8px 13px; font-size: 13px; background: white; font-family: inherit; cursor: pointer; outline: none; min-width: 160px; }
 
     /* KPI tiles */
     .kpi-row { display: grid; grid-template-columns: repeat(5, 1fr); gap: 12px; margin-bottom: 20px; }
@@ -316,12 +317,12 @@
             <div class="elig-list" id="elig-list"></div>
           </div>
 
-          <!-- Rules (unified KPIs table) -->
+          <!-- Job Awards (unified rules table — job awards + additional KPIs) -->
           <div class="card">
             <div class="card-head">
               <div>
-                <h3 class="card-title">Rules</h3>
-                <div class="card-sub">Performance rules that determine per-job payouts</div>
+                <h3 class="card-title">Job Awards</h3>
+                <div class="card-sub">Rules that determine per-job payouts and additional KPI bonuses</div>
               </div>
               <a class="card-action" onclick="openDrawer('award')">Edit ›</a>
             </div>
@@ -422,24 +423,19 @@
 
     <!-- ============== PERFORMANCE ============== -->
     <div class="tab-pane" id="pane-performance">
-      <!-- Sub-tabs -->
-      <div class="subtabs">
-        <button class="subtab active" id="st-jobs" onclick="setSubtab('jobs')">Jobs</button>
-        <button class="subtab" id="st-individual" onclick="setSubtab('individual')">Individual Performance</button>
-      </div>
-
-      <!-- Period bar (shared) -->
-      <div class="period-bar">
-        <div style="display:flex;align-items:center;gap:10px;">
-          <span style="font-size:13px;color:var(--muted);">Period:</span>
+      <!-- Sub-tabs + period selector + actions all on one row -->
+      <div class="perf-bar">
+        <div class="subtabs">
+          <button class="subtab active" id="st-jobs" onclick="setSubtab('jobs')">Jobs</button>
+          <button class="subtab" id="st-individual" onclick="setSubtab('individual')">Individual Performance</button>
+        </div>
+        <div class="perf-bar-right">
           <select id="perf-period" onchange="renderPerformance()">
             <option value="may-2026" selected>May 2026 (current)</option>
             <option value="apr-2026">April 2026</option>
             <option value="mar-2026">March 2026</option>
             <option value="ytd-2026">YTD 2026</option>
           </select>
-        </div>
-        <div style="display:flex;align-items:center;gap:8px;">
           <button class="btn-sm">↻ Refresh sync</button>
           <button class="btn-sm">Export CSV</button>
         </div>
