@@ -1,0 +1,667 @@
+<!DOCTYPE html>
+<html lang="en"><head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Employee · ShareWillow Job-Based Plan Prototype</title>
+  <link href="https://use.typekit.net/mgx2gxv.css" rel="stylesheet">
+  <style>
+    :root {
+      --bg: #efeee9;
+      --frame: #f6f5f0;
+      --ink: #1a1a1a;
+      --ink-2: #374151;
+      --muted: #6b7280;
+      --faint: #9ca3af;
+      --hairline: #ece9dc;
+      --hairline-2: #f4f1e5;
+      --green: #16a34a;
+      --green-bg: #dcfce7;
+      --green-light: #d1fae5;
+      --amber: #b45309;
+      --amber-bg: #fef3c7;
+      --red: #b91c1c;
+      --red-bg: #fef2f2;
+    }
+    * { box-sizing: border-box; }
+    body { font-family: 'Matter', -apple-system, BlinkMacSystemFont, sans-serif; background: var(--bg); color: var(--ink); margin: 0; min-height: 100vh; padding-bottom: 30px; }
+    h1, h2, h3, h4 { font-family: 'p22-mackinac-pro', serif; font-weight: 600; margin: 0; }
+
+    /* Prototype controls bar */
+    #proto-bar { padding: 9px 24px; display: flex; align-items: center; gap: 10px; border-bottom: 1px solid #d6d3c4; background: #fafaf6; }
+    .sc-tab { padding: 6px 14px; border-radius: 6px; font-size: 12px; font-weight: 500; cursor: pointer; transition: all .15s; border: 1.5px solid #d6d3c4; background: white; color: var(--ink-2); font-family: inherit; white-space: nowrap; }
+    .sc-tab.active { background: var(--ink); color: white; border-color: var(--ink); }
+
+    /* Mobile frame */
+    .stage { padding: 40px 20px 30px; display: flex; justify-content: center; align-items: flex-start; min-height: calc(100vh - 60px); }
+    .phone { width: 393px; height: 800px; background: black; border-radius: 48px; padding: 11px; box-shadow: 0 30px 60px rgba(0,0,0,.25), 0 8px 16px rgba(0,0,0,.18); position: relative; }
+    .screen { width: 100%; height: 100%; background: var(--frame); border-radius: 38px; overflow: hidden; position: relative; display: flex; flex-direction: column; }
+
+    /* Status bar (mock) */
+    .statusbar { height: 44px; padding: 14px 28px 0; display: flex; align-items: flex-start; justify-content: space-between; font-size: 14px; font-weight: 600; color: var(--ink); flex-shrink: 0; position: relative; }
+    .statusbar .notch { position: absolute; left: 50%; top: 10px; transform: translateX(-50%); width: 120px; height: 30px; background: black; border-radius: 16px; }
+    .statusbar .icons { display: flex; gap: 5px; align-items: center; }
+
+    /* Content scroll area */
+    .content { flex: 1; overflow-y: auto; padding: 12px 22px 24px; position: relative; }
+    .content::-webkit-scrollbar { width: 0; }
+
+    /* Bottom tab nav */
+    .tabnav { background: white; border-top: 1px solid #e5e7eb; padding: 10px 14px 24px; display: flex; align-items: stretch; flex-shrink: 0; }
+    .tabnav .tab-btn { flex: 1; display: flex; flex-direction: column; align-items: center; gap: 3px; padding: 6px 0; border: none; background: none; cursor: pointer; color: var(--faint); font-size: 11px; font-family: inherit; font-weight: 500; }
+    .tabnav .tab-btn svg { width: 22px; height: 22px; }
+    .tabnav .tab-btn.active { color: var(--green); }
+    .tabnav .tab-btn.active svg path,
+    .tabnav .tab-btn.active svg circle,
+    .tabnav .tab-btn.active svg rect { stroke: var(--green); }
+
+    /* Top right bell */
+    .topbar { display: flex; align-items: center; justify-content: flex-end; padding: 0 0 8px; }
+    .bell-btn { background: none; border: none; cursor: pointer; color: var(--ink); padding: 4px; }
+
+    /* Period pill */
+    .period-row { display: flex; justify-content: center; margin-bottom: 18px; }
+    .period-pill { background: #e6e3d6; color: var(--ink); padding: 8px 16px; border-radius: 999px; font-size: 13px; font-weight: 500; display: inline-flex; align-items: center; gap: 6px; cursor: pointer; }
+    .period-pill svg { width: 14px; height: 14px; }
+
+    /* Hero earnings */
+    .hero { text-align: center; margin-bottom: 28px; }
+    .hero-label { font-family: 'p22-mackinac-pro', serif; font-weight: 600; font-size: 26px; color: var(--ink); }
+    .hero-sub { font-size: 13px; color: var(--muted); margin-top: 4px; }
+    .hero-amount { font-family: 'p22-mackinac-pro', serif; font-size: 64px; font-weight: 700; margin-top: 18px; letter-spacing: -2px; line-height: 1; }
+    .hero-amount.zero { color: var(--ink); }
+
+    /* Card */
+    .card { background: white; border-radius: 16px; padding: 16px 18px; box-shadow: 0 1px 2px rgba(0,0,0,.04); margin-bottom: 14px; }
+    .card-title { font-family: 'p22-mackinac-pro', serif; font-weight: 600; font-size: 17px; }
+    .card-sub { font-size: 12px; color: var(--muted); margin-top: 2px; }
+    .card-action-link { color: var(--green); font-size: 14px; font-weight: 600; text-align: center; padding: 12px; cursor: pointer; }
+
+    /* Metric row */
+    .metric-row { display: flex; align-items: center; gap: 12px; padding: 12px 0; border-bottom: 1px solid var(--hairline-2); cursor: pointer; }
+    .metric-row:last-child { border-bottom: none; }
+    .metric-icon { width: 38px; height: 38px; border-radius: 50%; background: var(--green-light); color: var(--green); display: inline-flex; align-items: center; justify-content: center; flex-shrink: 0; }
+    .metric-icon svg { width: 20px; height: 20px; }
+    .metric-body { flex: 1; min-width: 0; }
+    .metric-name { font-size: 14px; font-weight: 700; color: var(--ink); line-height: 1.25; }
+    .metric-plan { font-size: 12px; color: var(--muted); margin-top: 2px; line-height: 1.3; }
+    .metric-amount { font-size: 16px; font-weight: 700; color: var(--green); text-align: right; flex-shrink: 0; min-width: 70px; }
+    .metric-amount.zero { color: var(--ink); }
+    .metric-amount-sub { font-size: 12px; color: var(--muted); font-weight: 400; margin-top: 1px; }
+
+    /* Sections */
+    .section-label { font-size: 14px; color: var(--ink-2); font-weight: 500; margin: 18px 0 10px 4px; }
+
+    /* Profile / plan header */
+    .plan-header { display: flex; align-items: flex-start; justify-content: space-between; gap: 12px; padding: 4px 0 18px; }
+    .plan-title { font-family: 'p22-mackinac-pro', serif; font-weight: 700; font-size: 28px; line-height: 1.1; flex: 1; }
+    .live-badge { background: var(--amber-bg); color: var(--amber); padding: 5px 12px; border-radius: 999px; font-size: 12px; font-weight: 600; display: inline-flex; align-items: center; gap: 4px; flex-shrink: 0; }
+    .x-btn { background: #d6d3c4; border: none; width: 36px; height: 36px; border-radius: 50%; cursor: pointer; color: var(--ink); display: inline-flex; align-items: center; justify-content: center; flex-shrink: 0; }
+
+    /* Plan details key/value */
+    .pd-row { display: flex; justify-content: space-between; align-items: center; padding: 14px 0; border-bottom: 1px solid var(--hairline-2); font-size: 16px; }
+    .pd-row:last-child { border-bottom: none; }
+    .pd-row .k { font-weight: 600; color: var(--ink); }
+    .pd-row .v { font-weight: 700; color: var(--ink); }
+
+    /* Eligibility item */
+    .elig-item { display: flex; align-items: center; gap: 10px; padding: 10px 0; border-bottom: 1px solid var(--hairline-2); font-size: 14px; }
+    .elig-item:last-child { border-bottom: none; }
+    .elig-item .check { color: var(--green); font-weight: 700; }
+
+    /* Sheet (modal that slides up from bottom inside phone) */
+    .sheet-overlay { position: absolute; inset: 0; background: rgba(0,0,0,.4); border-radius: 38px; opacity: 0; pointer-events: none; transition: opacity .25s; z-index: 50; }
+    .sheet-overlay.open { opacity: 1; pointer-events: auto; }
+    .sheet { position: absolute; left: 0; right: 0; bottom: 0; background: var(--frame); border-radius: 28px 28px 38px 38px; max-height: 92%; min-height: 60%; transform: translateY(100%); transition: transform .3s cubic-bezier(.4,0,.2,1); z-index: 51; display: flex; flex-direction: column; overflow: hidden; }
+    .sheet.open { transform: translateY(0); }
+    .sheet-handle { width: 38px; height: 4px; background: #d1d5db; border-radius: 2px; margin: 10px auto; flex-shrink: 0; }
+    .sheet-head { padding: 4px 22px 14px; display: flex; align-items: flex-start; justify-content: space-between; gap: 12px; flex-shrink: 0; }
+    .sheet-title { font-family: 'p22-mackinac-pro', serif; font-weight: 700; font-size: 24px; line-height: 1.15; }
+    .sheet-sub { font-size: 13px; color: var(--muted); margin-top: 4px; }
+    .sheet-body { flex: 1; overflow-y: auto; padding: 0 22px 30px; }
+
+    /* Total card inside sheet */
+    .total-card { background: white; border-radius: 14px; padding: 14px 16px; margin-bottom: 18px; }
+    .total-card-label { font-size: 12px; color: var(--muted); margin-bottom: 8px; }
+    .total-card-body { display: flex; align-items: center; gap: 12px; }
+    .total-card-body .metric-icon { width: 44px; height: 44px; }
+    .total-card-body .name { flex: 1; font-size: 13px; }
+    .total-card-body .name b { display: block; font-size: 14px; }
+    .total-card-body .amt { font-family: 'p22-mackinac-pro', serif; font-weight: 700; font-size: 22px; }
+
+    /* Job breakdown table */
+    .jb-section-title { font-family: 'p22-mackinac-pro', serif; font-weight: 700; font-size: 18px; margin: 12px 0 14px; }
+    .jb-table { width: 100%; border-collapse: collapse; background: white; border-radius: 14px; overflow: hidden; font-size: 13px; }
+    .jb-table th { padding: 12px 14px; text-align: left; font-size: 11px; font-weight: 600; color: var(--muted); text-transform: uppercase; letter-spacing: .35px; border-bottom: 1px solid var(--hairline-2); background: white; }
+    .jb-table td { padding: 14px; border-bottom: 1px solid var(--hairline-2); }
+    .jb-table tr:last-child td { border-bottom: none; }
+    .jb-table .amt-cell { text-align: right; font-weight: 700; color: var(--green); white-space: nowrap; }
+    .jb-table .math-cell { font-size: 11px; color: var(--muted); font-weight: 400; }
+    .jb-side-scroll { overflow-x: auto; -webkit-overflow-scrolling: touch; border-radius: 14px; }
+
+    /* Payouts list */
+    .year-pill { background: var(--green); color: white; font-weight: 600; padding: 7px 18px; border-radius: 999px; font-size: 14px; display: inline-flex; align-items: center; gap: 5px; cursor: pointer; margin-bottom: 18px; }
+    .year-pill svg { width: 12px; height: 12px; }
+    .month-label { font-family: 'p22-mackinac-pro', serif; font-weight: 700; font-size: 22px; margin: 14px 0 10px; }
+    .payout-row { display: flex; align-items: center; gap: 12px; padding: 14px 0; border-bottom: 1px solid var(--hairline-2); cursor: pointer; }
+    .payout-row:last-child { border-bottom: none; }
+    .pay-icon { width: 38px; height: 38px; border-radius: 50%; background: var(--green-light); color: var(--green); display: inline-flex; align-items: center; justify-content: center; flex-shrink: 0; }
+    .pay-icon svg { width: 18px; height: 18px; }
+    .pay-body { flex: 1; min-width: 0; }
+    .pay-period { font-size: 13px; color: var(--ink); line-height: 1.3; }
+    .pay-amt { font-size: 18px; font-weight: 700; color: var(--ink); margin-top: 4px; font-family: 'p22-mackinac-pro', serif; }
+    .pay-amt.zero { color: var(--muted); font-weight: 600; }
+    .pay-chev { color: var(--faint); }
+
+    /* Hero earnings card on Payouts tab */
+    .payouts-hero { background: white; border-radius: 14px; padding: 22px 24px; margin-bottom: 12px; font-family: 'p22-mackinac-pro', serif; font-weight: 700; font-size: 36px; letter-spacing: -.5px; }
+    .h1-page { font-family: 'p22-mackinac-pro', serif; font-weight: 700; font-size: 32px; line-height: 1.05; margin-bottom: 14px; }
+
+    /* Expand row inside payout sheet */
+    .pmrow { background: white; border-radius: 12px; margin-bottom: 10px; overflow: hidden; }
+    .pmrow .summary { padding: 14px 16px; display: flex; align-items: center; gap: 12px; cursor: pointer; }
+    .pmrow .summary .chev { color: var(--faint); transition: transform .2s; flex-shrink: 0; }
+    .pmrow.open .summary .chev { transform: rotate(90deg); color: var(--ink); }
+    .pmrow .detail { display: none; padding: 0 16px 16px; border-top: 1px solid var(--hairline-2); }
+    .pmrow.open .detail { display: block; }
+    .pmjob { display: flex; align-items: center; justify-content: space-between; padding: 10px 0; border-bottom: 1px solid var(--hairline-2); font-size: 13px; }
+    .pmjob:last-child { border-bottom: none; }
+    .pmjob .info { flex: 1; min-width: 0; }
+    .pmjob .info .top { color: var(--ink); font-weight: 600; font-size: 13px; }
+    .pmjob .info .bot { color: var(--muted); font-size: 11px; margin-top: 2px; }
+    .pmjob .amt { font-family: 'p22-mackinac-pro', serif; font-weight: 700; color: var(--green); }
+
+    /* Profile content small h-spacing */
+    .small-muted { font-size: 14px; color: var(--ink-2); margin-bottom: 8px; font-weight: 500; }
+  </style>
+</head>
+<body>
+
+<!-- Prototype controls -->
+<div id="proto-bar">
+  <span style="font-size:11px;font-weight:700;color:var(--faint);text-transform:uppercase;letter-spacing:.5px;">Prototype:</span>
+  <button class="sc-tab active" id="sc-a" onclick="setScenario('a')">A — Crew Chief (Anthony H.)</button>
+  <button class="sc-tab" id="sc-b" onclick="setScenario('b')">B — Field Tech (Carlos R.)</button>
+  <a href="./admin.html" style="margin-left:auto;font-size:12px;color:#2563eb;text-decoration:none;">← Back to Admin View</a>
+</div>
+
+<!-- Phone stage -->
+<div class="stage">
+  <div class="phone">
+    <div class="screen">
+
+      <!-- Status bar (mock) -->
+      <div class="statusbar">
+        <span>11:14</span>
+        <div class="notch"></div>
+        <div class="icons">
+          <span>📶</span>
+          <span>📊</span>
+          <span style="font-weight:700;">87</span>
+        </div>
+      </div>
+
+      <!-- Scrollable content -->
+      <div class="content" id="content">
+
+        <!-- ──────── HOME TAB ──────── -->
+        <div class="pane" id="pane-home">
+          <div class="topbar">
+            <button class="bell-btn"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg></button>
+          </div>
+
+          <div class="period-row">
+            <div class="period-pill" id="home-period">Period: May 12 – 18 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="6 9 12 15 18 9"/></svg></div>
+          </div>
+
+          <div class="hero">
+            <div class="hero-label">Total Earnings</div>
+            <div class="hero-sub" id="home-sub">5 days remaining</div>
+            <div class="hero-amount" id="home-amount">$290</div>
+          </div>
+
+          <div class="card">
+            <div class="card-title">Top Metrics</div>
+            <div id="home-metrics"></div>
+            <div class="card-action-link">View All Metrics</div>
+          </div>
+        </div>
+
+        <!-- ──────── BOARD TAB ──────── -->
+        <div class="pane" id="pane-board" style="display:none;">
+          <div class="topbar"><button class="bell-btn"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/></svg></button></div>
+          <h1 class="h1-page">Leaderboard</h1>
+          <div class="card" style="text-align:center;padding:60px 20px;color:var(--muted);font-size:14px;">Team leaderboard coming soon.</div>
+        </div>
+
+        <!-- ──────── PAYOUTS TAB ──────── -->
+        <div class="pane" id="pane-payouts" style="display:none;">
+          <h1 class="h1-page">Payouts</h1>
+          <div class="payouts-hero" id="payouts-total">$1,250</div>
+          <div class="year-pill">2026 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="6 9 12 15 18 9"/></svg></div>
+          <div id="payouts-list"></div>
+        </div>
+
+        <!-- ──────── PROFILE / PLAN ──────── -->
+        <div class="pane" id="pane-profile" style="display:none;">
+          <div class="plan-header">
+            <div class="plan-title" id="profile-plan-title">HVAC Install Crew Chief Bonus</div>
+            <div style="display:flex;flex-direction:column;align-items:flex-end;gap:8px;">
+              <span class="live-badge"><span>⚡</span> Live</span>
+            </div>
+          </div>
+
+          <div class="small-muted">Plan Details</div>
+          <div class="card" style="padding:4px 18px;">
+            <div class="pd-row"><span class="k">Last Award</span><span class="v" id="profile-last">$290</span></div>
+            <div class="pd-row"><span class="k">Awarded YTD</span><span class="v" id="profile-ytd">$1,250</span></div>
+          </div>
+
+          <div class="small-muted" style="margin-top:18px;">Eligibility</div>
+          <div class="card" id="profile-elig-card">
+            <div class="card-sub" style="margin-bottom:8px;">A job must meet all of these to qualify for a bonus.</div>
+            <div id="profile-elig-list"></div>
+          </div>
+
+          <div class="small-muted" style="margin-top:18px;">Rules</div>
+          <div class="card" id="profile-rules-card">
+            <div class="card-sub" style="margin-bottom:8px;">Per-job awards and additional bonuses earned on eligible jobs.</div>
+            <div id="profile-rules-list"></div>
+          </div>
+
+          <div class="small-muted" style="margin-top:18px;">Plan Details</div>
+          <div class="card" style="padding:4px 18px;">
+            <div class="pd-row"><span class="k">Effective Date</span><span class="v">Mar 14, 2026</span></div>
+            <div class="pd-row"><span class="k">Payout Frequency</span><span class="v">Weekly Payout</span></div>
+            <div class="pd-row"><span class="k">Award Mode</span><span class="v" id="profile-mode">Single-Role</span></div>
+          </div>
+        </div>
+
+      </div><!-- /content -->
+
+      <!-- Bottom tab nav -->
+      <div class="tabnav">
+        <button class="tab-btn active" id="t-home" onclick="setTab('home')">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12l9-9 9 9M5 10v10a1 1 0 001 1h3M19 10v10a1 1 0 01-1 1h-3M9 21h6"/></svg>
+          Home
+        </button>
+        <button class="tab-btn" id="t-board" onclick="setTab('board')">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9H4.5a2.5 2.5 0 010-5H6M18 9h1.5a2.5 2.5 0 000-5H18M4 22h16M10 14.66V17c0 .55.45 1 1 1h2c.55 0 1-.45 1-1v-2.34M18 2H6v7a6 6 0 0012 0V2z"/></svg>
+          Board
+        </button>
+        <button class="tab-btn" id="t-payouts" onclick="setTab('payouts')">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="6" width="20" height="12" rx="2"/><circle cx="12" cy="12" r="2"/><path d="M6 12h.01M18 12h.01"/></svg>
+          Payouts
+        </button>
+        <button class="tab-btn" id="t-profile" onclick="setTab('profile')">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="4"/><path d="M4 21v-2a4 4 0 014-4h8a4 4 0 014 4v2"/></svg>
+          Profile
+        </button>
+      </div>
+
+      <!-- Sheet overlay -->
+      <div class="sheet-overlay" id="sheet-bg" onclick="closeSheet()"></div>
+      <div class="sheet" id="sheet">
+        <div class="sheet-handle"></div>
+        <div class="sheet-head">
+          <div>
+            <div class="sheet-title" id="sheet-title">Detail</div>
+            <div class="sheet-sub" id="sheet-sub"></div>
+          </div>
+          <button class="x-btn" onclick="closeSheet()">✕</button>
+        </div>
+        <div class="sheet-body" id="sheet-body"></div>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<script>
+// ═══════════════════ DATA ═══════════════════
+let scenario = 'a';
+let tab = 'home';
+
+const SCEN = {
+  a: {
+    user: { name: 'Anthony Headen', initials: 'AH' },
+    plan: 'HVAC Install Crew Chief Bonus',
+    mode: 'Single-Role',
+    isPool: false,
+    homePeriod: 'May 12 – 18',
+    daysLeft: '5 days remaining',
+    eligibility: [
+      'GP% ≥ 35% on the job',
+      'Completed on or before scheduled date',
+      'No callbacks within 30 days',
+    ],
+    rules: [
+      { key: 'piece',   icon: 'wrench', name: 'Piece Rate per Eligible Install', desc: '$75 paid for every eligible install you lead.' },
+      { key: 'gpbonus', icon: 'trend',  name: 'GP-Over-$5k Bonus',                desc: '5% of gross profit over $5,000 per eligible install.' },
+      { key: 'review',  icon: 'star',   name: '5-Star Review Bonus',              desc: '+$25 per 5-star review on an eligible install.' },
+    ],
+    // Period earnings — current week
+    currentMetrics: [
+      { key: 'piece',   icon: 'wrench', name: 'Piece Rate per Eligible Install', plan: 'HVAC Install Crew Chief Bonus', amount: 225, sub: '3 eligible jobs × $75' },
+      { key: 'gpbonus', icon: 'trend',  name: 'GP-Over-$5k Bonus',                plan: 'HVAC Install Crew Chief Bonus', amount: 0,   sub: 'No jobs above $5k GP' },
+      { key: 'review',  icon: 'star',   name: '5-Star Review Bonus',              plan: 'HVAC Install Crew Chief Bonus', amount: 0,   sub: '0 reviews this period' },
+    ],
+    totalThisPeriod: 225,
+    ytd: 1250,
+    // Job-by-job breakdown per metric for the CURRENT period
+    metricJobs: {
+      piece: [
+        { jobNo: '60279', oppNo: '16035', property: 'Walsh Residence (Chalfont)', date: 'May 16', gpPct: 75, gpAmt: 9300, status: 'Complete', estHrs: 1.75, actHrs: 1.71, amount: 75 },
+        { jobNo: '58855', oppNo: '15921', property: 'Finley Residence',           date: 'May 15', gpPct: 51, gpAmt: 7800, status: 'Complete', estHrs: 2.25, actHrs: 0.97, amount: 75 },
+        { jobNo: '59573', oppNo: '15897', property: 'Hartman Office',             date: 'May 14', gpPct: 40, gpAmt: 8200, status: 'Complete', estHrs: 1.25, actHrs: 0.82, amount: 75 },
+      ],
+      gpbonus: [], // jobs all below $5k threshold this week
+      review:  [],
+    },
+    // Past periods for the Payouts tab
+    payouts: [
+      { period: 'May 5 – 11',   month: 'May',   amount: 425, metrics: { piece: 3*75, gpbonus: 200, review: 0 } },
+      { period: 'Apr 26 – May 2', month: 'May', amount: 300, metrics: { piece: 4*75, gpbonus: 0,   review: 0 } },
+      { period: 'Apr 19 – 25',  month: 'April', amount: 525, metrics: { piece: 5*75, gpbonus: 150, review: 0 } },
+      { period: 'Apr 12 – 18',  month: 'April', amount: 0,   metrics: { piece: 0,    gpbonus: 0,   review: 0 } },
+      { period: 'Apr 5 – 11',   month: 'April', amount: 0,   metrics: { piece: 0,    gpbonus: 0,   review: 0 } },
+      { period: 'Mar 29 – Apr 4', month: 'March', amount: 0, metrics: { piece: 0,    gpbonus: 0,   review: 0 } },
+    ],
+    payoutJobs: {
+      // jobs that fed each metric for the prior period
+      'May 5 – 11': {
+        piece: [
+          { jobNo: '60201', property: 'Anderson Residence', math: '$75 piece', amount: 75 },
+          { jobNo: '60198', property: 'Beck Residence',     math: '$75 piece', amount: 75 },
+          { jobNo: '60195', property: 'Caldwell Office',    math: '$75 piece', amount: 75 },
+        ],
+        gpbonus: [
+          { jobNo: '60198', property: 'Beck Residence',  math: '5% × ($9,000 − $5,000)', amount: 200 },
+        ],
+        review: [],
+      },
+    },
+    last: 425,
+  },
+  b: {
+    user: { name: 'Carlos Reyes', initials: 'CR' },
+    plan: 'HVAC Install Field Tech Pool',
+    mode: 'Multi-Role (Pool)',
+    isPool: true,
+    homePeriod: 'May 12 – 18',
+    daysLeft: '5 days remaining',
+    eligibility: [
+      'GP% ≥ 35% on the job (inherited from Crew Chief plan)',
+      'Completed on or before scheduled date (inherited)',
+      'No callbacks within 30 days (inherited)',
+    ],
+    rules: [
+      { key: 'pool',   icon: 'pool', name: 'Job Pool · 12% Labor Savings',  desc: '12% of labor budget savings per eligible job. After $60 lead deduction, the remainder is split among crew by hours worked.' },
+      { key: 'review', icon: 'star', name: '5-Star Review Bonus (per job)', desc: '+$25 per 5-star review, split among crew on the eligible job by hours worked.' },
+    ],
+    currentMetrics: [
+      { key: 'pool',   icon: 'pool', name: 'Job Pool · 12% Labor Savings',  plan: 'HVAC Install Field Tech Pool', amount: 174, sub: '3 eligible jobs · your share' },
+      { key: 'review', icon: 'star', name: '5-Star Review Bonus',           plan: 'HVAC Install Field Tech Pool', amount: 0,   sub: 'No reviews this period' },
+    ],
+    totalThisPeriod: 174,
+    ytd: 940,
+    metricJobs: {
+      pool: [
+        { jobNo: '60279', property: 'Walsh Residence', date: 'May 16', poolAmt: 240, dedAmt: 60, crewPool: 180, hours: 4.5, totalHrs: 9.0, share: '50%', amount: 90 },
+        { jobNo: '58855', property: 'Finley Residence', date: 'May 15', poolAmt: 192, dedAmt: 60, crewPool: 132, hours: 3.0, totalHrs: 9.0, share: '33%', amount: 44 },
+        { jobNo: '59573', property: 'Hartman Office',   date: 'May 14', poolAmt: 156, dedAmt: 60, crewPool:  96, hours: 4.0, totalHrs: 12.0, share: '33%', amount: 40 },
+      ],
+      review: [],
+    },
+    payouts: [
+      { period: 'May 5 – 11',     month: 'May',   amount: 230, metrics: { pool: 230, review: 0 } },
+      { period: 'Apr 26 – May 2', month: 'May',   amount: 210, metrics: { pool: 185, review: 25 } },
+      { period: 'Apr 19 – 25',   month: 'April', amount: 326, metrics: { pool: 326, review: 0 } },
+      { period: 'Apr 12 – 18',   month: 'April', amount: 0,   metrics: { pool: 0,   review: 0 } },
+      { period: 'Apr 5 – 11',    month: 'April', amount: 0,   metrics: { pool: 0,   review: 0 } },
+    ],
+    payoutJobs: {
+      'May 5 – 11': {
+        pool: [
+          { jobNo: '60201', property: 'Anderson Residence', math: '$60 of $180 crew pool · 4h/9h', amount: 60 },
+          { jobNo: '60198', property: 'Beck Residence',     math: '$80 of $144 crew pool · 5h/9h', amount: 80 },
+          { jobNo: '60195', property: 'Caldwell Office',    math: '$90 of $180 crew pool · 4.5h/9h', amount: 90 },
+        ],
+        review: [],
+      },
+    },
+    last: 230,
+  },
+};
+
+// ═══════════════════ ICONS ═══════════════════
+const ICONS = {
+  wrench: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14.7 6.3a1 1 0 000 1.4l1.6 1.6a1 1 0 001.4 0l3.77-3.77a6 6 0 01-7.94 7.94l-6.91 6.91a2.12 2.12 0 01-3-3l6.91-6.91a6 6 0 017.94-7.94l-3.76 3.76z"/></svg>',
+  trend:  '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="22 7 13.5 15.5 8.5 10.5 2 17"/><polyline points="16 7 22 7 22 13"/></svg>',
+  star:   '<svg viewBox="0 0 24 24" fill="currentColor"><polygon points="12 2 15 8.5 22 9.3 17 14.1 18.2 21 12 17.8 5.8 21 7 14.1 2 9.3 9 8.5 12 2"/></svg>',
+  pool:   '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="7" r="4"/><circle cx="17" cy="9" r="3"/><path d="M3 21v-2a4 4 0 014-4h4a4 4 0 014 4v2"/><path d="M16 13a3 3 0 015 2.5V17"/></svg>',
+};
+
+// ═══════════════════ RENDER ═══════════════════
+function setScenario(s) {
+  scenario = s;
+  document.getElementById('sc-a').classList.toggle('active', s === 'a');
+  document.getElementById('sc-b').classList.toggle('active', s === 'b');
+  render();
+}
+
+function setTab(t) {
+  tab = t;
+  ['home','board','payouts','profile'].forEach(n => {
+    document.getElementById('pane-' + n).style.display = (n === t) ? 'block' : 'none';
+    document.getElementById('t-' + n).classList.toggle('active', n === t);
+  });
+  document.getElementById('content').scrollTo({ top: 0, behavior: 'instant' });
+}
+
+function fmt$(n) { return '$' + (n || 0).toLocaleString(); }
+
+function render() {
+  const d = SCEN[scenario];
+
+  // HOME
+  document.getElementById('home-period').firstChild.textContent = 'Period: ' + d.homePeriod + ' ';
+  document.getElementById('home-sub').textContent = d.daysLeft;
+  document.getElementById('home-amount').textContent = fmt$(d.totalThisPeriod);
+  document.getElementById('home-metrics').innerHTML = d.currentMetrics.map(m => `
+    <div class="metric-row" onclick="openMetric('${m.key}')">
+      <span class="metric-icon">${ICONS[m.icon]}</span>
+      <div class="metric-body">
+        <div class="metric-name">${m.name}</div>
+        <div class="metric-plan">${m.plan}</div>
+      </div>
+      <div>
+        <div class="metric-amount ${m.amount === 0 ? 'zero' : ''}">${fmt$(m.amount)}</div>
+        <div class="metric-amount-sub" style="text-align:right;">${m.sub}</div>
+      </div>
+    </div>
+  `).join('');
+
+  // PAYOUTS
+  document.getElementById('payouts-total').textContent = fmt$(d.ytd);
+  const months = {};
+  d.payouts.forEach(p => { (months[p.month] = months[p.month] || []).push(p); });
+  document.getElementById('payouts-list').innerHTML = Object.entries(months).map(([m, arr]) => `
+    <div class="month-label">${m}</div>
+    <div class="card" style="padding:6px 18px;">
+      ${arr.map(p => `
+        <div class="payout-row" onclick="openPayout('${p.period}')">
+          <span class="pay-icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+          </span>
+          <div class="pay-body">
+            <div class="pay-period">${p.period} · ${d.plan}</div>
+            <div class="pay-amt ${p.amount === 0 ? 'zero' : ''}">${fmt$(p.amount)}</div>
+          </div>
+          <span class="pay-chev">›</span>
+        </div>
+      `).join('')}
+    </div>
+  `).join('');
+
+  // PROFILE
+  document.getElementById('profile-plan-title').textContent = d.plan;
+  document.getElementById('profile-last').textContent = fmt$(d.last);
+  document.getElementById('profile-ytd').textContent = fmt$(d.ytd);
+  document.getElementById('profile-mode').textContent = d.mode;
+  document.getElementById('profile-elig-list').innerHTML = d.eligibility.map(e => `
+    <div class="elig-item"><span class="check">✓</span> ${e}</div>
+  `).join('');
+  document.getElementById('profile-rules-list').innerHTML = d.rules.map(r => `
+    <div class="elig-item" style="border-bottom:1px solid var(--hairline-2);align-items:flex-start;padding:12px 0;">
+      <span class="metric-icon" style="width:32px;height:32px;flex-shrink:0;">${ICONS[r.icon]}</span>
+      <div>
+        <div style="font-weight:700;font-size:14px;color:var(--ink);">${r.name}</div>
+        <div style="font-size:12px;color:var(--muted);margin-top:2px;line-height:1.4;">${r.desc}</div>
+      </div>
+    </div>
+  `).join('');
+}
+
+// ═══════════════════ SHEETS ═══════════════════
+function openMetric(metricKey) {
+  const d = SCEN[scenario];
+  const m = d.currentMetrics.find(x => x.key === metricKey);
+  if (!m) return;
+  const jobs = d.metricJobs[metricKey] || [];
+
+  document.getElementById('sheet-title').textContent = m.name;
+  document.getElementById('sheet-sub').textContent = `${d.plan} · ${d.homePeriod}`;
+
+  // Job breakdown table — columns differ by scenario
+  let tableHtml = '';
+  if (jobs.length === 0) {
+    tableHtml = `<div style="text-align:center;padding:30px 20px;color:var(--muted);font-size:13px;background:white;border-radius:14px;">No qualifying jobs this period for this rule.</div>`;
+  } else if (d.isPool && metricKey === 'pool') {
+    tableHtml = `
+      <div class="jb-side-scroll">
+        <table class="jb-table">
+          <thead><tr><th>Job #</th><th>Property</th><th>Date</th><th>Pool</th><th>Crew Pool</th><th>Your %</th><th style="text-align:right;">Your Share</th></tr></thead>
+          <tbody>
+            ${jobs.map(j => `
+              <tr>
+                <td><strong>${j.jobNo}</strong></td>
+                <td>${j.property}</td>
+                <td style="color:var(--muted);">${j.date}</td>
+                <td>$${j.poolAmt}</td>
+                <td>$${j.crewPool} <div class="math-cell">−$${j.dedAmt} lead</div></td>
+                <td>${j.share} <div class="math-cell">${j.hours}h / ${j.totalHrs}h</div></td>
+                <td class="amt-cell">$${j.amount}</td>
+              </tr>
+            `).join('')}
+          </tbody>
+        </table>
+      </div>
+    `;
+  } else {
+    // Individual scenario A — match the existing app column style (Work Ticket / Opportunity / Property / Status / Est Hrs / Act Hrs)
+    tableHtml = `
+      <div class="jb-side-scroll">
+        <table class="jb-table">
+          <thead><tr><th>Work Ticket</th><th>Opp #</th><th>Property</th><th>Status</th><th>Est Hrs</th><th>Act Hrs</th><th style="text-align:right;">Earned</th></tr></thead>
+          <tbody>
+            ${jobs.map(j => `
+              <tr>
+                <td><strong>${j.jobNo}</strong></td>
+                <td style="color:var(--muted);">${j.oppNo || '—'}</td>
+                <td>${j.property}</td>
+                <td>${j.status || 'Complete'}</td>
+                <td>${j.estHrs?.toFixed(2) || '—'}</td>
+                <td>${j.actHrs?.toFixed(2) || '—'}</td>
+                <td class="amt-cell">$${j.amount}</td>
+              </tr>
+            `).join('')}
+          </tbody>
+        </table>
+      </div>
+    `;
+  }
+
+  document.getElementById('sheet-body').innerHTML = `
+    <div class="total-card">
+      <div class="total-card-label">Total this period</div>
+      <div class="total-card-body">
+        <span class="metric-icon">${ICONS[m.icon]}</span>
+        <div class="name"><b>${m.name}</b><span>${m.sub}</span></div>
+        <div class="amt">${fmt$(m.amount)}</div>
+      </div>
+    </div>
+    <div class="jb-section-title">Job Breakdown</div>
+    ${tableHtml}
+  `;
+  openSheet();
+}
+
+function openPayout(periodKey) {
+  const d = SCEN[scenario];
+  const pay = d.payouts.find(p => p.period === periodKey);
+  if (!pay) return;
+  document.getElementById('sheet-title').textContent = pay.period;
+  document.getElementById('sheet-sub').textContent = `${d.plan} · Paid ${pay.amount === 0 ? '(no qualifying jobs)' : ''}`;
+
+  // Metrics with expandable per-job breakdown
+  const jobsByMetric = d.payoutJobs[periodKey] || {};
+  const metricsHtml = d.currentMetrics.map(m => {
+    const amount = pay.metrics[m.key] || 0;
+    const jobs = jobsByMetric[m.key] || [];
+    const expandable = jobs.length > 0;
+    return `
+      <div class="pmrow" id="pm-${m.key}">
+        <div class="summary" ${expandable ? `onclick="document.getElementById('pm-${m.key}').classList.toggle('open')"` : ''}>
+          <span class="metric-icon">${ICONS[m.icon]}</span>
+          <div style="flex:1;">
+            <div style="font-weight:700;font-size:14px;">${m.name}</div>
+            <div style="font-size:11px;color:var(--muted);margin-top:2px;">${expandable ? `${jobs.length} eligible job${jobs.length===1?'':'s'} · tap to view` : 'No qualifying jobs this period'}</div>
+          </div>
+          <div style="font-family:'p22-mackinac-pro',serif;font-weight:700;font-size:16px;color:${amount > 0 ? 'var(--green)' : 'var(--ink)'};">${fmt$(amount)}</div>
+          ${expandable ? `<svg class="chev" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="9 18 15 12 9 6"/></svg>` : ''}
+        </div>
+        ${expandable ? `
+          <div class="detail">
+            ${jobs.map(j => `
+              <div class="pmjob">
+                <div class="info">
+                  <div class="top">${j.jobNo} · ${j.property}</div>
+                  <div class="bot">${j.math}</div>
+                </div>
+                <div class="amt">${fmt$(j.amount)}</div>
+              </div>
+            `).join('')}
+          </div>
+        ` : ''}
+      </div>
+    `;
+  }).join('');
+
+  document.getElementById('sheet-body').innerHTML = `
+    <div class="total-card" style="text-align:center;padding:20px 16px;">
+      <div class="total-card-label">Total paid this period</div>
+      <div style="font-family:'p22-mackinac-pro',serif;font-weight:700;font-size:36px;letter-spacing:-1px;color:${pay.amount > 0 ? 'var(--green)' : 'var(--ink)'};margin-top:4px;">${fmt$(pay.amount)}</div>
+    </div>
+    <div class="jb-section-title">Earnings by metric</div>
+    ${metricsHtml}
+    <div style="font-size:11px;color:var(--faint);text-align:center;margin-top:14px;">Tap a metric with eligible jobs to see the job-by-job breakdown.</div>
+  `;
+  openSheet();
+}
+
+function openSheet() {
+  document.getElementById('sheet').classList.add('open');
+  document.getElementById('sheet-bg').classList.add('open');
+}
+function closeSheet() {
+  document.getElementById('sheet').classList.remove('open');
+  document.getElementById('sheet-bg').classList.remove('open');
+}
+
+// ═══════════════════ INIT ═══════════════════
+const fromParam = new URLSearchParams(window.location.search).get('from');
+if (fromParam === 'b') setScenario('b'); else render();
+</script>
+
+</body>
+</html>

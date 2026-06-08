@@ -9,7 +9,7 @@
     * { box-sizing: border-box; margin: 0; padding: 0; }
     body { font-family: 'Matter', -apple-system, BlinkMacSystemFont, sans-serif; background: #f5f4f0; color: #1a1a1a; min-height: 100vh; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 40px 24px; }
     h1, h2 { font-family: 'p22-mackinac-pro', serif; font-weight: 600; }
-    .wrap { max-width: 720px; width: 100%; }
+    .wrap { max-width: 960px; width: 100%; }
     .eyebrow { font-size: 11px; font-weight: 700; color: #6b7280; text-transform: uppercase; letter-spacing: .6px; margin-bottom: 10px; }
     h1 { font-size: 42px; line-height: 1.1; margin-bottom: 14px; letter-spacing: -.5px; }
     .lede { font-size: 16px; color: #4b5563; line-height: 1.55; margin-bottom: 38px; }
@@ -31,7 +31,7 @@
     <h1>Job-Based Plans</h1>
     <p class="lede">Interactive prototypes for the Q2 2026 Job-Based Plans feature: plan creation, admin views, and payout calculation. All have Scenario A (Crew Chief, Individual) and Scenario B (Field Tech, Job Pool) toggles.</p>
 
-    <style>.cards{grid-template-columns:1fr 1fr 1fr;}</style>
+    <style>.cards{grid-template-columns:repeat(2,1fr);}@media(min-width:880px){.cards{grid-template-columns:repeat(4,1fr);}}</style>
     <div class="cards">
       <a class="card" href="./builder.html">
         <div class="icon">
@@ -57,6 +57,15 @@
         </div>
         <h2>Calculate Payout</h2>
         <p>3-step payout flow — Review jobs → Awards & Insights with per-employee drill-down to job-by-job math → Finalize & Notify.</p>
+        <span class="arrow">Open prototype →</span>
+      </a>
+
+      <a class="card" href="./employee.html">
+        <div class="icon">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="2" width="14" height="20" rx="3"/><line x1="11" y1="18" x2="13" y2="18"/></svg>
+        </div>
+        <h2>Employee View (Mobile)</h2>
+        <p>Mobile app: Home / Board / Payouts / Profile. Tap a metric to see job-by-job earnings. Plan summary split into Eligibility + Rules.</p>
         <span class="arrow">Open prototype →</span>
       </a>
     </div>
