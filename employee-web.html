@@ -1,0 +1,857 @@
+<!DOCTYPE html>
+<html lang="en"><head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Employee (Web) · ShareWillow Job-Based Plan Prototype</title>
+  <link href="https://use.typekit.net/mgx2gxv.css" rel="stylesheet">
+  <style>
+    :root {
+      --bg: #f7f5ee;
+      --card: #ffffff;
+      --hairline: #ece7d5;
+      --hairline-2: #f3eee0;
+      --ink: #1a1a1a;
+      --ink-2: #374151;
+      --muted: #6b7280;
+      --faint: #9ca3af;
+      --accent: #2563eb;
+      --green: #16a34a;
+      --green-bg: #dcfce7;
+      --green-light: #d1fae5;
+      --amber: #b45309;
+      --amber-bg: #fef3c7;
+      --red: #b91c1c;
+      --red-bg: #fef2f2;
+      --orange: #f97316;
+      --purple: #7c3aed;
+    }
+    * { box-sizing: border-box; }
+    body { font-family: 'Matter', -apple-system, BlinkMacSystemFont, sans-serif; background: var(--bg); color: var(--ink); margin: 0; min-height: 100vh; font-size: 14px; }
+    h1, h2, h3, h4 { font-family: 'p22-mackinac-pro', serif; font-weight: 600; margin: 0; }
+
+    /* Prototype controls */
+    #proto-bar { padding: 9px 24px; display: flex; align-items: center; gap: 10px; border-bottom: 1px solid var(--hairline); background: #fafaf6; }
+    .sc-tab { padding: 6px 14px; border-radius: 6px; font-size: 12px; font-weight: 500; cursor: pointer; transition: all .15s; border: 1.5px solid var(--hairline); background: white; color: var(--ink-2); font-family: inherit; white-space: nowrap; }
+    .sc-tab.active { background: var(--ink); color: white; border-color: var(--ink); }
+
+    /* App nav bar (logo + user icon) */
+    .app-nav { height: 64px; display: flex; align-items: center; justify-content: space-between; padding: 0 36px; border-bottom: 1px solid var(--hairline); background: var(--bg); }
+    .logo { display: flex; align-items: center; gap: 8px; font-family: 'p22-mackinac-pro', serif; font-size: 22px; font-weight: 700; color: var(--ink); }
+    .logo svg { width: 26px; height: 26px; }
+    .user-btn { width: 38px; height: 38px; border-radius: 50%; background: #efece1; border: 1px solid var(--hairline); display: inline-flex; align-items: center; justify-content: center; color: var(--ink-2); cursor: pointer; }
+    .user-btn svg { width: 20px; height: 20px; }
+
+    /* Page wrap */
+    .page { max-width: 1280px; margin: 0 auto; padding: 32px 36px 80px; }
+
+    /* Plan header */
+    .plan-head { padding-bottom: 16px; border-bottom: 1px solid var(--hairline); margin-bottom: 22px; }
+    .plan-title-row { display: flex; align-items: center; gap: 14px; margin-bottom: 6px; }
+    h1.plan-title { font-size: 36px; letter-spacing: -.5px; line-height: 1.1; }
+    .pill-live { background: var(--green-light); color: var(--green); padding: 4px 12px; border-radius: 999px; font-size: 12px; font-weight: 600; }
+    .plan-meta { font-size: 13px; color: var(--muted); }
+
+    /* Tabs */
+    .tabs { display: flex; align-items: center; gap: 0; margin-bottom: 26px; }
+    .tab { padding: 9px 0; margin-right: 26px; font-size: 14px; font-weight: 500; color: var(--muted); cursor: pointer; border: none; background: none; font-family: inherit; border-bottom: 2px solid transparent; }
+    .tab:hover { color: var(--ink); }
+    .tab.active { color: var(--ink); font-weight: 600; border-bottom-color: var(--ink); }
+    .tab .pill-new { background: var(--green-light); color: var(--green); padding: 2px 6px; border-radius: 999px; font-size: 9px; font-weight: 700; margin-left: 6px; letter-spacing: .3px; vertical-align: 1px; }
+
+    /* Layout: main + right rail */
+    .layout { display: grid; grid-template-columns: minmax(0, 1fr) 320px; gap: 28px; align-items: start; }
+
+    /* Section title */
+    .section-title { font-family: 'p22-mackinac-pro', serif; font-weight: 600; font-size: 20px; }
+    .section-row { display: flex; align-items: center; justify-content: space-between; margin-bottom: 16px; }
+
+    /* Period dropdown */
+    .period-pill { background: white; border: 1.5px solid var(--hairline); border-radius: 10px; padding: 8px 14px; font-size: 13px; font-weight: 500; cursor: pointer; display: inline-flex; align-items: center; gap: 8px; font-family: inherit; color: var(--ink); }
+    .period-pill svg { width: 12px; height: 12px; }
+
+    /* Metric grid */
+    .metric-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+
+    /* Metric card */
+    .metric-card { background: white; border: 1px solid var(--hairline); border-radius: 14px; padding: 18px 20px; }
+    .mc-head { display: flex; align-items: center; gap: 10px; margin-bottom: 14px; }
+    .mc-icon { width: 34px; height: 34px; border-radius: 50%; background: var(--green-light); color: var(--green); display: inline-flex; align-items: center; justify-content: center; flex-shrink: 0; }
+    .mc-icon.purple { background: #ede9fe; color: var(--purple); }
+    .mc-icon.orange { background: #ffedd5; color: var(--orange); }
+    .mc-icon.dark { background: #e7e5dd; color: var(--ink); }
+    .mc-icon svg { width: 16px; height: 16px; }
+    .mc-name { font-size: 14px; font-weight: 600; flex: 1; }
+    .mc-status-dot { width: 8px; height: 8px; border-radius: 50%; background: var(--green); display: inline-block; vertical-align: middle; margin-left: 4px; }
+    .mc-value { font-family: 'p22-mackinac-pro', serif; font-size: 28px; font-weight: 600; line-height: 1; margin-bottom: 18px; letter-spacing: -.4px; }
+    .mc-footer { display: flex; align-items: center; justify-content: space-between; padding-top: 14px; border-top: 1px solid var(--hairline-2); }
+    .mc-projected-label { font-size: 12px; color: var(--muted); }
+    .mc-projected-pill { background: var(--green-light); color: var(--green); padding: 3px 10px; border-radius: 999px; font-size: 12px; font-weight: 600; display: inline-flex; align-items: center; gap: 4px; }
+    .mc-details { display: inline-flex; align-items: center; gap: 4px; font-size: 13px; color: var(--ink); font-weight: 500; cursor: pointer; text-decoration: none; padding-top: 12px; }
+    .mc-details:hover { text-decoration: underline; }
+
+    /* Right rail card */
+    .rail-card { background: var(--bg); border: 1px solid var(--hairline); border-radius: 14px; padding: 22px 24px; }
+    .rail-label { font-size: 13px; color: var(--muted); margin-bottom: 8px; }
+    .rail-value { font-family: 'p22-mackinac-pro', serif; font-size: 30px; font-weight: 600; letter-spacing: -.5px; line-height: 1; margin-bottom: 6px; }
+    .rail-divider { border-top: 1px solid var(--hairline); margin: 18px 0; }
+    .rail-row { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
+    .ring { width: 36px; height: 36px; border-radius: 50%; background: conic-gradient(var(--ink) calc(var(--p, 35) * 1%), #e7e5dd 0); display: inline-flex; align-items: center; justify-content: center; flex-shrink: 0; position: relative; }
+    .ring::after { content: ""; position: absolute; inset: 4px; background: var(--bg); border-radius: 50%; }
+
+    /* Plan Summary list */
+    .ps-card { background: white; border: 1px solid var(--hairline); border-radius: 14px; padding: 6px 24px; }
+    .ps-row { display: flex; align-items: center; gap: 14px; padding: 18px 0; border-bottom: 1px solid var(--hairline-2); }
+    .ps-row:last-child { border-bottom: none; }
+    .ps-icon { width: 36px; height: 36px; border-radius: 50%; background: var(--green-light); color: var(--green); display: inline-flex; align-items: center; justify-content: center; flex-shrink: 0; }
+    .ps-icon.purple { background: #ede9fe; color: var(--purple); }
+    .ps-icon.orange { background: #ffedd5; color: var(--orange); }
+    .ps-icon.dark { background: #e7e5dd; color: var(--ink); }
+    .ps-icon svg { width: 18px; height: 18px; }
+    .ps-body { flex: 1; }
+    .ps-name { font-size: 14px; font-weight: 600; }
+    .ps-type { font-size: 12px; color: var(--muted); margin-top: 1px; }
+    .btn-details { background: white; border: 1.5px solid var(--hairline); border-radius: 8px; padding: 7px 14px; font-size: 13px; font-weight: 500; cursor: pointer; font-family: inherit; color: var(--ink); display: inline-flex; align-items: center; gap: 6px; }
+    .btn-details:hover { border-color: var(--ink); }
+
+    /* Eligibility list */
+    .elig-card { background: white; border: 1px solid var(--hairline); border-radius: 14px; padding: 6px 24px; }
+    .elig-row { display: flex; align-items: center; gap: 10px; padding: 14px 0; border-bottom: 1px solid var(--hairline-2); font-size: 14px; }
+    .elig-row:last-child { border-bottom: none; }
+    .elig-row .check { color: var(--green); font-weight: 700; }
+    .small-label { font-family: 'p22-mackinac-pro', serif; font-weight: 600; font-size: 18px; margin: 22px 0 12px; }
+
+    /* Awards table */
+    .awards-card { background: white; border: 1px solid var(--hairline); border-radius: 14px; padding: 8px 0; overflow: hidden; }
+    .awards-table { width: 100%; border-collapse: collapse; }
+    .awards-table th { font-size: 11px; font-weight: 600; color: var(--muted); text-transform: none; padding: 14px 18px; text-align: left; border-bottom: 1px solid var(--hairline-2); white-space: nowrap; }
+    .awards-table td { padding: 18px; border-bottom: 1px solid var(--hairline-2); font-size: 14px; vertical-align: middle; }
+    .awards-table tr:last-child td { border-bottom: none; }
+    .awards-table tr.clickable { cursor: pointer; }
+    .awards-table tr.clickable:hover td { background: #fdfcf3; }
+    .period-cell { display: flex; align-items: center; gap: 12px; }
+    .period-cal { width: 36px; height: 36px; border-radius: 50%; background: #efece1; color: var(--ink); display: inline-flex; align-items: center; justify-content: center; flex-shrink: 0; }
+    .period-cal svg { width: 16px; height: 16px; }
+    .period-name { font-weight: 600; font-size: 13px; }
+    .period-dates { font-size: 11px; color: var(--muted); margin-top: 1px; }
+
+    /* Jobs tab */
+    .jobs-card { background: white; border: 1px solid var(--hairline); border-radius: 14px; overflow: hidden; }
+    .jobs-table { width: 100%; border-collapse: collapse; font-size: 13px; }
+    .jobs-table th { background: #fafaf3; font-size: 11px; font-weight: 600; color: var(--muted); text-transform: uppercase; letter-spacing: .5px; padding: 12px 14px; text-align: left; border-bottom: 1px solid var(--hairline); }
+    .jobs-table td { padding: 14px; border-bottom: 1px solid var(--hairline-2); vertical-align: middle; }
+    .jobs-table tr.parent { cursor: pointer; }
+    .jobs-table tr.parent:hover td { background: #fdfcf3; }
+    .jobs-table tr.parent.inelig td { background: #fdfcf2; color: var(--muted); }
+    .jobs-table tr.parent.open td { background: #fafaf3; }
+    .jobs-table tr.expand td { padding: 0; background: #fafaf3; border-bottom: 1px solid var(--hairline); }
+    .expand-inner { padding: 16px 22px 20px; }
+    .expand-title { font-size: 11px; font-weight: 700; color: var(--muted); text-transform: uppercase; letter-spacing: .45px; margin-bottom: 10px; }
+    .expand-table { width: 100%; border-collapse: collapse; font-size: 12.5px; background: white; border: 1px solid var(--hairline); border-radius: 10px; overflow: hidden; }
+    .expand-table th { background: white; padding: 9px 12px; text-align: left; font-size: 10px; font-weight: 600; color: var(--muted); text-transform: uppercase; letter-spacing: .35px; border-bottom: 1px solid var(--hairline-2); }
+    .expand-table td { padding: 11px 12px; border-bottom: 1px solid var(--hairline-2); }
+    .expand-table tr:last-child td { border-bottom: none; }
+    .formula { font-family: 'JetBrains Mono', ui-monospace, Menlo, monospace; font-size: 11.5px; color: var(--ink-2); background: #fafaf3; padding: 3px 8px; border-radius: 5px; display: inline-block; }
+    .status-pill { display: inline-flex; align-items: center; gap: 4px; padding: 3px 9px; border-radius: 999px; font-size: 11px; font-weight: 600; }
+    .status-pill.elig { background: var(--green-light); color: var(--green); }
+    .status-pill.inelig { background: var(--red-bg); color: var(--red); }
+    .m-pass { color: var(--green); font-weight: 500; }
+    .m-fail { color: var(--red); font-weight: 500; }
+    .my-share { font-weight: 700; }
+    .chev-mini { color: var(--faint); transition: transform .15s; display: inline-block; }
+    tr.parent.open .chev-mini { transform: rotate(90deg); color: var(--ink); }
+    .job-link { color: var(--accent); text-decoration: none; font-weight: 500; }
+
+    .chips { display: inline-flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+    .chip { font-size: 12px; padding: 6px 12px; border-radius: 999px; border: 1.5px solid var(--hairline); background: white; cursor: pointer; font-weight: 500; color: var(--ink-2); font-family: inherit; display: inline-flex; align-items: center; gap: 5px; }
+    .chip:hover { border-color: var(--faint); }
+    .chip.active { background: var(--ink); border-color: var(--ink); color: white; }
+    .chip-n { background: rgba(0,0,0,.07); font-size: 10px; font-weight: 700; padding: 1px 6px; border-radius: 999px; }
+    .chip.active .chip-n { background: rgba(255,255,255,.18); }
+
+    /* KPI row (above Jobs table) */
+    .kpi-row { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; margin-bottom: 18px; }
+    .kpi-tile { background: white; border: 1px solid var(--hairline); border-radius: 12px; padding: 14px 16px; }
+    .kpi-label { font-size: 10.5px; font-weight: 700; color: var(--muted); text-transform: uppercase; letter-spacing: .45px; margin-bottom: 6px; }
+    .kpi-value { font-family: 'p22-mackinac-pro', serif; font-size: 22px; font-weight: 600; line-height: 1.1; }
+    .kpi-sub { font-size: 11px; color: var(--muted); margin-top: 4px; }
+    .kpi-sub.up { color: var(--green); }
+    .kpi-sub.down { color: var(--amber); }
+
+    /* Modal */
+    #modal-bg { position: fixed; inset: 0; background: rgba(0,0,0,.5); z-index: 99; display: none; }
+    #modal-bg.open { display: block; }
+    .modal { position: fixed; left: 50%; top: 50%; transform: translate(-50%, -50%); width: 92%; max-width: 720px; max-height: 86vh; background: white; border-radius: 16px; box-shadow: 0 20px 40px rgba(0,0,0,.2); z-index: 100; display: none; flex-direction: column; overflow: hidden; }
+    .modal.open { display: flex; }
+    .modal-head { padding: 20px 26px 14px; display: flex; align-items: flex-start; justify-content: space-between; gap: 12px; border-bottom: 1px solid var(--hairline-2); flex-shrink: 0; }
+    .modal-title { font-size: 22px; font-family: 'p22-mackinac-pro', serif; font-weight: 600; }
+    .btn-close { background: none; border: none; color: var(--faint); font-size: 22px; cursor: pointer; padding: 0; line-height: 1; }
+    .modal-body { padding: 22px 26px 28px; overflow-y: auto; }
+    .modal-section-title { font-family: 'p22-mackinac-pro', serif; font-weight: 600; font-size: 16px; margin: 18px 0 10px; }
+    .modal-row { display: flex; align-items: center; justify-content: space-between; padding: 16px 0; border-bottom: 1px solid var(--hairline-2); font-size: 14px; cursor: pointer; }
+    .modal-row:last-child { border-bottom: none; }
+    .modal-row .info { display: flex; flex-direction: column; }
+    .modal-row .info .top { font-weight: 600; }
+    .modal-row .info .bot { font-size: 12px; color: var(--muted); margin-top: 2px; }
+    .modal-row .amt { font-weight: 700; font-size: 16px; font-family: 'p22-mackinac-pro', serif; }
+    .modal-row .chev { color: var(--faint); margin-left: 14px; }
+
+    .modal-period-row { display: flex; align-items: center; gap: 14px; padding: 12px 16px; background: #fafaf3; border-radius: 12px; }
+    .modal-period-row .left { display: flex; align-items: center; gap: 12px; flex: 1; }
+
+    .modal-pill-row { display: flex; align-items: center; justify-content: space-between; padding: 18px 4px; border-bottom: 1px solid var(--hairline-2); }
+    .modal-pill-row:last-child { border-bottom: none; }
+    .subtotal-row { display: flex; align-items: center; justify-content: space-between; padding: 18px 4px; border-top: 1px solid var(--hairline); margin-top: 4px; font-weight: 700; }
+  </style>
+</head>
+<body>
+
+<!-- Prototype controls -->
+<div id="proto-bar">
+  <span style="font-size:11px;font-weight:700;color:var(--faint);text-transform:uppercase;letter-spacing:.5px;">Prototype:</span>
+  <button class="sc-tab active" id="sc-a" onclick="setScenario('a')">A — Crew Chief (Anthony H.)</button>
+  <button class="sc-tab" id="sc-b" onclick="setScenario('b')">B — Field Tech (Carlos R.)</button>
+  <a href="./employee.html" style="margin-left:auto;font-size:12px;color:var(--accent);text-decoration:none;">📱 Mobile view</a>
+</div>
+
+<!-- App nav -->
+<div class="app-nav">
+  <div class="logo">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 10c4-2 8-2 12 0s8 2 12 0v12c-4 2-8 2-12 0s-8-2-12 0V10z" transform="translate(-1.5 -1)"/></svg>
+    <span>ShareWillow</span>
+  </div>
+  <button class="user-btn">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="4"/><path d="M4 21v-2a4 4 0 014-4h8a4 4 0 014 4v2"/></svg>
+  </button>
+</div>
+
+<div class="page">
+  <!-- Plan header -->
+  <div class="plan-head">
+    <div class="plan-title-row">
+      <h1 class="plan-title" id="plan-title">HVAC Install Crew Chief Bonus</h1>
+      <span class="pill-live">Live</span>
+    </div>
+    <div class="plan-meta" id="plan-meta">2026 Job-Based Plan · Weekly Payout</div>
+  </div>
+
+  <!-- Tabs -->
+  <div class="tabs">
+    <button class="tab active" id="t-performance" onclick="setTab('performance')">Performance</button>
+    <button class="tab" id="t-summary" onclick="setTab('summary')">Plan Summary</button>
+    <button class="tab" id="t-awards" onclick="setTab('awards')">Awards</button>
+    <button class="tab" id="t-jobs" onclick="setTab('jobs')">Jobs <span class="pill-new">NEW</span></button>
+  </div>
+
+  <!-- ────── PERFORMANCE TAB ────── -->
+  <div class="tab-pane" id="pane-performance">
+    <div class="layout">
+      <div>
+        <div class="section-row">
+          <h2 class="section-title">Your Performance</h2>
+          <div class="period-pill" id="perf-period-pill">
+            Week of May 12 – 18
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="6 9 12 15 18 9"/></svg>
+          </div>
+        </div>
+        <div class="metric-grid" id="perf-metrics"></div>
+      </div>
+
+      <!-- Right rail -->
+      <div>
+        <div class="rail-card">
+          <div class="rail-label">Current Projected Award</div>
+          <div class="rail-value" id="rail-projected">$440</div>
+          <div class="rail-divider"></div>
+          <div class="rail-row">
+            <div>
+              <div class="rail-label" style="margin-bottom:2px;">Days left in period</div>
+              <div style="font-family:'p22-mackinac-pro',serif;font-size:24px;font-weight:600;" id="rail-days">5</div>
+            </div>
+            <div class="ring" style="--p: 30;"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ────── PLAN SUMMARY TAB ────── -->
+  <div class="tab-pane" id="pane-summary" style="display:none;">
+    <div class="layout">
+      <div>
+        <h2 class="section-title" style="margin-bottom:14px;">Eligibility</h2>
+        <p style="font-size:13px;color:var(--muted);margin:0 0 12px;">A job must meet all of these to qualify for a bonus.</p>
+        <div class="elig-card" id="elig-list"></div>
+
+        <h2 class="section-title" style="margin:28px 0 14px;">How Your Bonus Works</h2>
+        <p style="font-size:13px;color:var(--muted);margin:0 0 12px;">Per-job awards and additional bonuses earned on eligible jobs.</p>
+        <div class="ps-card" id="rules-list"></div>
+      </div>
+
+      <div>
+        <div class="rail-card">
+          <div class="rail-label">Total Earned YTD</div>
+          <div class="rail-value" id="rail-ytd">$1,250</div>
+          <div class="rail-divider"></div>
+          <div class="rail-row">
+            <div>
+              <div class="rail-label" style="margin-bottom:2px;">Days left in current period</div>
+              <div style="font-family:'p22-mackinac-pro',serif;font-size:24px;font-weight:600;" id="rail-days-2">5</div>
+            </div>
+            <div class="ring" style="--p: 30;"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ────── AWARDS TAB ────── -->
+  <div class="tab-pane" id="pane-awards" style="display:none;">
+    <div class="section-row">
+      <div>
+        <h2 class="section-title">Award Breakdown</h2>
+        <p style="font-size:13px;color:var(--muted);margin:4px 0 0;max-width:700px;">All pay periods in the selected quarter are shown below. Click any row to see the breakdown.</p>
+      </div>
+      <div class="period-pill">
+        Q2
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="6 9 12 15 18 9"/></svg>
+      </div>
+    </div>
+    <div class="awards-card">
+      <table class="awards-table">
+        <thead><tr id="awards-head"></tr></thead>
+        <tbody id="awards-rows"></tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- ────── JOBS TAB (NEW for job-based) ────── -->
+  <div class="tab-pane" id="pane-jobs" style="display:none;">
+    <div class="section-row">
+      <div>
+        <h2 class="section-title">Your Jobs</h2>
+        <p style="font-size:13px;color:var(--muted);margin:4px 0 0;">Eligible jobs you were on this period and what you earned from each.</p>
+      </div>
+      <div class="period-pill">Week of May 12 – 18 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="6 9 12 15 18 9"/></svg></div>
+    </div>
+
+    <div class="kpi-row" id="jobs-kpis"></div>
+
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;flex-wrap:wrap;gap:10px;">
+      <div class="chips">
+        <span style="font-size:12px;color:var(--muted);margin-right:4px;">Show:</span>
+        <button class="chip active" id="chip-all" onclick="setFilter('all')">All <span class="chip-n" id="chip-all-n">0</span></button>
+        <button class="chip" id="chip-elig" onclick="setFilter('eligible')">✓ Eligible <span class="chip-n" id="chip-elig-n">0</span></button>
+        <button class="chip" id="chip-inelig" onclick="setFilter('ineligible')">✗ Ineligible <span class="chip-n" id="chip-inelig-n">0</span></button>
+      </div>
+      <span id="jobs-count" style="font-size:12px;color:var(--faint);">Showing 0 jobs</span>
+    </div>
+
+    <div class="jobs-card">
+      <table class="jobs-table">
+        <thead>
+          <tr>
+            <th style="width:28px;"></th>
+            <th>Job #</th>
+            <th>Date</th>
+            <th>Customer</th>
+            <th>GP %</th>
+            <th>On-Time</th>
+            <th>Callbacks 30d</th>
+            <th>Status</th>
+            <th style="text-align:right;" id="jobs-th-amount">My Share</th>
+          </tr>
+        </thead>
+        <tbody id="jobs-rows"></tbody>
+      </table>
+    </div>
+    <div style="font-size:11px;color:var(--faint);text-align:center;margin-top:12px;">Click any eligible job to see the math behind your earnings.</div>
+  </div>
+
+</div>
+
+<!-- Modal -->
+<div id="modal-bg" onclick="closeModal()"></div>
+<div class="modal" id="modal">
+  <div class="modal-head">
+    <div>
+      <div style="font-size:11px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.5px;margin-bottom:4px;" id="modal-eyebrow">Detail</div>
+      <div class="modal-title" id="modal-title">Detail</div>
+    </div>
+    <button class="btn-close" onclick="closeModal()">×</button>
+  </div>
+  <div class="modal-body" id="modal-body"></div>
+</div>
+
+<script>
+// ═══════════════════ DATA ═══════════════════
+let scenario = 'a';
+let tab = 'performance';
+let jobsFilter = 'all';
+const openJobs = new Set();
+
+// Icon paths
+const I = {
+  install:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14.7 6.3a1 1 0 000 1.4l1.6 1.6a1 1 0 001.4 0l3.77-3.77a6 6 0 01-7.94 7.94l-6.91 6.91a2.12 2.12 0 01-3-3l6.91-6.91a6 6 0 017.94-7.94l-3.76 3.76z"/></svg>',
+  trend:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="22 7 13.5 15.5 8.5 10.5 2 17"/><polyline points="16 7 22 7 22 13"/></svg>',
+  star:'<svg viewBox="0 0 24 24" fill="currentColor"><polygon points="12 2 15 8.5 22 9.3 17 14.1 18.2 21 12 17.8 5.8 21 7 14.1 2 9.3 9 8.5 12 2"/></svg>',
+  pool:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="7" r="4"/><circle cx="17" cy="9" r="3"/><path d="M3 21v-2a4 4 0 014-4h4a4 4 0 014 4v2"/><path d="M16 13a3 3 0 015 2.5V17"/></svg>',
+  clock:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>',
+  cal:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>',
+};
+
+const SCEN = {
+  a: {
+    plan: 'HVAC Install Crew Chief Bonus',
+    meta: '2026 Job-Based Plan · Weekly Payout',
+    employeeName: 'Anthony Headen',
+    isPool: false,
+    period: 'May 12 – 18',
+    daysLeft: 5,
+    daysPct: 30,
+    projected: 440,
+    ytd: 1250,
+    // Current period metrics
+    metrics: [
+      { key: 'installs',  iconKey: 'install', iconCls: '',       name: 'Eligible Installs',  value: 3,        unit: 'jobs',    projected: 225, },
+      { key: 'gpbonus',   iconKey: 'trend',   iconCls: '',       name: 'GP Over $5k Bonus',  value: '$4,300', unit: 'over',    projected: 215, },
+      { key: 'reviews',   iconKey: 'star',    iconCls: 'orange', name: '5-Star Reviews',     value: 0,        unit: 'reviews', projected: 0,   },
+    ],
+    // Eligibility criteria
+    eligibility: [
+      'GP% ≥ 35% on the job',
+      'Completed on or before scheduled date',
+      'No callbacks within 30 days',
+    ],
+    // Rules / How Your Bonus Works
+    rules: [
+      { iconKey: 'install', iconCls: '',       name: 'Piece Rate per Eligible Install', type: 'Piece Rate Award · $75 per install' },
+      { iconKey: 'trend',   iconCls: '',       name: 'GP-Over-$5k Bonus',                type: 'Commission · 5% of GP over $5,000' },
+      { iconKey: 'star',    iconCls: 'orange', name: '5-Star Review Bonus',              type: 'Per-Event · $25 per 5-star review on an eligible job' },
+    ],
+    // Award table columns
+    awardCols: ['Installs', 'GP Bonus', '5★ Reviews', 'Total'],
+    awardKeys: ['installs', 'gpbonus', 'reviews', 'total'],
+    awardRows: [
+      { wk: 'Wk 5/12', dates: 'May 12 – 18 (current)', installs: 3, gpbonus: 215, reviews: 0,  total: 440 },
+      { wk: 'Wk 5/5',  dates: 'May 5 – 11',           installs: 5, gpbonus: 200, reviews: 25, total: 600 },
+      { wk: 'Wk 4/28', dates: 'Apr 28 – May 4',       installs: 4, gpbonus: 0,   reviews: 0,  total: 300 },
+      { wk: 'Wk 4/21', dates: 'Apr 21 – 27',          installs: 7, gpbonus: 150, reviews: 50, total: 725 },
+      { wk: 'Wk 4/14', dates: 'Apr 14 – 20',          installs: 0, gpbonus: 0,   reviews: 0,  total: 0 },
+    ],
+    awardFmt: { installs: 'count', gpbonus: 'currency', reviews: 'currency', total: 'currency' },
+    awardUnits: { installs: 'jobs', gpbonus: '', reviews: '', total: '' },
+  },
+  b: {
+    plan: 'HVAC Install Field Tech Pool',
+    meta: '2026 Job-Based Plan · Weekly Payout · Crew Member',
+    employeeName: 'Carlos Reyes',
+    isPool: true,
+    period: 'May 12 – 18',
+    daysLeft: 5,
+    daysPct: 30,
+    projected: 174,
+    ytd: 940,
+    metrics: [
+      { key: 'jobs',    iconKey: 'pool',  iconCls: 'purple', name: 'Eligible Jobs Worked', value: 3,    unit: 'jobs',    projected: 174 },
+      { key: 'hours',   iconKey: 'clock', iconCls: 'dark',   name: 'Hours on Jobs',         value: 11.5, unit: 'hours',   projected: null },
+      { key: 'reviews', iconKey: 'star',  iconCls: 'orange', name: '5-Star Reviews',        value: 0,    unit: 'reviews', projected: 0 },
+    ],
+    eligibility: [
+      'GP% ≥ 35% on the job (inherited from Crew Chief plan)',
+      'Completed on or before scheduled date (inherited)',
+      'No callbacks within 30 days (inherited)',
+    ],
+    rules: [
+      { iconKey: 'pool', iconCls: 'purple', name: 'Job Pool · 12% Labor Savings',  type: 'Pool Award · 12% × labor savings · split by hours after $60 lead deduction' },
+      { iconKey: 'star', iconCls: 'orange', name: '5-Star Review Bonus (per job)', type: 'Per-Event Pool · $25 per review, split among crew by hours' },
+    ],
+    awardCols: ['Jobs', 'Hours', 'Pool Share', '5★ Reviews', 'Total'],
+    awardKeys: ['jobs', 'hours', 'pool', 'reviews', 'total'],
+    awardRows: [
+      { wk: 'Wk 5/12', dates: 'May 12 – 18 (current)', jobs: 3, hours: 11.5, pool: 174, reviews: 0,  total: 174 },
+      { wk: 'Wk 5/5',  dates: 'May 5 – 11',           jobs: 5, hours: 18.0, pool: 230, reviews: 0,  total: 230 },
+      { wk: 'Wk 4/28', dates: 'Apr 28 – May 4',       jobs: 4, hours: 15.5, pool: 185, reviews: 25, total: 210 },
+      { wk: 'Wk 4/21', dates: 'Apr 21 – 27',          jobs: 8, hours: 32.0, pool: 326, reviews: 0,  total: 326 },
+      { wk: 'Wk 4/14', dates: 'Apr 14 – 20',          jobs: 0, hours: 0,    pool: 0,   reviews: 0,  total: 0 },
+    ],
+    awardFmt: { jobs: 'count', hours: 'number', pool: 'currency', reviews: 'currency', total: 'currency' },
+    awardUnits: { jobs: '', hours: 'h', pool: '', reviews: '', total: '' },
+  },
+};
+
+// Jobs data — shared, but Scenario A only shows jobs Anthony led; Scenario B shows jobs Carlos was on
+const JOBS = [
+  { id: '#1058', date: 'May 16', customer: 'Smith Residence',  revenue: 12400, gpAmt: 9300, gpPct: 75, onTime: true,  callbacks: 0, savings: 2000, leadA: 'Anthony', crewB: true,  hoursB: 4.5, totalCrewHrsB: 9.0 },
+  { id: '#1057', date: 'May 15', customer: 'Park Place Bldg.', revenue: 8200,  gpAmt: 5400, gpPct: 42, onTime: true,  callbacks: 0, savings: 1600, leadA: 'Austin',  crewB: true,  hoursB: 3.0, totalCrewHrsB: 9.0 },
+  { id: '#1056', date: 'May 15', customer: 'Riverdale Apts.',  revenue: 6800,  gpAmt: 1900, gpPct: 28, onTime: true,  callbacks: 0, savings: 800,  leadA: 'Anthony', crewB: false, hoursB: 0,   totalCrewHrsB: 9.0 },
+  { id: '#1055', date: 'May 14', customer: 'Westwood Family',  revenue: 15300, gpAmt: 7800, gpPct: 51, onTime: true,  callbacks: 1, savings: 1900, leadA: 'Austin',  crewB: false, hoursB: 0,   totalCrewHrsB: 0   },
+  { id: '#1054', date: 'May 14', customer: 'Hartman Office',   revenue: 20500, gpAmt: 8200, gpPct: 40, onTime: true,  callbacks: 0, savings: 2300, leadA: 'Anthony', crewB: true,  hoursB: 4.0, totalCrewHrsB: 12.0 },
+  { id: '#1053', date: 'May 13', customer: 'Bell Townhomes',   revenue: 11000, gpAmt: 4200, gpPct: 38, onTime: false, callbacks: 0, savings: 1100, leadA: 'Anthony', crewB: false, hoursB: 0,   totalCrewHrsB: 0   },
+];
+
+// ═══════════════════ COMPUTE ═══════════════════
+function evalElig(j) {
+  const reasons = [];
+  if (j.gpPct < 35)    reasons.push('GP% below 35%');
+  if (!j.onTime)       reasons.push('Not on-time');
+  if (j.callbacks > 0) reasons.push('Callback within 30d');
+  return { ok: reasons.length === 0, reasons };
+}
+
+function myJobsForScenario() {
+  // Scenario A: include jobs where Anthony was the lead
+  // Scenario B: include jobs where Carlos was on the crew (crewB)
+  if (scenario === 'a') return JOBS.filter(j => j.leadA === 'Anthony');
+  return JOBS.filter(j => j.crewB);
+}
+
+function myShareFor(j) {
+  const e = evalElig(j);
+  if (!e.ok) return { eligible: false, reasons: e.reasons, amount: 0, math: null, details: null };
+  if (scenario === 'a') {
+    const piece = 75;
+    const bonus = j.gpAmt > 5000 ? Math.round((j.gpAmt - 5000) * 0.05) : 0;
+    return {
+      eligible: true, amount: piece + bonus,
+      math: bonus ? `$75 piece + $${bonus} GP bonus` : `$75 piece rate`,
+      details: { piece, bonus, total: piece + bonus, gpAmt: j.gpAmt },
+    };
+  } else {
+    const pool = Math.round(j.savings * 0.12);
+    const ded = 60;
+    const crew = Math.max(0, pool - ded);
+    const share = j.totalCrewHrsB ? (j.hoursB / j.totalCrewHrsB) : 0;
+    const amount = Math.round(crew * share);
+    return {
+      eligible: true, amount,
+      math: `${j.hoursB}h / ${j.totalCrewHrsB}h of $${crew} crew pool`,
+      details: { pool, ded, crew, share: Math.round(share*100), hours: j.hoursB, totalHrs: j.totalCrewHrsB, amount },
+    };
+  }
+}
+
+// ═══════════════════ RENDER ═══════════════════
+function setScenario(s) {
+  scenario = s;
+  document.getElementById('sc-a').classList.toggle('active', s === 'a');
+  document.getElementById('sc-b').classList.toggle('active', s === 'b');
+  openJobs.clear();
+  render();
+}
+
+function setTab(t) {
+  tab = t;
+  ['performance','summary','awards','jobs'].forEach(n => {
+    document.getElementById('pane-' + n).style.display = (n === t) ? 'block' : 'none';
+    document.getElementById('t-' + n).classList.toggle('active', n === t);
+  });
+}
+
+function fmt$(n) { return '$' + (n || 0).toLocaleString(); }
+
+function render() {
+  const d = SCEN[scenario];
+  document.getElementById('plan-title').textContent = d.plan;
+  document.getElementById('plan-meta').textContent = d.meta;
+  document.title = d.plan + ' · ShareWillow';
+  document.getElementById('perf-period-pill').firstChild.textContent = `Week of ${d.period} `;
+
+  // PERFORMANCE — metric cards
+  document.getElementById('perf-metrics').innerHTML = d.metrics.map(m => `
+    <div class="metric-card">
+      <div class="mc-head">
+        <span class="mc-icon ${m.iconCls}">${I[m.iconKey]}</span>
+        <span class="mc-name">${m.name} <span class="mc-status-dot"></span></span>
+      </div>
+      <div class="mc-value">${typeof m.value === 'number' ? m.value.toLocaleString() : m.value}</div>
+      <div class="mc-footer">
+        <span class="mc-projected-label">Projected Award</span>
+        <span class="mc-projected-pill">${m.projected === null ? '—' : fmt$(m.projected)}</span>
+      </div>
+      <a class="mc-details" onclick="openMetricModal('${m.key}')">View Details ›</a>
+    </div>
+  `).join('');
+
+  // Right rail
+  document.getElementById('rail-projected').textContent = fmt$(d.projected);
+  document.getElementById('rail-ytd').textContent = fmt$(d.ytd);
+  document.getElementById('rail-days').textContent = d.daysLeft;
+  document.getElementById('rail-days-2').textContent = d.daysLeft;
+  document.querySelectorAll('.ring').forEach(r => r.style.setProperty('--p', d.daysPct));
+
+  // PLAN SUMMARY
+  document.getElementById('elig-list').innerHTML = d.eligibility.map(e => `
+    <div class="elig-row"><span class="check">✓</span> ${e}</div>
+  `).join('');
+  document.getElementById('rules-list').innerHTML = d.rules.map(r => `
+    <div class="ps-row">
+      <span class="ps-icon ${r.iconCls}">${I[r.iconKey]}</span>
+      <div class="ps-body">
+        <div class="ps-name">${r.name}</div>
+        <div class="ps-type">${r.type}</div>
+      </div>
+      <button class="btn-details" onclick="openRuleModal('${r.name}')">Details <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="6 9 12 15 18 9"/></svg></button>
+    </div>
+  `).join('');
+
+  // AWARDS table
+  document.getElementById('awards-head').innerHTML =
+    '<th>Period</th>' + d.awardCols.map(c => `<th>${c}</th>`).join('');
+  document.getElementById('awards-rows').innerHTML = d.awardRows.map(r => {
+    const cells = d.awardKeys.map((k, i) => {
+      const v = r[k];
+      const fmt = d.awardFmt[k];
+      const unit = d.awardUnits[k];
+      const isTotal = k === 'total';
+      let display;
+      if (fmt === 'currency') display = v === 0 ? '$0' : fmt$(v);
+      else if (fmt === 'number') display = (v || 0).toFixed(unit ? 1 : 0) + (unit ? unit : '');
+      else display = v;
+      return `<td style="${isTotal ? 'font-weight:700;color:var(--green);' : ''}">${display}</td>`;
+    }).join('');
+    return `
+      <tr class="clickable" onclick="openPayoutModal('${r.wk}')">
+        <td>
+          <div class="period-cell">
+            <span class="period-cal">${I.cal}</span>
+            <div>
+              <div class="period-name">${r.wk}</div>
+              <div class="period-dates">${r.dates}</div>
+            </div>
+          </div>
+        </td>
+        ${cells}
+      </tr>
+    `;
+  }).join('');
+
+  // JOBS tab
+  renderJobsTab();
+}
+
+function renderJobsTab() {
+  const d = SCEN[scenario];
+  const mine = myJobsForScenario();
+  const evald = mine.map(j => {
+    const r = myShareFor(j);
+    const e = evalElig(j);
+    return { ...j, ...r, reasons: e.reasons };
+  });
+  const elig = evald.filter(j => j.eligible);
+  const inelig = evald.filter(j => !j.eligible);
+  const total = evald.length;
+  const earned = elig.reduce((s, j) => s + j.amount, 0);
+  const avg = elig.length ? Math.round(earned / elig.length) : 0;
+  const totalHrs = scenario === 'b' ? elig.reduce((s, j) => s + (j.hoursB || 0), 0) : null;
+
+  document.getElementById('jobs-kpis').innerHTML = `
+    <div class="kpi-tile"><div class="kpi-label">Jobs you were on</div><div class="kpi-value">${total}</div><div class="kpi-sub">this period</div></div>
+    <div class="kpi-tile"><div class="kpi-label">Eligible</div><div class="kpi-value">${elig.length} <span style="font-size:14px;color:var(--muted);font-weight:500;">/ ${total}</span></div><div class="kpi-sub up">${total ? Math.round(elig.length/total*100) : 0}% qualified</div></div>
+    <div class="kpi-tile"><div class="kpi-label">You earned</div><div class="kpi-value" style="color:var(--green);">${fmt$(earned)}</div><div class="kpi-sub">${scenario === 'b' && totalHrs ? totalHrs.toFixed(1) + ' hours worked' : 'across eligible jobs'}</div></div>
+    <div class="kpi-tile"><div class="kpi-label">Avg / Eligible Job</div><div class="kpi-value">${fmt$(avg)}</div><div class="kpi-sub">per qualifying job</div></div>
+  `;
+
+  document.getElementById('chip-all-n').textContent = total;
+  document.getElementById('chip-elig-n').textContent = elig.length;
+  document.getElementById('chip-inelig-n').textContent = inelig.length;
+
+  let shown = evald;
+  if (jobsFilter === 'eligible')   shown = elig;
+  if (jobsFilter === 'ineligible') shown = inelig;
+  document.getElementById('jobs-count').textContent = `Showing ${shown.length} of ${total} jobs`;
+  document.getElementById('jobs-th-amount').textContent = scenario === 'a' ? 'You Earned' : 'Your Share';
+
+  const rowsHtml = shown.map(j => {
+    const isOpen = openJobs.has(j.id);
+    const statusCell = j.eligible
+      ? `<span class="status-pill elig">✓ Eligible</span>`
+      : `<span class="status-pill inelig" title="${j.reasons.join('; ')}">✗ ${j.reasons[0]}</span>`;
+    const amountCell = j.eligible
+      ? `<div class="my-share" style="color:var(--green);">${fmt$(j.amount)}</div><div style="font-size:11px;color:var(--muted);margin-top:1px;">${j.math}</div>`
+      : `<span style="color:var(--faint);">—</span>`;
+    const expandable = j.eligible;
+    const parentRow = `
+      <tr class="parent ${j.eligible ? '' : 'inelig'} ${isOpen ? 'open' : ''}" onclick="toggleJob('${j.id}')">
+        <td><span class="chev-mini">${expandable ? '›' : ''}</span></td>
+        <td><a class="job-link" onclick="event.stopPropagation();">${j.id}</a></td>
+        <td style="color:var(--muted);">${j.date}</td>
+        <td>${j.customer}</td>
+        <td><span class="${j.gpPct < 35 ? 'm-fail' : 'm-pass'}">${j.gpPct}%</span></td>
+        <td><span class="${!j.onTime ? 'm-fail' : 'm-pass'}">${j.onTime ? '✓' : '✗'}</span></td>
+        <td><span class="${j.callbacks > 0 ? 'm-fail' : 'm-pass'}">${j.callbacks > 0 ? '✗ ' + j.callbacks : '✓ 0'}</span></td>
+        <td>${statusCell}</td>
+        <td style="text-align:right;">${amountCell}</td>
+      </tr>`;
+    let expandRow = '';
+    if (isOpen && j.eligible) {
+      let detailRows;
+      if (scenario === 'a') {
+        const det = j.details;
+        detailRows = `
+          <tr><td>Piece Rate</td><td><span class="formula">$75 per eligible install</span></td><td style="text-align:right;font-weight:600;">$${det.piece}</td></tr>
+          ${det.bonus > 0 ? `<tr><td>GP-Over-$5k Bonus</td><td><span class="formula">5% × ($${det.gpAmt.toLocaleString()} − $5,000)</span></td><td style="text-align:right;font-weight:600;">$${det.bonus}</td></tr>` : '<tr><td colspan="3" style="color:var(--muted);font-style:italic;font-size:12px;">GP under $5k — no bonus from this rule on this job.</td></tr>'}
+          <tr style="background:#fafaf3;"><td style="font-weight:700;">Total to you</td><td></td><td style="text-align:right;font-weight:700;color:var(--green);">$${det.total}</td></tr>
+        `;
+      } else {
+        const det = j.details;
+        detailRows = `
+          <tr><td>Job Pool (12% × labor savings)</td><td><span class="formula">12% × $${j.savings.toLocaleString()}</span></td><td style="text-align:right;font-weight:600;">$${det.pool}</td></tr>
+          <tr><td>Lead Deduction</td><td><span class="formula">−$60 to lead plan</span></td><td style="text-align:right;font-weight:600;color:var(--amber);">−$${det.ded}</td></tr>
+          <tr><td>Crew Pool</td><td><span class="formula">$${det.pool} − $${det.ded}</span></td><td style="text-align:right;font-weight:600;">$${det.crew}</td></tr>
+          <tr><td>Your Share</td><td><span class="formula">${det.hours}h / ${det.totalHrs}h = ${det.share}%</span></td><td style="text-align:right;font-weight:600;">$${det.amount}</td></tr>
+          <tr style="background:#fafaf3;"><td style="font-weight:700;">Total to you</td><td></td><td style="text-align:right;font-weight:700;color:var(--green);">$${det.amount}</td></tr>
+        `;
+      }
+      expandRow = `
+        <tr class="expand">
+          <td colspan="9">
+            <div class="expand-inner">
+              <div class="expand-title">Your earnings from this job</div>
+              <table class="expand-table">
+                <thead><tr><th>Component</th><th>Math</th><th style="text-align:right;">Amount</th></tr></thead>
+                <tbody>${detailRows}</tbody>
+              </table>
+            </div>
+          </td>
+        </tr>`;
+    }
+    return parentRow + expandRow;
+  }).join('') || `<tr><td colspan="9" style="text-align:center;color:var(--faint);padding:30px;">No jobs match the current filter.</td></tr>`;
+
+  document.getElementById('jobs-rows').innerHTML = rowsHtml;
+}
+
+function toggleJob(jobId) {
+  if (openJobs.has(jobId)) openJobs.delete(jobId);
+  else openJobs.add(jobId);
+  renderJobsTab();
+}
+
+function setFilter(f) {
+  jobsFilter = f;
+  ['all','elig','inelig'].forEach(k => {
+    const id = k === 'elig' ? 'eligible' : k === 'inelig' ? 'ineligible' : 'all';
+    document.getElementById('chip-' + k).classList.toggle('active', id === f);
+  });
+  openJobs.clear();
+  renderJobsTab();
+}
+
+// ═══════════════════ MODAL ═══════════════════
+function openMetricModal(key) {
+  const d = SCEN[scenario];
+  const m = d.metrics.find(x => x.key === key);
+  if (!m) return;
+  const mine = myJobsForScenario().filter(j => evalElig(j).ok);
+
+  // Build per-job contributions for this metric
+  let rowsHtml = '';
+  if (key === 'installs' || key === 'jobs') {
+    rowsHtml = mine.map(j => {
+      const s = myShareFor(j);
+      return `<div class="modal-row"><div class="info"><div class="top">${j.id} · ${j.customer}</div><div class="bot">${j.date} · ${j.gpPct}% GP</div></div><div class="amt" style="color:var(--green);">${fmt$(s.amount)}</div></div>`;
+    }).join('');
+  } else if (key === 'gpbonus') {
+    rowsHtml = mine.filter(j => j.gpAmt > 5000).map(j => {
+      const bonus = Math.round((j.gpAmt - 5000) * 0.05);
+      return `<div class="modal-row"><div class="info"><div class="top">${j.id} · ${j.customer}</div><div class="bot">GP $${j.gpAmt.toLocaleString()} · 5% × ($${j.gpAmt.toLocaleString()} − $5,000)</div></div><div class="amt" style="color:var(--green);">${fmt$(bonus)}</div></div>`;
+    }).join('') || `<div style="padding:20px;text-align:center;color:var(--muted);font-size:13px;">No jobs had GP over $5,000 this period.</div>`;
+  } else if (key === 'hours') {
+    rowsHtml = mine.map(j => `
+      <div class="modal-row"><div class="info"><div class="top">${j.id} · ${j.customer}</div><div class="bot">${j.date}</div></div><div class="amt">${j.hoursB}h</div></div>
+    `).join('');
+  } else if (key === 'reviews') {
+    rowsHtml = `<div style="padding:20px;text-align:center;color:var(--muted);font-size:13px;">No 5-star reviews recorded this period.</div>`;
+  }
+
+  document.getElementById('modal-eyebrow').textContent = 'Metric Detail';
+  document.getElementById('modal-title').innerHTML = m.name;
+  document.getElementById('modal-body').innerHTML = `
+    <div style="display:flex;align-items:center;justify-content:space-between;padding:14px 0;border-bottom:1px solid var(--hairline-2);">
+      <div>
+        <div style="font-size:11px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.45px;margin-bottom:4px;">Total this period</div>
+        <div style="font-family:'p22-mackinac-pro',serif;font-size:32px;font-weight:600;">${m.projected === null ? '—' : fmt$(m.projected)}</div>
+      </div>
+      <span class="ps-icon ${m.iconCls}" style="width:54px;height:54px;">${I[m.iconKey]}</span>
+    </div>
+    <div class="modal-section-title">Per-job contributions</div>
+    ${rowsHtml}
+  `;
+  showModal();
+}
+
+function openRuleModal(name) {
+  const d = SCEN[scenario];
+  const r = d.rules.find(x => x.name === name);
+  if (!r) return;
+  document.getElementById('modal-eyebrow').textContent = 'Rule Detail';
+  document.getElementById('modal-title').textContent = r.name;
+  document.getElementById('modal-body').innerHTML = `
+    <div style="padding:14px 0;font-size:14px;color:var(--ink-2);line-height:1.55;">${r.type}</div>
+    <div class="modal-section-title">How it pays out</div>
+    <p style="font-size:13px;color:var(--muted);line-height:1.5;">
+      ${scenario === 'a'
+        ? 'You earn this directly when you lead an eligible install. Each qualifying job stacks the amount on top of your other rules.'
+        : 'This rule creates a pool per eligible job. After the $60 lead deduction goes to the Crew Chief plan, the remainder is split among the crew based on hours each person worked on the job.'}
+    </p>
+    <div class="modal-section-title">Where to see what you earned</div>
+    <p style="font-size:13px;color:var(--muted);line-height:1.5;">Open the <strong>Jobs</strong> tab to see every job you were on this period with the math behind your share. The <strong>Awards</strong> tab shows your totals broken out by week.</p>
+  `;
+  showModal();
+}
+
+function openPayoutModal(wk) {
+  const d = SCEN[scenario];
+  const row = d.awardRows.find(r => r.wk === wk);
+  if (!row) return;
+  document.getElementById('modal-eyebrow').textContent = 'Payouts Breakdown';
+  document.getElementById('modal-title').textContent = wk;
+  document.getElementById('modal-body').innerHTML = `
+    <div class="modal-period-row" style="margin-bottom:12px;">
+      <div class="left"><span class="period-cal">${I.cal}</span><div><div class="period-name">${row.wk}</div><div class="period-dates">${row.dates}</div></div></div>
+      <button class="btn-details">${row.wk} <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="6 9 12 15 18 9"/></svg></button>
+    </div>
+    <div class="modal-section-title" style="margin-top:6px;">Performance Pay</div>
+    ${d.awardKeys.filter(k => k !== 'total').map(k => {
+      const fmt = d.awardFmt[k];
+      const unit = d.awardUnits[k];
+      const v = row[k];
+      let display;
+      if (fmt === 'currency') display = fmt$(v);
+      else if (fmt === 'number') display = (v || 0).toFixed(unit === 'h' ? 1 : 0) + (unit ? unit : '');
+      else display = v + (unit ? ' ' + unit : '');
+      return `
+        <div class="modal-pill-row">
+          <div>
+            <div style="font-weight:600;font-size:14px;">${d.awardCols[d.awardKeys.indexOf(k)]}</div>
+            <div style="font-size:12px;color:var(--muted);margin-top:2px;">${typeof v === 'number' ? v.toLocaleString() : v} ${unit || ''}</div>
+          </div>
+          <div style="font-family:'p22-mackinac-pro',serif;font-weight:700;font-size:18px;">${display}</div>
+        </div>
+      `;
+    }).join('')}
+    <div class="subtotal-row">
+      <div>Total payout this week</div>
+      <div style="color:var(--green);font-family:'p22-mackinac-pro',serif;font-size:22px;">${fmt$(row.total)}</div>
+    </div>
+  `;
+  showModal();
+}
+
+function showModal() {
+  document.getElementById('modal').classList.add('open');
+  document.getElementById('modal-bg').classList.add('open');
+}
+function closeModal() {
+  document.getElementById('modal').classList.remove('open');
+  document.getElementById('modal-bg').classList.remove('open');
+}
+document.addEventListener('keydown', e => { if (e.key === 'Escape') closeModal(); });
+
+// ═══════════════════ INIT ═══════════════════
+const fromParam = new URLSearchParams(window.location.search).get('from');
+if (fromParam === 'b') { setScenario('b'); } else { render(); }
+</script>
+
+</body>
+</html>
