@@ -233,6 +233,28 @@
     .btn-primary { background: var(--ink); color: white; border: none; border-radius: 8px; padding: 8px 16px; font-size: 13px; font-weight: 600; cursor: pointer; font-family: inherit; }
     code { background: #f3f4f6; padding: 1px 6px; border-radius: 4px; font-size: 12px; }
 
+    /* Payout drawer */
+    .payout-section-head { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 14px 16px; background: #fafaf3; border: 1px solid var(--hairline-2); border-radius: 12px; margin-bottom: 14px; }
+    .payout-period-select { border: 1.5px solid var(--hairline); border-radius: 8px; padding: 8px 12px; font-size: 13px; background: white; font-family: inherit; outline: none; cursor: pointer; min-width: 200px; }
+    .payout-kpis { display: flex; flex-direction: column; }
+    .payout-kpi-row { border-bottom: 1px solid var(--hairline-2); }
+    .payout-kpi-row:last-child { border-bottom: none; }
+    .payout-kpi-summary { display: flex; align-items: center; gap: 14px; padding: 16px 4px; }
+    .payout-kpi-summary[onclick] { cursor: pointer; }
+    .payout-kpi-summary:hover { background: #fdfcf5; }
+    .payout-kpi-left { flex: 1; }
+    .payout-kpi-name { font-size: 14px; font-weight: 700; color: var(--ink); display: inline-flex; align-items: center; }
+    .payout-kpi-sub { font-size: 12px; color: var(--muted); margin-top: 2px; }
+    .payout-kpi-amt { font-family: 'p22-mackinac-pro', serif; font-weight: 700; font-size: 18px; color: var(--ink); }
+    .payout-kpi-chev { color: var(--faint); transition: transform .15s; }
+    .payout-kpi-row.open .payout-kpi-chev { transform: rotate(180deg); color: var(--ink); }
+    .payout-kpi-detail { display: none; padding: 0 4px 16px; }
+    .payout-kpi-row.open .payout-kpi-detail { display: block; }
+    .payout-job-line { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 10px 14px; background: white; border: 1px solid var(--hairline-2); border-radius: 8px; margin-bottom: 6px; }
+    .payout-job-line:last-child { margin-bottom: 0; }
+    .payout-total { display: flex; align-items: center; justify-content: space-between; padding: 18px 4px 4px; border-top: 1px solid var(--hairline); margin-top: 6px; font-size: 16px; font-weight: 700; }
+    .payout-total-amt { font-family: 'p22-mackinac-pro', serif; font-size: 26px; color: var(--green); letter-spacing: -.5px; }
+
     /* Tab panes */
     .tab-pane { display: none; }
     .tab-pane.active { display: block; }
@@ -717,7 +739,7 @@ function render() {
   document.getElementById('part-count').textContent = `(${d.partCount})`;
   document.getElementById('part-footer-text').textContent = `Showing ${d.partCount} of ${d.partCount} · All synced from ServiceTitan`;
   document.getElementById('part-rows').innerHTML = d.parts.map(p => `
-    <tr>
+    <tr onclick="openDrawer('payout-${p.initials}')">
       <td><span class="avatar">${p.initials}</span><strong>${p.name}</strong></td>
       <td style="color:var(--muted);">${p.role}</td>
       <td>
@@ -931,7 +953,7 @@ function renderIndividual() {
   // Sort by total earned desc
   const rows = [...d.ipRows].sort((a, b) => b.total - a.total);
   document.getElementById('ip-rows').innerHTML = rows.map(p => `
-    <tr>
+    <tr onclick="openDrawer('payout-${p.initials}')" style="cursor:pointer;">
       <td><span class="avatar">${p.initials}</span><strong>${p.name}</strong></td>
       ${cols.map(c => {
         const v = p[c.key];
@@ -1095,11 +1117,118 @@ const fixedDrawers = {
   }),
 };
 
+// Per-employee payout breakdown for the current period.
+// Generates the KPI rows + per-job expansions deterministically from the
+// jobs dataset + scenario rule config. Stored per scenario+employee.
+function payoutDrawer(empInit) {
+  const d = SCEN[scenario];
+  const emp = d.parts.find(p => p.initials === empInit);
+  if (!emp) return null;
+
+  const jobs = PERF_JOBS['may-2026'] || [];
+  const elig = jobs.filter(j => evalElig(j).ok);
+  const leadAssignments = ['AH', 'AU', 'BJ'];
+
+  let kpis = [];
+
+  if (scenario === 'a') {
+    // Filter to jobs this lead was assigned to
+    const myJobs = elig.filter(j => {
+      const ix = parseInt(j.id.replace(/\D/g,''), 10) % 3;
+      return leadAssignments[ix] === empInit;
+    });
+    const pieceJobs = myJobs.map(j => ({ id: j.id, customer: j.customer, math: '$75 piece', amount: 75 }));
+    const pieceAmt = pieceJobs.reduce((s, j) => s + j.amount, 0);
+    const gpJobs = myJobs.filter(j => j.gpAmt > 5000).map(j => {
+      const b = Math.round((j.gpAmt - 5000) * 0.05);
+      return { id: j.id, customer: j.customer, math: `5% × ($${j.gpAmt.toLocaleString()} − $5,000)`, amount: b };
+    });
+    const gpAmt = gpJobs.reduce((s, j) => s + j.amount, 0);
+    const reviewCount = { AH: 0, AU: 1, BJ: 0 }[empInit] || 0;
+    const memberships = { AH: 5, AU: 2, BJ: 3 }[empInit] || 0;
+    kpis = [
+      { name: 'Piece Rate per Eligible Install', value: `${pieceJobs.length} install${pieceJobs.length===1?'':'s'}`, amount: pieceAmt, jobs: pieceJobs },
+      { name: 'GP-Over-$5k Bonus',                value: `${gpJobs.length} job${gpJobs.length===1?'':'s'} over $5k GP`, amount: gpAmt, jobs: gpJobs },
+      { name: '5-Star Reviews',                   value: `${reviewCount}`, amount: reviewCount * 25, jobs: [] },
+      { name: 'Memberships Sold',                 value: `${memberships} × $30`, amount: memberships * 30, jobs: [], src: 'ServiceTitan' },
+    ];
+  } else {
+    // Crew member share — Carlos / Derek / Angelina etc all on the same eligible jobs
+    const poolJobs = elig.map(j => {
+      const pool = Math.round(j.savings * 0.12);
+      const crew = Math.max(0, pool - 60);
+      const per = Math.round(crew / 3);
+      return { id: j.id, customer: j.customer, math: `Your share of $${crew} crew pool`, amount: per };
+    });
+    const poolAmt = poolJobs.reduce((s, j) => s + j.amount, 0);
+    const memberships = { CR: 4, DM: 1, AB: 2, GT: 3, DC: 0, EB: 1, D2: 2, GS: 0 }[empInit] || 0;
+    kpis = [
+      { name: 'Job Pool · 12% Labor Savings', value: `${poolJobs.length} eligible job${poolJobs.length===1?'':'s'}`, amount: poolAmt, jobs: poolJobs },
+      { name: '5-Star Reviews (pool)',         value: '0', amount: 0, jobs: [] },
+      { name: 'Memberships Sold',              value: `${memberships} × $30`, amount: memberships * 30, jobs: [], src: 'ServiceTitan' },
+    ];
+  }
+
+  const total = kpis.reduce((s, k) => s + k.amount, 0);
+
+  const kpiRowsHtml = kpis.map((k, idx) => {
+    const expandable = k.jobs && k.jobs.length > 0;
+    const sub = k.src
+      ? `<span style="background:#dbeafe;color:#1e40af;font-size:10px;font-weight:600;padding:1px 6px;border-radius:999px;margin-left:6px;">${k.src}</span>`
+      : '';
+    return `
+      <div class="payout-kpi-row" data-idx="${idx}">
+        <div class="payout-kpi-summary" ${expandable ? `onclick="this.parentElement.classList.toggle('open')"` : ''}>
+          <div class="payout-kpi-left">
+            <div class="payout-kpi-name">${k.name}${sub}</div>
+            <div class="payout-kpi-sub">${k.value}</div>
+          </div>
+          <div class="payout-kpi-amt">$${k.amount.toLocaleString()}</div>
+          ${expandable ? `<svg class="payout-kpi-chev" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="6 9 12 15 18 9"/></svg>` : '<span style="width:16px;display:inline-block;"></span>'}
+        </div>
+        ${expandable ? `
+        <div class="payout-kpi-detail">
+          ${k.jobs.map(j => `
+            <div class="payout-job-line">
+              <div>
+                <div style="font-weight:600;font-size:13px;">${j.id} · ${j.customer}</div>
+                <div style="font-size:11px;color:var(--muted);margin-top:1px;">${j.math}</div>
+              </div>
+              <div style="font-weight:700;font-family:'p22-mackinac-pro',serif;color:var(--green);">$${j.amount.toLocaleString()}</div>
+            </div>
+          `).join('')}
+        </div>` : ''}
+      </div>
+    `;
+  }).join('');
+
+  return {
+    eyebrow: 'Payout Detail',
+    title: emp.name,
+    body: `
+      <div class="payout-section-head">
+        <div style="font-family:'p22-mackinac-pro',serif;font-size:18px;font-weight:600;">Performance</div>
+        <select class="payout-period-select">
+          <option>Week of May 12 – 18 (current)</option>
+          <option>Week of May 5 – 11</option>
+          <option>Week of Apr 28 – May 4</option>
+        </select>
+      </div>
+      <div class="payout-kpis">${kpiRowsHtml}</div>
+      <div class="payout-total">
+        <div>Total</div>
+        <div class="payout-total-amt">$${total.toLocaleString()}</div>
+      </div>
+    `,
+  };
+}
+
 function openDrawer(kind) {
   let cfg = null;
   if (fixedDrawers[kind]) cfg = fixedDrawers[kind]();
-  else if (kind.startsWith('rule-')) cfg = ruleDrawer(kind.replace('rule-',''));
-  else if (kind.startsWith('job-'))  cfg = jobDrawer(kind.replace('job-',''));
+  else if (kind.startsWith('rule-'))   cfg = ruleDrawer(kind.replace('rule-',''));
+  else if (kind.startsWith('job-'))    cfg = jobDrawer(kind.replace('job-',''));
+  else if (kind.startsWith('payout-')) cfg = payoutDrawer(kind.replace('payout-',''));
   if (!cfg) return;
   document.getElementById('dr-eyebrow').textContent = cfg.eyebrow;
   document.getElementById('dr-title').innerHTML = cfg.title;
