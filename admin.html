@@ -233,6 +233,23 @@
     .btn-primary { background: var(--ink); color: white; border: none; border-radius: 8px; padding: 8px 16px; font-size: 13px; font-weight: 600; cursor: pointer; font-family: inherit; }
     code { background: #f3f4f6; padding: 1px 6px; border-radius: 4px; font-size: 12px; }
 
+    /* Weekly Awards table (Payouts tab) */
+    .payouts-scroll { overflow-x: auto; -webkit-overflow-scrolling: touch; }
+    .payouts-table { width: 100%; border-collapse: collapse; font-size: 13.5px; min-width: 100%; }
+    .payouts-table th { background: #fafaf3; padding: 14px 18px; text-align: right; font-size: 11px; font-weight: 600; color: var(--muted); text-transform: uppercase; letter-spacing: .45px; border-bottom: 1px solid var(--hairline-2); white-space: nowrap; }
+    .payouts-table th:first-child { text-align: left; }
+    .payouts-table td { padding: 18px; border-bottom: 1px solid var(--hairline-2); text-align: right; white-space: nowrap; }
+    .payouts-table td:first-child { text-align: left; font-weight: 600; color: var(--ink); }
+    .payouts-table tr:last-child td { border-bottom: none; }
+    .payouts-table tbody tr:hover td { background: #fdfcf3; }
+    .payouts-table tfoot td { font-weight: 700; background: #fafaf3; }
+    .payouts-table td.amt-cell { cursor: pointer; color: var(--ink); }
+    .payouts-table td.amt-cell:hover { color: var(--green); text-decoration: underline; }
+    .payouts-table td.empty-cell { color: var(--faint); }
+    .payouts-table th.row-end, .payouts-table td.row-end { width: 44px; padding: 14px 18px; text-align: center; }
+    .row-end-icon { display: inline-flex; color: var(--ink); cursor: pointer; }
+    .row-end-icon svg { width: 17px; height: 17px; }
+
     /* Payout drawer */
     .payout-section-head { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 14px 16px; background: #fafaf3; border: 1px solid var(--hairline-2); border-radius: 12px; margin-bottom: 14px; }
     .payout-period-select { border: 1.5px solid var(--hairline); border-radius: 8px; padding: 8px 12px; font-size: 13px; background: white; font-family: inherit; outline: none; cursor: pointer; min-width: 200px; }
@@ -517,7 +534,34 @@
 
     <!-- ============== PAYOUTS ============== -->
     <div class="tab-pane" id="pane-payouts">
-      <div style="text-align:center;padding:80px 20px;color:var(--muted);font-size:14px;">Payouts tab — coming soon.</div>
+      <div class="section-row" style="display:flex;align-items:center;justify-content:space-between;margin-bottom:18px;">
+        <h2 class="card-title" style="font-size:22px;">Weekly Awards</h2>
+        <div style="display:flex;align-items:center;gap:8px;">
+          <select class="btn-sm" style="padding:8px 14px;font-size:13px;border-radius:10px;outline:none;cursor:pointer;background:white;">
+            <option>Q2 ▾</option>
+            <option>Q1</option>
+            <option>Q3</option>
+            <option>YTD 2026</option>
+          </select>
+          <button class="btn-sm" style="padding:8px 16px;border-radius:10px;">Export</button>
+        </div>
+      </div>
+
+      <div class="card" style="padding:0;overflow:hidden;">
+        <div class="payouts-scroll" id="payouts-scroll">
+          <table class="payouts-table">
+            <thead><tr id="payouts-head"></tr></thead>
+            <tbody id="payouts-body"></tbody>
+            <tfoot><tr id="payouts-foot"></tr></tfoot>
+          </table>
+        </div>
+      </div>
+
+      <div style="display:flex;align-items:center;justify-content:flex-end;padding-top:16px;font-size:13px;color:var(--muted);">
+        <label style="display:inline-flex;align-items:center;gap:8px;cursor:pointer;">
+          <input type="checkbox"> Show Inactive Employees
+        </label>
+      </div>
     </div>
 
   </main>
@@ -739,7 +783,7 @@ function render() {
   document.getElementById('part-count').textContent = `(${d.partCount})`;
   document.getElementById('part-footer-text').textContent = `Showing ${d.partCount} of ${d.partCount} · All synced from ServiceTitan`;
   document.getElementById('part-rows').innerHTML = d.parts.map(p => `
-    <tr onclick="openDrawer('payout-${p.initials}')">
+    <tr>
       <td><span class="avatar">${p.initials}</span><strong>${p.name}</strong></td>
       <td style="color:var(--muted);">${p.role}</td>
       <td>
@@ -771,6 +815,82 @@ function setTab(name) {
   document.getElementById('t-performance').classList.toggle('active', name === 'performance');
   document.getElementById('t-payouts').classList.toggle('active', name === 'payouts');
   if (name === 'performance') renderPerformance();
+  if (name === 'payouts')     renderPayouts();
+}
+
+// ═══════════════════ PAYOUTS TAB ═══════════════════
+// Generate weekly amounts per participant. Deterministic per scenario+initials
+// so it stays stable across renders.
+const PAYOUT_WEEKS = [
+  { key: '4/2', label: 'WK 4/2' },
+  { key: '4/9', label: 'WK 4/9' },
+  { key: '4/16', label: 'WK 4/16' },
+  { key: '4/23', label: 'WK 4/23' },
+  { key: '4/30', label: 'WK 4/30' },
+  { key: '5/7', label: 'WK 5/7' },
+  { key: '5/14', label: 'WK 5/14', current: true },
+  { key: '5/21', label: 'WK 5/21', future: true },
+  { key: '5/28', label: 'WK 5/28', future: true },
+  { key: '6/4',  label: 'WK 6/4',  future: true },
+  { key: '6/11', label: 'WK 6/11', future: true },
+  { key: '6/18', label: 'WK 6/18', future: true },
+];
+
+function seededAmount(seed, lo, hi) {
+  // Simple deterministic pseudo-random in [lo, hi]
+  let x = 0;
+  for (let i = 0; i < seed.length; i++) x = (x * 31 + seed.charCodeAt(i)) >>> 0;
+  return lo + ((x >>> 0) % (hi - lo));
+}
+
+function renderPayouts() {
+  const d = SCEN[scenario];
+  const head = document.getElementById('payouts-head');
+  const body = document.getElementById('payouts-body');
+  const foot = document.getElementById('payouts-foot');
+
+  head.innerHTML =
+    '<th>Name</th>' +
+    PAYOUT_WEEKS.map(w => `<th>${w.label}</th>`).join('') +
+    '<th class="row-end"></th>';
+
+  // Generate per-participant weekly amounts
+  const rangeLo = scenario === 'a' ? 200 : 80;
+  const rangeHi = scenario === 'a' ? 900 : 480;
+  const data = d.parts.map(p => {
+    const cells = PAYOUT_WEEKS.map(w => {
+      if (w.future) return null;
+      // Stable seeded amount
+      return seededAmount(`${scenario}|${p.initials}|${w.key}`, rangeLo, rangeHi);
+    });
+    return { ...p, cells };
+  });
+
+  body.innerHTML = data.map(p => {
+    const cells = p.cells.map((amt, i) => {
+      const w = PAYOUT_WEEKS[i];
+      if (amt === null) return `<td class="empty-cell">—</td>`;
+      return `<td class="amt-cell" onclick="openDrawer('payout-${p.initials}|${w.key}')">$${amt.toLocaleString()}</td>`;
+    }).join('');
+    return `
+      <tr>
+        <td>${p.name}</td>
+        ${cells}
+        <td class="row-end"><span class="row-end-icon" title="Send payout email"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg></span></td>
+      </tr>
+    `;
+  }).join('');
+
+  // Total row
+  const totals = PAYOUT_WEEKS.map((_, i) => {
+    const t = data.reduce((s, p) => s + (p.cells[i] || 0), 0);
+    return t;
+  });
+  foot.innerHTML = `
+    <td>Total</td>
+    ${totals.map((t, i) => PAYOUT_WEEKS[i].future ? `<td class="empty-cell">—</td>` : `<td>$${t.toLocaleString()}</td>`).join('')}
+    <td class="row-end"></td>
+  `;
 }
 
 function setSubtab(name) {
@@ -953,7 +1073,7 @@ function renderIndividual() {
   // Sort by total earned desc
   const rows = [...d.ipRows].sort((a, b) => b.total - a.total);
   document.getElementById('ip-rows').innerHTML = rows.map(p => `
-    <tr onclick="openDrawer('payout-${p.initials}')" style="cursor:pointer;">
+    <tr>
       <td><span class="avatar">${p.initials}</span><strong>${p.name}</strong></td>
       ${cols.map(c => {
         const v = p[c.key];
@@ -1117,13 +1237,15 @@ const fixedDrawers = {
   }),
 };
 
-// Per-employee payout breakdown for the current period.
+// Per-employee payout breakdown for a specific week.
 // Generates the KPI rows + per-job expansions deterministically from the
-// jobs dataset + scenario rule config. Stored per scenario+employee.
-function payoutDrawer(empInit) {
+// jobs dataset + scenario rule config.
+function payoutDrawer(payload) {
+  const [empInit, weekKey] = payload.split('|');
   const d = SCEN[scenario];
   const emp = d.parts.find(p => p.initials === empInit);
   if (!emp) return null;
+  const week = PAYOUT_WEEKS.find(w => w.key === weekKey) || PAYOUT_WEEKS.find(w => w.current);
 
   const jobs = PERF_JOBS['may-2026'] || [];
   const elig = jobs.filter(j => evalElig(j).ok);
@@ -1209,9 +1331,9 @@ function payoutDrawer(empInit) {
       <div class="payout-section-head">
         <div style="font-family:'p22-mackinac-pro',serif;font-size:18px;font-weight:600;">Performance</div>
         <select class="payout-period-select">
-          <option>Week of May 12 – 18 (current)</option>
-          <option>Week of May 5 – 11</option>
-          <option>Week of Apr 28 – May 4</option>
+          ${PAYOUT_WEEKS.filter(w => !w.future).map(w => `
+            <option ${week && w.key === week.key ? 'selected' : ''}>Week of ${w.label.replace('WK ', '')}${w.current ? ' (current)' : ''}</option>
+          `).join('')}
         </select>
       </div>
       <div class="payout-kpis">${kpiRowsHtml}</div>
