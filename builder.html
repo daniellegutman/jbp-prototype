@@ -142,32 +142,71 @@
     .second-award-wrap { border:2px dashed #e5e7eb;border-radius:12px;padding:16px 20px;margin-top:12px; }
 
     /* NEW Award Card design */
-    .aw-card { background: white; border: 1.5px solid #e5e7eb; border-radius: 14px; padding: 20px 22px; transition: border-color .15s; }
+    .aw-card { background: white; border: 1.5px solid #e5e7eb; border-radius: 14px; padding: 22px 24px; transition: border-color .15s; position: relative; }
     .aw-card:hover { border-color: #d1d5db; }
     .aw-card.focused { border-color: #1a1a1a; }
-    .aw-head { display: flex; align-items: center; gap: 12px; margin-bottom: 18px; }
-    .aw-idx-badge { width: 26px; height: 26px; border-radius: 8px; background: #1a1a1a; color: white; font-size: 12px; font-weight: 700; display: inline-flex; align-items: center; justify-content: center; flex-shrink: 0; font-family: inherit; }
-    .aw-name-input { flex: 1; border: none; background: transparent; outline: none; font-size: 15px; font-weight: 600; color: #1a1a1a; font-family: inherit; padding: 4px 8px; margin-left: -8px; border-radius: 6px; }
-    .aw-name-input:hover { background: #fafafa; }
-    .aw-name-input:focus { background: #f3f4f6; }
+
+    /* Combined icon + name input row (matches KPI modal style) */
+    .aw-name-row { display: flex; align-items: center; gap: 10px; margin-bottom: 20px; position: relative; }
+    .aw-name-shell { flex: 1; display: flex; align-items: center; gap: 8px; border: 1.5px solid #e5e7eb; border-radius: 10px; padding: 6px 6px 6px 8px; background: white; transition: border-color .15s; }
+    .aw-name-shell:focus-within { border-color: #1a1a1a; }
+
+    /* Icon picker button */
+    .aw-icon-btn { display: inline-flex; align-items: center; gap: 4px; padding: 5px 4px 5px 5px; background: transparent; border: none; cursor: pointer; border-radius: 8px; }
+    .aw-icon-btn:hover { background: #fafafa; }
+    .aw-icon-swatch { width: 34px; height: 34px; border-radius: 50%; display: inline-flex; align-items: center; justify-content: center; color: #1a1a1a; flex-shrink: 0; }
+    .aw-icon-swatch svg { width: 18px; height: 18px; }
+    .aw-icon-chev { color: #9ca3af; }
+    .aw-icon-chev svg { width: 12px; height: 12px; }
+
+    /* Icon picker panel (popover) */
+    .aw-icon-panel { position: absolute; top: 100%; left: 0; margin-top: 6px; background: white; border: 1px solid #e5e7eb; border-radius: 12px; padding: 14px; box-shadow: 0 12px 32px rgba(0,0,0,.12); z-index: 30; display: none; min-width: 300px; }
+    .aw-icon-panel.open { display: block; }
+    .aw-panel-title { font-size: 12px; font-weight: 600; color: #1a1a1a; margin-bottom: 8px; }
+    .aw-swatches { display: flex; gap: 6px; margin-bottom: 14px; }
+    .aw-swatch { width: 22px; height: 22px; border-radius: 50%; border: 1.5px solid transparent; cursor: pointer; transition: transform .1s; }
+    .aw-swatch:hover { transform: scale(1.1); }
+    .aw-swatch.active { border-color: #1a1a1a; }
+    .aw-icon-grid { display: grid; grid-template-columns: repeat(6, 1fr); gap: 6px; }
+    .aw-icon-choice { width: 34px; height: 34px; border-radius: 50%; border: 1px solid #f3f4f6; background: white; cursor: pointer; display: inline-flex; align-items: center; justify-content: center; color: #1a1a1a; padding: 0; transition: all .12s; }
+    .aw-icon-choice:hover { background: #fafafa; }
+    .aw-icon-choice.active { background: #1a1a1a; color: white; border-color: #1a1a1a; }
+    .aw-icon-choice svg { width: 16px; height: 16px; }
+
+    .aw-name-input { flex: 1; border: none; background: transparent; outline: none; font-size: 15px; font-weight: 600; color: #1a1a1a; font-family: inherit; padding: 7px 8px; }
     .aw-name-input::placeholder { color: #9ca3af; font-weight: 500; }
-    .aw-delete { background: none; border: none; color: #9ca3af; cursor: pointer; padding: 6px; border-radius: 6px; display: inline-flex; align-items: center; justify-content: center; transition: all .15s; }
+
+    .aw-delete { background: none; border: none; color: #9ca3af; cursor: pointer; padding: 8px; border-radius: 8px; display: inline-flex; align-items: center; justify-content: center; transition: all .15s; flex-shrink: 0; }
     .aw-delete:hover { color: #dc2626; background: #fef2f2; }
     .aw-delete svg { width: 16px; height: 16px; }
 
+    /* Metric typeahead dropdown */
+    .aw-typeahead { position: absolute; top: 100%; left: 0; right: 0; margin-top: 4px; background: white; border: 1px solid #e5e7eb; border-radius: 12px; box-shadow: 0 12px 28px rgba(0,0,0,.12); z-index: 20; display: none; max-height: 260px; overflow-y: auto; }
+    .aw-typeahead.open { display: block; }
+    .aw-ta-item { display: flex; align-items: center; justify-content: space-between; padding: 10px 14px; cursor: pointer; font-size: 13px; }
+    .aw-ta-item:hover { background: #fafafa; }
+    .aw-ta-item .ta-left { display: flex; align-items: center; gap: 10px; }
+    .aw-ta-item svg { width: 16px; height: 16px; color: #6b7280; }
+    .aw-ta-item .ta-name { font-weight: 600; color: #1a1a1a; }
+    .aw-ta-item .ta-tag { font-size: 11px; color: #6b7280; background: #f3f4f6; padding: 2px 8px; border-radius: 999px; }
+    .aw-ta-create { border-top: 1px solid #f3f4f6; }
+    .aw-ta-create .ta-left { color: #1a1a1a; }
+    .aw-ta-create svg { color: #1a1a1a; }
+
     /* Segmented type control */
-    .aw-seg { display: inline-flex; padding: 3px; background: #f3f4f6; border-radius: 10px; gap: 2px; margin-bottom: 18px; }
+    .aw-seg { display: inline-flex; padding: 3px; background: #f3f4f6; border-radius: 10px; gap: 2px; margin-bottom: 20px; }
     .aw-seg-btn { border: none; background: none; padding: 8px 16px; font-size: 12.5px; font-weight: 500; color: #6b7280; cursor: pointer; font-family: inherit; border-radius: 7px; transition: all .15s; white-space: nowrap; }
     .aw-seg-btn:hover { color: #1a1a1a; }
     .aw-seg-btn.active { background: white; color: #1a1a1a; font-weight: 600; box-shadow: 0 1px 3px rgba(0,0,0,.08); }
 
     /* Type config area */
-    .aw-cfg-grid { display: grid; grid-template-columns: 1.5fr 1fr; gap: 14px; align-items: end; }
+    .aw-cfg-row { display: flex; align-items: center; gap: 12px; }
     .aw-field-label { font-size: 11px; font-weight: 600; color: #6b7280; margin-bottom: 6px; text-transform: uppercase; letter-spacing: .3px; }
-    .aw-full { grid-column: 1 / -1; }
+    .aw-metric-tag { display: inline-flex; align-items: center; gap: 6px; padding: 6px 12px; background: #f3f4f6; border-radius: 999px; font-size: 12px; font-weight: 600; color: #374151; }
+    .aw-metric-tag svg { width: 12px; height: 12px; color: #6b7280; }
 
     /* Per-rule distribution (new subtle style) */
-    .aw-dist { display: none; margin-top: 18px; padding-top: 16px; border-top: 1px solid #f3f4f6; }
+    .aw-dist { display: none; margin-top: 20px; padding-top: 18px; border-top: 1px solid #f3f4f6; }
     .aw-dist.show { display: block; }
     .aw-dist-label { font-size: 11px; font-weight: 700; color: #9ca3af; text-transform: uppercase; letter-spacing: .4px; margin-bottom: 10px; }
     .aw-dist-pills { display: flex; gap: 8px; margin-bottom: 10px; }
@@ -1061,7 +1100,7 @@ function setScenario(s) {
     q('plan-name').value = 'HVAC Install Field Tech Bonus';
     // Award list — Multi-Role default: one % of Metric rule (Labor Savings)
     awardsState = [
-      { id: 'a1', name: 'Job Pool · Labor Savings', type: 'pct', metric: 'labor_savings', pct: 12, pieceAmt: 75, flatAmt: 200, dist: { mode: 'split', by: 'hours' } },
+      { id: 'a1', name: 'Labor Budget Savings', type: 'pct', pct: 12, pieceAmt: 75, icon: 'trending', color: 'blue', dist: { mode: 'split', by: 'hours' } },
     ];
     awardNextId = 2;
     renderAwards();
@@ -1077,8 +1116,8 @@ function setScenario(s) {
     q('plan-name').value = 'HVAC Install Crew Chief Bonus';
     // Award list — Single-Role default: piece rate + GP bonus
     awardsState = [
-      { id: 'a1', name: 'Piece Rate per Eligible Install', type: 'piece', pieceAmt: 75, metric: 'gp', pct: 5, flatAmt: 200, dist: { mode: 'full', by: 'hours' } },
-      { id: 'a2', name: 'Bonus on GP Over Goal',           type: 'pct',   pieceAmt: 75, metric: 'gp', pct: 5, flatAmt: 200, dist: { mode: 'full', by: 'hours' } },
+      { id: 'a1', name: 'Piece Rate per Eligible Install', type: 'piece', pieceAmt: 75, pct: 5, icon: 'wrench', color: 'green', dist: { mode: 'full', by: 'hours' } },
+      { id: 'a2', name: 'Gross Profit',                    type: 'pct',   pieceAmt: 75, pct: 5, icon: 'trending', color: 'blue', dist: { mode: 'full', by: 'hours' } },
     ];
     awardNextId = 3;
     renderAwards();
@@ -1193,49 +1232,108 @@ function selectLeadRole(role) {
 // Each award rule card gets its own Distribution sub-section. Lets you say
 // "split the pool from rule A, but everyone gets the piece rate from rule B."
 
-// ═════ NEW: Job Awards — dynamic card list ═════
-// Each award has: id, name, type (pct|piece|flat), config fields, distribution.
+// ═════ Job Awards — dynamic card list ═════
+// Each award has: id, name, type (pct|piece), icon, color, config, distribution.
 // Rendered from state so users can add, edit, and remove flexibly.
 
-const AW_TYPE_LABELS = { pct: '% of Metric', piece: 'Piece Rate', flat: 'Flat Rate' };
-const AW_METRIC_OPTIONS = [
-  { key: 'revenue',       label: 'Revenue' },
-  { key: 'gp',            label: 'Gross Profit' },
-  { key: 'gp_over',       label: 'GP over Minimum GP%' },
-  { key: 'labor_savings', label: 'Labor Budget Savings' },
-  { key: 'total_cost',    label: 'Total Job Cost' },
-  { key: 'custom',        label: 'Custom column…' },
+// Preset metrics — used for % of Metric autocomplete
+const AW_PRESET_METRICS = [
+  { name: 'Revenue',              tag: 'ServiceTitan · invoices.total' },
+  { name: 'Gross Profit',         tag: 'ServiceTitan · jobs.gross_profit' },
+  { name: 'GP Over Minimum',      tag: 'Computed · gp − (revenue × min%)' },
+  { name: 'Labor Budget Savings', tag: 'Computed · (budget − actual) × rate' },
+  { name: 'Labor Hours Saved',    tag: 'Computed · budget hours − actual hours' },
+  { name: 'Total Job Cost',       tag: 'ServiceTitan · jobs.total_cost' },
 ];
 
+// Icon palette (SVG paths)
+const AW_ICONS = {
+  target:   '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="6"/><circle cx="12" cy="12" r="2"/></svg>',
+  wrench:   '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14.7 6.3a1 1 0 000 1.4l1.6 1.6a1 1 0 001.4 0l3.77-3.77a6 6 0 01-7.94 7.94l-6.91 6.91a2.12 2.12 0 01-3-3l6.91-6.91a6 6 0 017.94-7.94l-3.76 3.76z"/></svg>',
+  shield:   '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><polyline points="9 12 11 14 15 10"/></svg>',
+  star:     '<svg viewBox="0 0 24 24" fill="currentColor"><polygon points="12 2 15 8.5 22 9.3 17 14.1 18.2 21 12 17.8 5.8 21 7 14.1 2 9.3 9 8.5 12 2"/></svg>',
+  truck:    '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="1" y="3" width="15" height="13" rx="1"/><polygon points="16 8 20 8 23 11 23 16 16 16"/><circle cx="5.5" cy="18.5" r="2.5"/><circle cx="18.5" cy="18.5" r="2.5"/></svg>',
+  trending: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="22 7 13.5 15.5 8.5 10.5 2 17"/><polyline points="16 7 22 7 22 13"/></svg>',
+  undo:     '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 7v6h6"/><path d="M21 17a9 9 0 00-15-6.7L3 13"/></svg>',
+  clock:    '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>',
+  calendar: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>',
+  dollar:   '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 000 7h5a3.5 3.5 0 010 7H6"/></svg>',
+  plus:     '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>',
+  check:    '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>',
+};
+
+const AW_COLORS = [
+  { key: 'grey',   bg: '#f3f4f6' },
+  { key: 'yellow', bg: '#fef3c7' },
+  { key: 'pink',   bg: '#fce7f3' },
+  { key: 'orange', bg: '#ffedd5' },
+  { key: 'coral',  bg: '#fed7d7' },
+  { key: 'blue',   bg: '#dbeafe' },
+  { key: 'purple', bg: '#ede9fe' },
+  { key: 'green',  bg: '#d1fae5' },
+  { key: 'mint',   bg: '#ecfdf5' },
+];
+const AW_COLOR_MAP = Object.fromEntries(AW_COLORS.map(c => [c.key, c.bg]));
+
 let awardsState = [
-  { id: 'a1', name: 'Piece Rate per Eligible Install', type: 'piece', pieceAmt: 75, metric: 'gp', pct: 10, flatAmt: 200, dist: { mode: 'full', by: 'hours' } },
+  { id: 'a1', name: 'Piece Rate per Eligible Install', type: 'piece', pieceAmt: 75, metricName: '', pct: 10, icon: 'wrench', color: 'green', dist: { mode: 'full', by: 'hours' } },
 ];
 let awardNextId = 2;
+let openIconPanel = null;
+let openTypeahead = null;
 
 function renderAwards() {
   const list = document.getElementById('awards-list');
   if (!list) return;
-  list.innerHTML = awardsState.map((a, idx) => awardCardHtml(a, idx)).join('');
+  list.innerHTML = awardsState.map(a => awardCardHtml(a)).join('');
   showRuleDistributions(awardMode === 'pool');
 }
 
-function awardCardHtml(a, idx) {
+function awardCardHtml(a) {
   const canDelete = awardsState.length > 1;
-  const num = idx + 1;
   const cfg = awardTypeConfigHtml(a);
   const distHtml = awardDistributionHtml(a);
+  const iconSvg = AW_ICONS[a.icon] || AW_ICONS.target;
+  const swatchBg = AW_COLOR_MAP[a.color] || AW_COLOR_MAP.grey;
+  const isMetric = a.type === 'pct';
+  const namePlaceholder = isMetric ? 'Pick or create a metric…' : 'Name this award (e.g. Install Bonus)';
   return `
     <div class="aw-card" data-id="${a.id}">
-      <div class="aw-head">
-        <div class="aw-idx-badge">${num}</div>
-        <input class="aw-name-input" type="text" placeholder="Name this award (e.g. GP Bonus)" value="${a.name || ''}" oninput="updateAward('${a.id}', 'name', this.value)">
+      <div class="aw-name-row">
+        <div class="aw-name-shell">
+          <button class="aw-icon-btn" onclick="toggleIconPanel('${a.id}', event)">
+            <span class="aw-icon-swatch" style="background:${swatchBg};">${iconSvg}</span>
+            <span class="aw-icon-chev"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="6 9 12 15 18 9"/></svg></span>
+          </button>
+          <input class="aw-name-input" id="aw-name-${a.id}" type="text" placeholder="${namePlaceholder}" value="${a.name || ''}"
+            oninput="updateAward('${a.id}', 'name', this.value); ${isMetric ? `filterTypeahead('${a.id}', this.value)` : ''}"
+            ${isMetric ? `onfocus="openTypeaheadFor('${a.id}')" onblur="setTimeout(() => closeTypeahead('${a.id}'), 150)"` : ''}>
+        </div>
         ${canDelete ? `<button class="aw-delete" onclick="removeAward('${a.id}')" title="Remove"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 01-2 2H8a2 2 0 01-2-2L5 6"/><path d="M10 11v6M14 11v6"/><path d="M9 6V4a2 2 0 012-2h2a2 2 0 012 2v2"/></svg></button>` : ''}
+
+        <!-- Icon picker panel -->
+        <div class="aw-icon-panel" id="aw-icon-panel-${a.id}">
+          <div class="aw-panel-title">Select color</div>
+          <div class="aw-swatches">
+            ${AW_COLORS.map(c => `<div class="aw-swatch ${a.color === c.key ? 'active' : ''}" style="background:${c.bg};" onclick="setAwardColor('${a.id}', '${c.key}')"></div>`).join('')}
+          </div>
+          <div class="aw-panel-title">Select icon</div>
+          <div class="aw-icon-grid">
+            ${Object.entries(AW_ICONS).map(([k, svg]) => `<button class="aw-icon-choice ${a.icon === k ? 'active' : ''}" onclick="setAwardIcon('${a.id}', '${k}')">${svg}</button>`).join('')}
+          </div>
+        </div>
+
+        <!-- Metric typeahead (only for % of Metric) -->
+        ${isMetric ? `
+          <div class="aw-typeahead" id="aw-typeahead-${a.id}">
+            ${renderTypeaheadItems(a.id, a.name || '')}
+          </div>
+        ` : ''}
       </div>
 
       <div class="aw-seg">
         <button class="aw-seg-btn ${a.type === 'pct' ? 'active' : ''}"   onclick="setAwardType('${a.id}', 'pct')">% of Metric</button>
         <button class="aw-seg-btn ${a.type === 'piece' ? 'active' : ''}" onclick="setAwardType('${a.id}', 'piece')">Piece Rate</button>
-        <button class="aw-seg-btn ${a.type === 'flat' ? 'active' : ''}"  onclick="setAwardType('${a.id}', 'flat')">Flat Rate</button>
       </div>
 
       ${cfg}
@@ -1245,52 +1343,110 @@ function awardCardHtml(a, idx) {
   `;
 }
 
+function renderTypeaheadItems(id, query) {
+  const q = (query || '').toLowerCase().trim();
+  const matches = AW_PRESET_METRICS.filter(m => m.name.toLowerCase().includes(q));
+  const showCreate = q.length > 0 && !AW_PRESET_METRICS.some(m => m.name.toLowerCase() === q);
+  return `
+    ${matches.map(m => `
+      <div class="aw-ta-item" onclick="pickMetric('${id}', '${m.name.replace(/'/g, "\\'")}')">
+        <div class="ta-left">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="22 7 13.5 15.5 8.5 10.5 2 17"/><polyline points="16 7 22 7 22 13"/></svg>
+          <span class="ta-name">${m.name}</span>
+        </div>
+        <span class="ta-tag">${m.tag}</span>
+      </div>
+    `).join('') || '<div style="padding:12px 14px;font-size:12px;color:#9ca3af;">No matching preset metrics.</div>'}
+    ${showCreate ? `
+      <div class="aw-ta-item aw-ta-create" onclick="pickMetric('${id}', '${(query || '').replace(/'/g, "\\'")}')">
+        <div class="ta-left">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+          <span class="ta-name">Create new metric: <em>"${query}"</em></span>
+        </div>
+      </div>
+    ` : ''}
+  `;
+}
+
 function awardTypeConfigHtml(a) {
   if (a.type === 'pct') {
     return `
-      <div class="aw-cfg-grid">
-        <div>
-          <div class="aw-field-label">Job Metric</div>
-          <select onchange="updateAward('${a.id}', 'metric', this.value)">
-            ${AW_METRIC_OPTIONS.map(o => `<option value="${o.key}" ${a.metric === o.key ? 'selected' : ''}>${o.label}</option>`).join('')}
-          </select>
+      <div class="aw-cfg-row">
+        <div class="aw-field-label" style="margin-bottom:0;">Percentage</div>
+        <div class="input-with-suffix" style="width:auto;">
+          <input type="number" value="${a.pct}" oninput="updateAward('${a.id}', 'pct', +this.value)" style="width:70px;border-radius:8px 0 0 8px;border-right:none;">
+          <span class="input-suffix">%</span>
         </div>
-        <div>
-          <div class="aw-field-label">Percentage</div>
-          <div class="input-with-suffix"><input type="number" value="${a.pct}" oninput="updateAward('${a.id}', 'pct', +this.value)" style="border-radius:8px 0 0 8px;border-right:none;"><span class="input-suffix">%</span></div>
-        </div>
+        <span style="font-size:13px;color:#6b7280;">of ${a.name || 'the selected metric'}</span>
       </div>
     `;
   }
   if (a.type === 'piece') {
     return `
-      <div class="aw-cfg-grid">
-        <div>
-          <div class="aw-field-label">Amount</div>
-          <div class="input-with-prefix"><span class="input-prefix">$</span><input type="number" value="${a.pieceAmt}" oninput="updateAward('${a.id}', 'pieceAmt', +this.value)" style="border-radius:0 8px 8px 0;"></div>
+      <div class="aw-cfg-row">
+        <div class="aw-field-label" style="margin-bottom:0;">Amount</div>
+        <div class="input-with-prefix" style="width:auto;">
+          <span class="input-prefix">$</span>
+          <input type="number" value="${a.pieceAmt}" oninput="updateAward('${a.id}', 'pieceAmt', +this.value)" style="width:90px;border-radius:0 8px 8px 0;">
         </div>
-        <div>
-          <div class="aw-field-label" style="visibility:hidden;">.</div>
-          <div style="font-size:13px;color:#6b7280;padding-bottom:9px;">per eligible job</div>
-        </div>
-      </div>
-    `;
-  }
-  if (a.type === 'flat') {
-    return `
-      <div class="aw-cfg-grid">
-        <div>
-          <div class="aw-field-label">Amount</div>
-          <div class="input-with-prefix"><span class="input-prefix">$</span><input type="number" value="${a.flatAmt}" oninput="updateAward('${a.id}', 'flatAmt', +this.value)" style="border-radius:0 8px 8px 0;"></div>
-        </div>
-        <div>
-          <div class="aw-field-label" style="visibility:hidden;">.</div>
-          <div style="font-size:13px;color:#6b7280;padding-bottom:9px;">flat per eligible job</div>
-        </div>
+        <span style="font-size:13px;color:#6b7280;">per eligible job</span>
       </div>
     `;
   }
   return '';
+}
+
+function toggleIconPanel(id, evt) {
+  if (evt) evt.stopPropagation();
+  const el = document.getElementById('aw-icon-panel-' + id);
+  if (!el) return;
+  const isOpen = el.classList.contains('open');
+  document.querySelectorAll('.aw-icon-panel').forEach(p => p.classList.remove('open'));
+  if (!isOpen) el.classList.add('open');
+  openIconPanel = isOpen ? null : id;
+}
+document.addEventListener('click', () => {
+  document.querySelectorAll('.aw-icon-panel').forEach(p => p.classList.remove('open'));
+  openIconPanel = null;
+});
+
+function setAwardIcon(id, iconKey) {
+  const a = awardsState.find(x => x.id === id);
+  if (!a) return;
+  a.icon = iconKey;
+  renderAwards();
+}
+
+function setAwardColor(id, colorKey) {
+  const a = awardsState.find(x => x.id === id);
+  if (!a) return;
+  a.color = colorKey;
+  renderAwards();
+}
+
+function openTypeaheadFor(id) {
+  const el = document.getElementById('aw-typeahead-' + id);
+  if (!el) return;
+  el.classList.add('open');
+  openTypeahead = id;
+}
+function closeTypeahead(id) {
+  const el = document.getElementById('aw-typeahead-' + id);
+  if (!el) return;
+  el.classList.remove('open');
+  openTypeahead = null;
+}
+function filterTypeahead(id, query) {
+  const el = document.getElementById('aw-typeahead-' + id);
+  if (!el) return;
+  el.innerHTML = renderTypeaheadItems(id, query);
+  el.classList.add('open');
+}
+function pickMetric(id, name) {
+  const a = awardsState.find(x => x.id === id);
+  if (!a) return;
+  a.name = name;
+  renderAwards();
 }
 
 function awardDistributionHtml(a) {
@@ -1325,7 +1481,8 @@ function addAward() {
   const id = 'a' + (awardNextId++);
   // Default new awards to % of Metric with sensible defaults
   awardsState.push({
-    id, name: '', type: 'pct', pieceAmt: 100, metric: 'gp', pct: 5, flatAmt: 200,
+    id, name: '', type: 'pct', pieceAmt: 100, pct: 5,
+    icon: 'trending', color: 'blue',
     dist: { mode: 'split', by: 'hours' },
   });
   renderAwards();
