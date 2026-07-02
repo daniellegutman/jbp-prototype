@@ -141,6 +141,48 @@
     /* Secondary award section */
     .second-award-wrap { border:2px dashed #e5e7eb;border-radius:12px;padding:16px 20px;margin-top:12px; }
 
+    /* NEW Award Card design */
+    .aw-card { background: white; border: 1.5px solid #e5e7eb; border-radius: 14px; padding: 20px 22px; transition: border-color .15s; }
+    .aw-card:hover { border-color: #d1d5db; }
+    .aw-card.focused { border-color: #1a1a1a; }
+    .aw-head { display: flex; align-items: center; gap: 12px; margin-bottom: 18px; }
+    .aw-idx-badge { width: 26px; height: 26px; border-radius: 8px; background: #1a1a1a; color: white; font-size: 12px; font-weight: 700; display: inline-flex; align-items: center; justify-content: center; flex-shrink: 0; font-family: inherit; }
+    .aw-name-input { flex: 1; border: none; background: transparent; outline: none; font-size: 15px; font-weight: 600; color: #1a1a1a; font-family: inherit; padding: 4px 8px; margin-left: -8px; border-radius: 6px; }
+    .aw-name-input:hover { background: #fafafa; }
+    .aw-name-input:focus { background: #f3f4f6; }
+    .aw-name-input::placeholder { color: #9ca3af; font-weight: 500; }
+    .aw-delete { background: none; border: none; color: #9ca3af; cursor: pointer; padding: 6px; border-radius: 6px; display: inline-flex; align-items: center; justify-content: center; transition: all .15s; }
+    .aw-delete:hover { color: #dc2626; background: #fef2f2; }
+    .aw-delete svg { width: 16px; height: 16px; }
+
+    /* Segmented type control */
+    .aw-seg { display: inline-flex; padding: 3px; background: #f3f4f6; border-radius: 10px; gap: 2px; margin-bottom: 18px; }
+    .aw-seg-btn { border: none; background: none; padding: 8px 16px; font-size: 12.5px; font-weight: 500; color: #6b7280; cursor: pointer; font-family: inherit; border-radius: 7px; transition: all .15s; white-space: nowrap; }
+    .aw-seg-btn:hover { color: #1a1a1a; }
+    .aw-seg-btn.active { background: white; color: #1a1a1a; font-weight: 600; box-shadow: 0 1px 3px rgba(0,0,0,.08); }
+
+    /* Type config area */
+    .aw-cfg-grid { display: grid; grid-template-columns: 1.5fr 1fr; gap: 14px; align-items: end; }
+    .aw-field-label { font-size: 11px; font-weight: 600; color: #6b7280; margin-bottom: 6px; text-transform: uppercase; letter-spacing: .3px; }
+    .aw-full { grid-column: 1 / -1; }
+
+    /* Per-rule distribution (new subtle style) */
+    .aw-dist { display: none; margin-top: 18px; padding-top: 16px; border-top: 1px solid #f3f4f6; }
+    .aw-dist.show { display: block; }
+    .aw-dist-label { font-size: 11px; font-weight: 700; color: #9ca3af; text-transform: uppercase; letter-spacing: .4px; margin-bottom: 10px; }
+    .aw-dist-pills { display: flex; gap: 8px; margin-bottom: 10px; }
+    .aw-dist-pill { flex: 1; padding: 10px 14px; border-radius: 10px; border: 1.5px solid #e5e7eb; background: white; cursor: pointer; font-size: 12.5px; display: flex; align-items: center; gap: 8px; transition: all .15s; }
+    .aw-dist-pill:hover { border-color: #9ca3af; }
+    .aw-dist-pill.active { border-color: #1a1a1a; background: #fafafa; }
+    .aw-dist-pill .aw-dot { width: 14px; height: 14px; border-radius: 50%; border: 2px solid #d1d5db; flex-shrink: 0; }
+    .aw-dist-pill.active .aw-dot { border-color: #1a1a1a; background: #1a1a1a; position: relative; }
+    .aw-dist-pill.active .aw-dot::after { content: ""; position: absolute; inset: 0; margin: auto; width: 5px; height: 5px; border-radius: 50%; background: white; }
+    .aw-split-by { display: none; margin-top: 10px; }
+    .aw-split-by.show { display: block; }
+    .aw-split-chips { display: flex; gap: 6px; flex-wrap: wrap; }
+    .aw-split-chip { font-size: 11px; padding: 5px 12px; border-radius: 999px; border: 1.5px solid #e5e7eb; background: white; cursor: pointer; font-weight: 500; color: #374151; font-family: inherit; }
+    .aw-split-chip.active { background: #1a1a1a; border-color: #1a1a1a; color: white; }
+
     /* Per-rule distribution sub-section */
     .rule-dist { display:none;margin-top:14px;padding-top:14px;border-top:1px solid #f3f4f6; }
     .rule-dist.show { display:block; }
@@ -633,110 +675,20 @@
         </div>
 
         <!-- ══════════════════════════════════════
-             PANEL 6: JOB AWARD (with stacking)
+             PANEL 6: JOB AWARDS
         ══════════════════════════════════════ -->
         <div class="step-panel" id="panel-6">
-          <div style="display:flex;align-items:center;gap:10px;margin-bottom:6px;">
-            <h3 style="font-size:18px;margin:0;">How is each eligible job awarded?</h3>
-            <span class="badge-new">NEW</span>
-          </div>
-          <p style="font-size:14px;color:#6b7280;margin:0 0 20px;">Choose how the bonus for each qualifying job is calculated. You can add more than one award type.</p>
+          <h3 style="font-size:22px;margin:0 0 6px;text-align:center;">How is each eligible job awarded?</h3>
+          <p style="font-size:14px;color:#6b7280;margin:0 0 28px;text-align:center;">Add one or more award types. Each pays out per eligible job and stacks together.</p>
 
-          <!-- PRIMARY AWARD -->
-          <div style="max-width:600px;" id="award-section-primary">
-            <div style="font-size:11px;font-weight:700;color:#9ca3af;text-transform:uppercase;letter-spacing:.5px;margin-bottom:10px;">Primary Award</div>
-            <div style="display:flex;flex-direction:column;gap:10px;">
+          <!-- Award cards list (JS-rendered) -->
+          <div id="awards-list" style="max-width:640px;margin:0 auto;display:flex;flex-direction:column;gap:14px;"></div>
 
-              <div class="award-card selected" id="award-piece" onclick="selectAward('piece','primary')">
-                <div style="display:flex;align-items:flex-start;gap:12px;">
-                  <div style="margin-top:2px;width:18px;height:18px;border-radius:50%;border:2px solid #1a1a1a;background:#1a1a1a;display:flex;align-items:center;justify-content:center;flex-shrink:0;"><div style="width:8px;height:8px;border-radius:50%;background:white;"></div></div>
-                  <div style="flex:1;">
-                    <div style="font-size:14px;font-weight:600;color:#1a1a1a;margin-bottom:3px;">Piece Rate — Fixed amount per eligible job</div>
-                    <div style="font-size:12px;color:#6b7280;margin-bottom:12px;">Each enrolled crew member in this role receives a fixed dollar amount for every eligible job they are on.</div>
-                    <div id="award-piece-config" style="display:flex;align-items:center;gap:8px;">
-                      <span style="font-size:13px;color:#374151;font-weight:500;">Amount:</span>
-                      <div class="input-with-prefix"><span class="input-prefix">$</span><input type="number" value="75" style="width:80px;border-radius:0 8px 8px 0;"></div>
-                      <span style="font-size:13px;color:#6b7280;">per eligible job</span>
-                    </div>
-                    <div class="success-box" style="margin-top:10px;font-size:12px;">Best for: One person in this role per job (e.g., the crew lead on each install).</div>
-                  </div>
-                </div>
-              </div>
-
-              <div class="award-card" id="award-pool" onclick="selectAward('pool','primary')">
-                <div style="display:flex;align-items:flex-start;gap:12px;">
-                  <div style="margin-top:2px;width:18px;height:18px;border-radius:50%;border:2px solid #d1d5db;flex-shrink:0;" id="award-pool-radio"></div>
-                  <div style="flex:1;">
-                    <div style="font-size:14px;font-weight:600;color:#1a1a1a;margin-bottom:3px;">Percentage of Job Metric — Creates a job pool</div>
-                    <div style="font-size:12px;color:#6b7280;margin-bottom:12px;">A percentage of a job-level metric generates an award pool for each eligible job. The pool is then split among enrolled crew on that job.</div>
-                    <div id="award-pool-config" style="display:none;flex-direction:column;gap:10px;">
-                      <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;">
-                        <span style="font-size:13px;color:#374151;font-weight:500;">Take</span>
-                        <div class="input-with-suffix"><input type="number" value="12" style="width:60px;border-radius:8px 0 0 8px;border-right:none;"><span class="input-suffix">%</span></div>
-                        <span style="font-size:13px;color:#374151;font-weight:500;">of</span>
-                        <select style="width:auto;min-width:200px;"><option>Revenue</option><option>Gross Profit</option><option>GP over Minimum GP%</option><option selected="">Labor Budget Savings</option><option>Labor Hours Saved (piece rate)</option></select>
-                      </div>
-                      <div class="info-box" style="font-size:12px;"><strong>Labor Budget Savings</strong> = (Budgeted Hours − Actual Hours) × Labor Rate.</div>
-                    </div>
-                  </div>
-                </div>
-              </div>
-
-              <div class="award-card" id="award-flat" onclick="selectAward('flat','primary')">
-                <div style="display:flex;align-items:flex-start;gap:12px;">
-                  <div style="margin-top:2px;width:18px;height:18px;border-radius:50%;border:2px solid #d1d5db;flex-shrink:0;" id="award-flat-radio"></div>
-                  <div style="flex:1;">
-                    <div style="font-size:14px;font-weight:600;color:#1a1a1a;margin-bottom:3px;">Flat Rate — Fixed total per eligible job</div>
-                    <div style="font-size:12px;color:#6b7280;margin-bottom:12px;">A fixed dollar total per eligible job, split among crew per your split rules.</div>
-                    <div id="award-flat-config" style="display:none;align-items:center;gap:8px;">
-                      <div class="input-with-prefix"><span class="input-prefix">$</span><input type="number" value="200" style="width:80px;border-radius:0 8px 8px 0;"></div>
-                      <span style="font-size:13px;color:#6b7280;">per eligible job (split among crew)</span>
-                    </div>
-                  </div>
-                </div>
-              </div>
-
-            </div>
-          </div>
-
-          <!-- SECONDARY AWARD (stacking) -->
-          <div id="second-award-wrap" style="display:none;max-width:600px;margin-top:4px;">
-            <div class="second-award-wrap">
-              <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;">
-                <div style="font-size:11px;font-weight:700;color:#9ca3af;text-transform:uppercase;letter-spacing:.5px;">Additional Award</div>
-                <button onclick="removeSecondAward()" style="background:none;border:none;color:#9ca3af;font-size:12px;cursor:pointer;font-family:inherit;">✕ Remove</button>
-              </div>
-              <div style="display:flex;flex-direction:column;gap:10px;">
-                <div class="award-card selected" id="award2-pct" onclick="selectAward2('pct')">
-                  <div style="display:flex;align-items:flex-start;gap:12px;">
-                    <div style="margin-top:2px;width:18px;height:18px;border-radius:50%;border:2px solid #1a1a1a;background:#1a1a1a;display:flex;align-items:center;justify-content:center;flex-shrink:0;"><div style="width:8px;height:8px;border-radius:50%;background:white;"></div></div>
-                    <div style="flex:1;">
-                      <div style="font-size:14px;font-weight:600;color:#1a1a1a;margin-bottom:3px;">Percentage of Job Metric</div>
-                      <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-top:10px;">
-                        <span style="font-size:13px;font-weight:500;color:#374151;">Take</span>
-                        <div class="input-with-suffix"><input type="number" value="5" style="width:55px;border-radius:8px 0 0 8px;border-right:none;"><span class="input-suffix">%</span></div>
-                        <span style="font-size:13px;font-weight:500;color:#374151;">of</span>
-                        <select style="width:auto;min-width:160px;"><option selected="">Gross Profit</option><option>Revenue</option><option>GP over Minimum GP%</option></select>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-                <div class="award-card" id="award2-piece" onclick="selectAward2('piece')">
-                  <div style="display:flex;align-items:flex-start;gap:12px;">
-                    <div style="margin-top:2px;width:18px;height:18px;border-radius:50%;border:2px solid #d1d5db;flex-shrink:0;" id="award2-piece-radio"></div>
-                    <div style="flex:1;"><div style="font-size:14px;font-weight:600;color:#1a1a1a;margin-bottom:3px;">Piece Rate</div><div style="font-size:12px;color:#6b7280;">Additional fixed $ amount per eligible job.</div></div>
-                  </div>
-                </div>
-              </div>
-              <div class="info-box" style="margin-top:12px;font-size:12px;">Total award per eligible job = Primary Award + Additional Award. Both are evaluated on the same job eligibility criteria.</div>
-            </div>
-          </div>
-
-          <!-- Add stacking button -->
-          <div style="max-width:600px;margin-top:16px;" id="add-award-row">
-            <button id="add-award-btn" onclick="addSecondAward()" style="display:flex;align-items:center;gap:8px;background:white;border:1.5px dashed #d1d5db;border-radius:10px;padding:12px 20px;width:100%;font-size:13px;font-weight:500;color:#6b7280;cursor:pointer;font-family:inherit;transition:all .15s;" onmouseover="this.style.borderColor='#9ca3af'" onmouseout="this.style.borderColor='#d1d5db'">
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
-              Add another award type
+          <!-- Add another award -->
+          <div style="max-width:640px;margin:16px auto 0;">
+            <button id="add-award-btn" onclick="addAward()" style="display:flex;align-items:center;justify-content:center;gap:8px;background:white;border:1.5px dashed #d1d5db;border-radius:12px;padding:14px 20px;width:100%;font-size:13px;font-weight:600;color:#374151;cursor:pointer;font-family:inherit;transition:all .15s;" onmouseover="this.style.borderColor='#1a1a1a';this.style.color='#1a1a1a'" onmouseout="this.style.borderColor='#d1d5db';this.style.color='#374151'">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
+              Add another award
             </button>
           </div>
 
@@ -1094,31 +1046,42 @@ function setScenario(s) {
   document.getElementById('tab-a').className = 'sc-tab' + (s === 'a' ? ' active' : '');
   document.getElementById('tab-b').className = 'sc-tab' + (s === 'b' ? ' active' : '');
 
+  const q = id => document.getElementById(id);
   if (s === 'b') {
     // Pre-select Field Tech role tab
     selectPTab('role');
-    document.getElementById('chk-role-ft').checked = true;
-    // Pre-select pool award
-    selectAward('pool', 'primary');
+    if (q('chk-role-ft')) q('chk-role-ft').checked = true;
     // Show timesheet section
-    document.getElementById('timesheet-section').style.display = 'block';
-    document.getElementById('labor-row-1').style.display = '';
-    document.getElementById('labor-row-2').style.display = '';
+    if (q('timesheet-section')) q('timesheet-section').style.display = 'block';
+    if (q('labor-row-1')) q('labor-row-1').style.display = '';
+    if (q('labor-row-2')) q('labor-row-2').style.display = '';
     // Ref plan option
-    document.getElementById('ref-plan-box').style.display = 'block';
+    if (q('ref-plan-box')) q('ref-plan-box').style.display = 'block';
     // Plan name
-    document.getElementById('plan-name').value = 'HVAC Install Field Tech Bonus';
+    q('plan-name').value = 'HVAC Install Field Tech Bonus';
+    // Award list — Multi-Role default: one % of Metric rule (Labor Savings)
+    awardsState = [
+      { id: 'a1', name: 'Job Pool · Labor Savings', type: 'pct', metric: 'labor_savings', pct: 12, pieceAmt: 75, flatAmt: 200, dist: { mode: 'split', by: 'hours' } },
+    ];
+    awardNextId = 2;
+    renderAwards();
     // Pre-configure Award Mode: Job Pool → Performance Pay
     awardMode = 'pool';
     setTimeout(() => selectAwardMode('pool'), 50);
   } else {
     selectPTab('individual');
-    selectAward('piece', 'primary');
-    document.getElementById('timesheet-section').style.display = 'none';
-    document.getElementById('labor-row-1').style.display = 'none';
-    document.getElementById('labor-row-2').style.display = 'none';
-    document.getElementById('ref-plan-box').style.display = 'none';
-    document.getElementById('plan-name').value = 'HVAC Install Crew Chief Bonus';
+    if (q('timesheet-section')) q('timesheet-section').style.display = 'none';
+    if (q('labor-row-1')) q('labor-row-1').style.display = 'none';
+    if (q('labor-row-2')) q('labor-row-2').style.display = 'none';
+    if (q('ref-plan-box')) q('ref-plan-box').style.display = 'none';
+    q('plan-name').value = 'HVAC Install Crew Chief Bonus';
+    // Award list — Single-Role default: piece rate + GP bonus
+    awardsState = [
+      { id: 'a1', name: 'Piece Rate per Eligible Install', type: 'piece', pieceAmt: 75, metric: 'gp', pct: 5, flatAmt: 200, dist: { mode: 'full', by: 'hours' } },
+      { id: 'a2', name: 'Bonus on GP Over Goal',           type: 'pct',   pieceAmt: 75, metric: 'gp', pct: 5, flatAmt: 200, dist: { mode: 'full', by: 'hours' } },
+    ];
+    awardNextId = 3;
+    renderAwards();
     // Pre-configure Award Mode: individual
     awardMode = 'individual';
     leadRole = null;
@@ -1230,82 +1193,196 @@ function selectLeadRole(role) {
 // Each award rule card gets its own Distribution sub-section. Lets you say
 // "split the pool from rule A, but everyone gets the piece rate from rule B."
 
-// Rule defaults — piece rate usually goes to each person; pool/flat usually splits
-const ruleDistDefaults = { piece: 'full', pool: 'split', flat: 'split' };
+// ═════ NEW: Job Awards — dynamic card list ═════
+// Each award has: id, name, type (pct|piece|flat), config fields, distribution.
+// Rendered from state so users can add, edit, and remove flexibly.
 
-function distSnippet(ruleId) {
-  const defMode = ruleDistDefaults[ruleId] || 'full';
-  const fullActive = defMode === 'full' ? 'active' : '';
-  const splitActive = defMode === 'split' ? 'active' : '';
-  const splitByVisible = defMode === 'split' ? '' : 'display:none;';
+const AW_TYPE_LABELS = { pct: '% of Metric', piece: 'Piece Rate', flat: 'Flat Rate' };
+const AW_METRIC_OPTIONS = [
+  { key: 'revenue',       label: 'Revenue' },
+  { key: 'gp',            label: 'Gross Profit' },
+  { key: 'gp_over',       label: 'GP over Minimum GP%' },
+  { key: 'labor_savings', label: 'Labor Budget Savings' },
+  { key: 'total_cost',    label: 'Total Job Cost' },
+  { key: 'custom',        label: 'Custom column…' },
+];
+
+let awardsState = [
+  { id: 'a1', name: 'Piece Rate per Eligible Install', type: 'piece', pieceAmt: 75, metric: 'gp', pct: 10, flatAmt: 200, dist: { mode: 'full', by: 'hours' } },
+];
+let awardNextId = 2;
+
+function renderAwards() {
+  const list = document.getElementById('awards-list');
+  if (!list) return;
+  list.innerHTML = awardsState.map((a, idx) => awardCardHtml(a, idx)).join('');
+  showRuleDistributions(awardMode === 'pool');
+}
+
+function awardCardHtml(a, idx) {
+  const canDelete = awardsState.length > 1;
+  const num = idx + 1;
+  const cfg = awardTypeConfigHtml(a);
+  const distHtml = awardDistributionHtml(a);
   return `
-    <div class="rule-dist" id="rule-dist-${ruleId}" data-rule="${ruleId}" onclick="event.stopPropagation()">
-      <div style="font-size:11px;font-weight:700;color:#9ca3af;text-transform:uppercase;letter-spacing:.4px;margin-bottom:10px;">Distribution per job</div>
-      <div style="display:flex;gap:8px;margin-bottom:10px;">
-        <div class="dist-pill ${fullActive}" data-mode="full" onclick="selectRuleDist('${ruleId}','full')">
-          <span class="ddot"></span>
-          <span><strong>Each person gets the full amount</strong><div style="font-size:11px;color:#9ca3af;font-weight:400;margin-top:1px;">No splitting; every crew member earns this rule.</div></span>
+    <div class="aw-card" data-id="${a.id}">
+      <div class="aw-head">
+        <div class="aw-idx-badge">${num}</div>
+        <input class="aw-name-input" type="text" placeholder="Name this award (e.g. GP Bonus)" value="${a.name || ''}" oninput="updateAward('${a.id}', 'name', this.value)">
+        ${canDelete ? `<button class="aw-delete" onclick="removeAward('${a.id}')" title="Remove"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 01-2 2H8a2 2 0 01-2-2L5 6"/><path d="M10 11v6M14 11v6"/><path d="M9 6V4a2 2 0 012-2h2a2 2 0 012 2v2"/></svg></button>` : ''}
+      </div>
+
+      <div class="aw-seg">
+        <button class="aw-seg-btn ${a.type === 'pct' ? 'active' : ''}"   onclick="setAwardType('${a.id}', 'pct')">% of Metric</button>
+        <button class="aw-seg-btn ${a.type === 'piece' ? 'active' : ''}" onclick="setAwardType('${a.id}', 'piece')">Piece Rate</button>
+        <button class="aw-seg-btn ${a.type === 'flat' ? 'active' : ''}"  onclick="setAwardType('${a.id}', 'flat')">Flat Rate</button>
+      </div>
+
+      ${cfg}
+
+      ${distHtml}
+    </div>
+  `;
+}
+
+function awardTypeConfigHtml(a) {
+  if (a.type === 'pct') {
+    return `
+      <div class="aw-cfg-grid">
+        <div>
+          <div class="aw-field-label">Job Metric</div>
+          <select onchange="updateAward('${a.id}', 'metric', this.value)">
+            ${AW_METRIC_OPTIONS.map(o => `<option value="${o.key}" ${a.metric === o.key ? 'selected' : ''}>${o.label}</option>`).join('')}
+          </select>
         </div>
-        <div class="dist-pill ${splitActive}" data-mode="split" onclick="selectRuleDist('${ruleId}','split')">
-          <span class="ddot"></span>
-          <span><strong>Split among crew</strong><div style="font-size:11px;color:#9ca3af;font-weight:400;margin-top:1px;">Pool this rule and divide among everyone on the job.</div></span>
+        <div>
+          <div class="aw-field-label">Percentage</div>
+          <div class="input-with-suffix"><input type="number" value="${a.pct}" oninput="updateAward('${a.id}', 'pct', +this.value)" style="border-radius:8px 0 0 8px;border-right:none;"><span class="input-suffix">%</span></div>
         </div>
       </div>
-      <div class="split-by-row" id="split-by-row-${ruleId}" style="${splitByVisible}">
-        <div style="font-size:11px;color:#9ca3af;margin-bottom:6px;">Split by:</div>
-        <div style="display:flex;gap:6px;flex-wrap:wrap;">
-          <button class="splitby-mini" onclick="selectMiniSplitBy('${ruleId}','role',this)">Role</button>
-          <button class="splitby-mini active" onclick="selectMiniSplitBy('${ruleId}','hours',this)">Hours</button>
-          <button class="splitby-mini" onclick="selectMiniSplitBy('${ruleId}','comp',this)">Compensation</button>
-          <button class="splitby-mini" onclick="selectMiniSplitBy('${ruleId}','multi',this)">Multi</button>
+    `;
+  }
+  if (a.type === 'piece') {
+    return `
+      <div class="aw-cfg-grid">
+        <div>
+          <div class="aw-field-label">Amount</div>
+          <div class="input-with-prefix"><span class="input-prefix">$</span><input type="number" value="${a.pieceAmt}" oninput="updateAward('${a.id}', 'pieceAmt', +this.value)" style="border-radius:0 8px 8px 0;"></div>
         </div>
-        <div class="info-box" style="margin-top:10px;font-size:11px;" id="dist-preview-${ruleId}">
-          Example: pool from this rule splits proportional to hours each crew member worked on the job.
+        <div>
+          <div class="aw-field-label" style="visibility:hidden;">.</div>
+          <div style="font-size:13px;color:#6b7280;padding-bottom:9px;">per eligible job</div>
+        </div>
+      </div>
+    `;
+  }
+  if (a.type === 'flat') {
+    return `
+      <div class="aw-cfg-grid">
+        <div>
+          <div class="aw-field-label">Amount</div>
+          <div class="input-with-prefix"><span class="input-prefix">$</span><input type="number" value="${a.flatAmt}" oninput="updateAward('${a.id}', 'flatAmt', +this.value)" style="border-radius:0 8px 8px 0;"></div>
+        </div>
+        <div>
+          <div class="aw-field-label" style="visibility:hidden;">.</div>
+          <div style="font-size:13px;color:#6b7280;padding-bottom:9px;">flat per eligible job</div>
+        </div>
+      </div>
+    `;
+  }
+  return '';
+}
+
+function awardDistributionHtml(a) {
+  const d = a.dist || { mode: 'full', by: 'hours' };
+  const isFull = d.mode === 'full';
+  return `
+    <div class="aw-dist" id="aw-dist-${a.id}">
+      <div class="aw-dist-label">Distribution per job</div>
+      <div class="aw-dist-pills">
+        <div class="aw-dist-pill ${isFull ? 'active' : ''}" onclick="setAwardDist('${a.id}', 'full')">
+          <span class="aw-dot"></span>
+          <div><strong>Each person gets the full amount</strong><div style="font-size:11px;color:#9ca3af;font-weight:400;margin-top:1px;">Every crew member earns this rule.</div></div>
+        </div>
+        <div class="aw-dist-pill ${!isFull ? 'active' : ''}" onclick="setAwardDist('${a.id}', 'split')">
+          <span class="aw-dot"></span>
+          <div><strong>Split among crew</strong><div style="font-size:11px;color:#9ca3af;font-weight:400;margin-top:1px;">Pool this rule and divide among crew on the job.</div></div>
+        </div>
+      </div>
+      <div class="aw-split-by ${!isFull ? 'show' : ''}" id="aw-split-${a.id}">
+        <div style="font-size:11px;color:#9ca3af;margin-bottom:6px;">Split by:</div>
+        <div class="aw-split-chips">
+          ${['role','hours','comp','multi'].map(b => `
+            <button class="aw-split-chip ${d.by === b ? 'active' : ''}" onclick="setAwardSplitBy('${a.id}', '${b}')">${{role:'Role',hours:'Hours',comp:'Compensation',multi:'Multi'}[b]}</button>
+          `).join('')}
         </div>
       </div>
     </div>
   `;
 }
 
-function injectRuleDistributions() {
-  ['piece','pool','flat'].forEach(ruleId => {
-    const configEl = document.getElementById('award-' + ruleId + '-config');
-    if (!configEl) return;
-    // Already injected?
-    if (configEl.parentElement.querySelector('.rule-dist[data-rule="' + ruleId + '"]')) return;
-    configEl.insertAdjacentHTML('afterend', distSnippet(ruleId));
+function addAward() {
+  const id = 'a' + (awardNextId++);
+  // Default new awards to % of Metric with sensible defaults
+  awardsState.push({
+    id, name: '', type: 'pct', pieceAmt: 100, metric: 'gp', pct: 5, flatAmt: 200,
+    dist: { mode: 'split', by: 'hours' },
+  });
+  renderAwards();
+}
+
+function removeAward(id) {
+  awardsState = awardsState.filter(a => a.id !== id);
+  if (awardsState.length === 0) addAward(); // always keep at least one
+  else renderAwards();
+}
+
+function setAwardType(id, type) {
+  const a = awardsState.find(x => x.id === id);
+  if (!a) return;
+  a.type = type;
+  // Piece rate → default full distribution; Pct/Flat → default split
+  if (!a._distTouched) {
+    a.dist = { mode: type === 'piece' ? 'full' : 'split', by: 'hours' };
+  }
+  renderAwards();
+}
+
+function updateAward(id, field, value) {
+  const a = awardsState.find(x => x.id === id);
+  if (!a) return;
+  a[field] = value;
+}
+
+function setAwardDist(id, mode) {
+  const a = awardsState.find(x => x.id === id);
+  if (!a) return;
+  a.dist = a.dist || {};
+  a.dist.mode = mode;
+  a._distTouched = true;
+  // Update just this card
+  const root = document.getElementById('aw-dist-' + id);
+  if (root) {
+    root.querySelectorAll('.aw-dist-pill').forEach((p, i) => p.classList.toggle('active', (i === 0) === (mode === 'full')));
+    document.getElementById('aw-split-' + id).classList.toggle('show', mode !== 'full');
+  }
+}
+
+function setAwardSplitBy(id, by) {
+  const a = awardsState.find(x => x.id === id);
+  if (!a) return;
+  a.dist = a.dist || {};
+  a.dist.by = by;
+  const root = document.getElementById('aw-split-' + id);
+  if (root) root.querySelectorAll('.aw-split-chip').forEach(c => {
+    c.classList.toggle('active', c.textContent.toLowerCase().startsWith(by.slice(0,3)) || c.textContent.toLowerCase() === {role:'role',hours:'hours',comp:'compensation',multi:'multi'}[by]);
   });
 }
 
-function selectRuleDist(ruleId, mode) {
-  const root = document.getElementById('rule-dist-' + ruleId);
-  if (!root) return;
-  root.querySelectorAll('.dist-pill').forEach(p => p.classList.toggle('active', p.dataset.mode === mode));
-  const sb = document.getElementById('split-by-row-' + ruleId);
-  if (sb) sb.style.display = (mode === 'split') ? '' : 'none';
-}
-
-function selectMiniSplitBy(ruleId, by, el) {
-  const row = document.getElementById('split-by-row-' + ruleId);
-  if (row) row.querySelectorAll('.splitby-mini').forEach(b => b.classList.toggle('active', b === el));
-  const previews = {
-    role: 'Example: pool split by fixed % per role. Crew Lead 60%, Helpers 40% (rescaled if a role is absent).',
-    hours: 'Example: pool splits proportional to hours each crew member worked on the job.',
-    comp: 'Example: pool weighted by base hourly rate. Senior tech gets a larger share than apprentices.',
-    multi: 'Example: combination — e.g. 70% by hours + 30% by role weight. Configurable in dataset config.',
-  };
-  const preview = document.getElementById('dist-preview-' + ruleId);
-  if (preview) preview.textContent = previews[by] || '';
-}
-
+// Kept for compatibility with existing selectAwardMode wiring
+function injectRuleDistributions() { /* no-op — distributions are now inline in each card */ }
 function showRuleDistributions(multiRole) {
-  ['piece','pool','flat'].forEach(ruleId => {
-    const card = document.getElementById('award-' + ruleId);
-    const dist = document.getElementById('rule-dist-' + ruleId);
-    if (!card || !dist) return;
-    const isSelected = card.classList.contains('selected');
-    dist.classList.toggle('show', !!multiRole && isSelected);
-  });
+  document.querySelectorAll('.aw-dist').forEach(el => el.classList.toggle('show', !!multiRole));
 }
 
 // ─── Custom Criterion (dynamic add) ───────────────────────────────────────────
@@ -1451,49 +1528,13 @@ function toggleRefPlan() {
   document.getElementById('ref-plan-select').style.display = chk.checked ? 'block' : 'none';
 }
 
-// ─── Job Award Selection ──────────────────────────────────────────────────────
-function selectAward(type, group) {
-  ['piece','pool','flat'].forEach(t => {
-    const card = document.getElementById('award-' + t);
-    const radio = document.getElementById('award-' + t + '-radio');
-    const cfg = document.getElementById('award-' + t + '-config');
-    if (!card) return;
-    if (t === type) {
-      card.classList.add('selected');
-      if (radio) { radio.style.background='#1a1a1a'; radio.style.borderColor='#1a1a1a'; radio.innerHTML='<div style="width:8px;height:8px;border-radius:50%;background:white;"></div>'; }
-      if (cfg) cfg.style.display = 'flex';
-    } else {
-      card.classList.remove('selected');
-      if (radio) { radio.style.background=''; radio.style.borderColor='#d1d5db'; radio.innerHTML=''; }
-      if (cfg) cfg.style.display = 'none';
-    }
-  });
-  // Refresh per-rule distribution visibility (only the selected card shows it)
-  showRuleDistributions(awardMode === 'pool');
-}
-
-// ─── Second Award (Stacking) ──────────────────────────────────────────────────
-function addSecondAward() {
-  document.getElementById('second-award-wrap').style.display = 'block';
-  document.getElementById('add-award-btn').style.display = 'none';
-}
-function removeSecondAward() {
-  document.getElementById('second-award-wrap').style.display = 'none';
-  document.getElementById('add-award-btn').style.display = '';
-}
-function selectAward2(type) {
-  ['pct','piece'].forEach(t => {
-    const c = document.getElementById('award2-' + t);
-    const r = document.getElementById('award2-' + t + '-radio');
-    if (t === type) {
-      if (c) c.classList.add('selected');
-      if (r) { r.style.background='#1a1a1a'; r.style.borderColor='#1a1a1a'; r.innerHTML='<div style="width:8px;height:8px;border-radius:50%;background:white;"></div>'; }
-    } else {
-      if (c) c.classList.remove('selected');
-      if (r) { r.style.background=''; r.style.borderColor='#d1d5db'; r.innerHTML=''; }
-    }
-  });
-}
+// ─── Job Award Selection (legacy stubs — new dynamic system is above) ─────────
+// selectAward / selectAward2 / addSecondAward / removeSecondAward are no-ops
+// now. Old scenario-config code may still call them; keep as no-ops.
+function selectAward(type, group)   { /* legacy no-op */ }
+function selectAward2(type)         { /* legacy no-op */ }
+function addSecondAward()           { /* legacy no-op */ }
+function removeSecondAward()        { /* legacy no-op */ }
 
 // ─── Crew Split ───────────────────────────────────────────────────────────────
 function selectSplit(type) {
@@ -1582,6 +1623,7 @@ function addQualifier() {
 
 // ─── Init ─────────────────────────────────────────────────────────────────────
 render();
+renderAwards();
 setTimeout(() => {
   selectPlanCard(document.getElementById('job-plan-card'));
 }, 30);
